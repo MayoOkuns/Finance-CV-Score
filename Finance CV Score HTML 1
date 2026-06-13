@@ -1,0 +1,1784 @@
+<!DOCTYPE html><!-- CVScore v4 -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FinanceCV Score — Built for Finance Careers</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --ink: #0E0E0F; --ink-mid: #3A3A3C; --ink-light: #7A7A80;
+    --surface: #F7F6F3; --white: #FFFFFF;
+    --accent: #2563EB; --accent-light: #EFF4FF;
+    --danger: #DC2626; --warn: #D97706; --good: #16A34A;
+    --border: #E4E3DF; --gold: #B45309;
+  }
+  body { font-family:'Inter',sans-serif; background:var(--surface); color:var(--ink); min-height:100vh; font-size:15px; line-height:1.6; }
+
+  /* NAV */
+  nav { display:flex; align-items:center; justify-content:space-between; padding:18px 40px; background:var(--white); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:100; }
+  .logo { font-family:'Instrument Serif',serif; font-size:22px; color:var(--ink); letter-spacing:-0.3px; }
+  .logo span { color:var(--accent); }
+  .nav-tag { font-size:11px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; background:var(--accent-light); color:var(--accent); padding:4px 10px; border-radius:20px; }
+  .nav-pro-badge { font-size:11px; font-weight:700; letter-spacing:0.06em; text-transform:uppercase; background:linear-gradient(135deg,#B45309,#D97706); color:white; padding:4px 12px; border-radius:20px; display:none; }
+
+  /* HERO */
+  .hero { max-width:680px; margin:0 auto; padding:72px 24px 48px; text-align:center; }
+  .hero-eyebrow { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:var(--accent); background:var(--accent-light); padding:5px 14px; border-radius:20px; margin-bottom:20px; }
+  .hero h1 { font-family:'Instrument Serif',serif; font-size:clamp(36px,6vw,56px); line-height:1.1; letter-spacing:-1.5px; margin-bottom:18px; }
+  .hero h1 em { font-style:italic; color:var(--accent); }
+  .hero p { font-size:17px; color:var(--ink-mid); max-width:480px; margin:0 auto 12px; }
+  .hero-stat { font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--ink-light); margin-top:8px; }
+
+  /* UPLOAD */
+  .upload-section { max-width:680px; margin:0 auto; padding:0 24px 80px; }
+  .upload-card { background:var(--white); border:2px dashed var(--border); border-radius:16px; padding:48px 32px; text-align:center; transition:border-color .2s,background .2s; cursor:pointer; }
+  .upload-card:hover,.upload-card.dragging { border-color:var(--accent); background:var(--accent-light); }
+  .upload-icon { width:52px; height:52px; background:var(--accent-light); border-radius:12px; display:flex; align-items:center; justify-content:center; margin:0 auto 16px; }
+  .upload-icon svg { color:var(--accent); }
+  .upload-card h3 { font-size:17px; font-weight:600; margin-bottom:6px; }
+  .upload-card p { font-size:14px; color:var(--ink-light); margin-bottom:20px; }
+  .upload-btn { display:inline-flex; align-items:center; gap:8px; background:var(--accent); color:white; font-size:15px; font-weight:600; padding:12px 28px; border-radius:10px; border:none; cursor:pointer; transition:opacity .15s; }
+  .upload-btn:hover { opacity:.88; }
+  #fileInput { display:none; }
+  .job-input-wrap { margin-top:16px; }
+  .job-input-wrap label { display:block; font-size:13px; font-weight:600; color:var(--ink-mid); margin-bottom:6px; text-align:left; }
+  .job-input-wrap input { width:100%; padding:12px 16px; border:1.5px solid var(--border); border-radius:10px; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); background:var(--white); outline:none; transition:border-color .2s; }
+  .job-input-wrap input:focus { border-color:var(--accent); }
+  .analyse-btn { width:100%; margin-top:20px; background:var(--ink); color:white; font-size:16px; font-weight:600; padding:15px 28px; border-radius:10px; border:none; cursor:pointer; transition:opacity .15s; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .analyse-btn:hover { opacity:.85; }
+  .file-chosen { display:none; align-items:center; gap:10px; background:var(--accent-light); border:1.5px solid #BFCFFF; border-radius:10px; padding:12px 16px; margin-top:16px; font-size:14px; font-weight:500; color:var(--accent); }
+
+  /* LOADING */
+  .loading-state { display:none; text-align:center; padding:60px 24px; max-width:680px; margin:0 auto; }
+  .loading-state.active { display:block; }
+  .spinner { width:48px; height:48px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 20px; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .loading-steps { display:flex; flex-direction:column; gap:8px; max-width:320px; margin:20px auto 0; text-align:left; }
+  .loading-step { display:flex; align-items:center; gap:10px; font-size:13px; color:var(--ink-light); transition:color .3s; }
+  .loading-step.done { color:var(--good); }
+  .loading-step.active-step { color:var(--ink); font-weight:500; }
+  .step-dot { width:8px; height:8px; border-radius:50%; background:var(--border); flex-shrink:0; transition:background .3s; }
+  .loading-step.done .step-dot { background:var(--good); }
+  .loading-step.active-step .step-dot { background:var(--accent); }
+
+  /* RESULTS */
+  .results-section { display:none; max-width:780px; margin:0 auto; padding:0 24px 80px; }
+  .results-section.active { display:block; }
+  .results-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:32px; flex-wrap:wrap; gap:16px; }
+  .results-header h2 { font-family:'Instrument Serif',serif; font-size:28px; letter-spacing:-0.5px; }
+  .restart-btn { font-size:13px; font-weight:600; color:var(--ink-light); background:none; border:1.5px solid var(--border); padding:8px 16px; border-radius:8px; cursor:pointer; transition:color .15s,border-color .15s; }
+  .restart-btn:hover { color:var(--ink); border-color:var(--ink-mid); }
+
+  /* SCORE CARD */
+  .score-grid { display:grid; grid-template-columns:auto 1fr; gap:24px; background:var(--white); border-radius:16px; padding:32px; margin-bottom:24px; border:1px solid var(--border); align-items:center; }
+  .score-ring-wrap { position:relative; width:120px; height:120px; flex-shrink:0; }
+  .score-ring-wrap canvas { position:absolute; top:0; left:0; }
+  .score-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
+  .score-number { font-family:'JetBrains Mono',monospace; font-size:32px; font-weight:600; line-height:1; }
+  .score-label { font-size:10px; font-weight:600; letter-spacing:0.08em; text-transform:uppercase; color:var(--ink-light); }
+  .score-meta h3 { font-family:'Instrument Serif',serif; font-size:22px; letter-spacing:-0.3px; margin-bottom:6px; }
+  .score-verdict { font-size:14px; color:var(--ink-mid); line-height:1.5; }
+  .score-pills { display:flex; gap:8px; flex-wrap:wrap; margin-top:12px; }
+  .pill { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; padding:4px 10px; border-radius:20px; letter-spacing:0.04em; }
+  .pill-red { background:#FEF2F2; color:var(--danger); }
+  .pill-amber { background:#FFFBEB; color:var(--warn); }
+  .pill-green { background:#F0FDF4; color:var(--good); }
+
+  /* BREAKDOWN */
+  .breakdown-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); }
+  .breakdown-card h3 { font-size:14px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-light); margin-bottom:20px; }
+  .score-bar-row { display:flex; align-items:center; gap:12px; margin-bottom:14px; }
+  .bar-label { font-size:13px; font-weight:500; width:160px; flex-shrink:0; color:var(--ink-mid); }
+  .bar-track { flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden; }
+  .bar-fill { height:100%; border-radius:4px; transition:width 1.2s cubic-bezier(.16,1,.3,1); width:0; }
+  .bar-fill.green { background:var(--good); }
+  .bar-fill.amber { background:var(--warn); }
+  .bar-fill.red { background:var(--danger); }
+  .bar-score { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; width:36px; text-align:right; color:var(--ink-mid); }
+
+  /* ISSUES */
+  .issues-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); }
+  .issues-card h3 { font-size:14px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-light); margin-bottom:20px; }
+  .issue-item { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
+  .issue-item:last-child { border-bottom:none; }
+  .issue-icon { width:28px; height:28px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:13px; flex-shrink:0; margin-top:1px; }
+  .issue-icon.red { background:#FEF2F2; }
+  .issue-icon.amber { background:#FFFBEB; }
+  .issue-icon.green { background:#F0FDF4; }
+  .issue-title { font-size:14px; font-weight:600; color:var(--ink); margin-bottom:3px; }
+  .issue-desc { font-size:13px; color:var(--ink-mid); line-height:1.5; }
+
+  /* KEYWORD SECTION - locked/unlocked states */
+  .keyword-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); position:relative; overflow:hidden; }
+  .keyword-card h3 { font-size:14px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-light); margin-bottom:16px; }
+  .keyword-blur { filter:blur(6px); user-select:none; pointer-events:none; }
+  .keyword-tag { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:500; padding:5px 12px; border-radius:6px; margin:4px; }
+  .kw-missing { background:#FEF2F2; color:var(--danger); }
+  .kw-present { background:#F0FDF4; color:var(--good); }
+  .keyword-lock-overlay { position:absolute; inset:0; background:rgba(247,246,243,0.75); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:10px; backdrop-filter:blur(2px); }
+  .lock-icon { width:44px; height:44px; background:white; border:1.5px solid var(--border); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; }
+  .lock-label { font-size:13px; font-weight:600; color:var(--ink); }
+  .lock-sub { font-size:12px; color:var(--ink-light); }
+  .unlock-mini-btn { background:var(--accent); color:white; font-size:13px; font-weight:600; padding:9px 20px; border-radius:8px; border:none; cursor:pointer; transition:opacity .15s; margin-top:4px; }
+  .unlock-mini-btn:hover { opacity:.88; }
+
+  /* PAYWALL CARD */
+  .paywall-card { background:var(--ink); border-radius:16px; padding:40px 36px; margin-bottom:24px; text-align:center; position:relative; overflow:hidden; }
+  .paywall-card::before { content:''; position:absolute; top:-60px; right:-60px; width:220px; height:220px; background:radial-gradient(circle,rgba(37,99,235,.3) 0%,transparent 70%); border-radius:50%; }
+  .paywall-card h3 { font-family:'Instrument Serif',serif; font-size:26px; color:white; margin-bottom:10px; letter-spacing:-0.3px; position:relative; }
+  .paywall-card > p { font-size:14px; color:rgba(255,255,255,.6); margin-bottom:28px; max-width:400px; margin-left:auto; margin-right:auto; position:relative; }
+  .paywall-features { display:flex; justify-content:center; gap:32px; margin-bottom:32px; flex-wrap:wrap; position:relative; }
+  .paywall-feature { text-align:center; color:white; }
+  .paywall-feature-icon { font-size:22px; margin-bottom:6px; }
+  .paywall-feature-label { font-size:12px; color:rgba(255,255,255,.6); line-height:1.3; }
+  .paywall-cta { display:inline-flex; align-items:center; gap:10px; background:var(--accent); color:white; font-size:16px; font-weight:600; padding:15px 36px; border-radius:10px; border:none; cursor:pointer; transition:opacity .15s; position:relative; flex-direction:column; }
+  .paywall-cta:hover { opacity:.88; }
+  .paywall-price { font-size:12px; font-weight:400; opacity:.8; }
+  .paywall-guarantee { margin-top:14px; font-size:12px; color:rgba(255,255,255,.4); position:relative; }
+
+  /* ===== PAYMENT MODAL ===== */
+  .modal-overlay { position:fixed; inset:0; background:rgba(0,0,0,.55); z-index:1000; display:none; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(4px); }
+  .modal-overlay.open { display:flex; }
+  .modal { background:var(--white); border-radius:20px; width:100%; max-width:480px; overflow:hidden; animation:slideUp .25s ease; }
+  @keyframes slideUp { from { transform:translateY(24px); opacity:0; } to { transform:translateY(0); opacity:1; } }
+  .modal-header { padding:24px 28px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; }
+  .modal-header-left h3 { font-family:'Instrument Serif',serif; font-size:22px; letter-spacing:-0.3px; }
+  .modal-header-left p { font-size:13px; color:var(--ink-light); margin-top:2px; }
+  .modal-close { width:32px; height:32px; background:var(--surface); border:none; border-radius:50%; cursor:pointer; font-size:16px; display:flex; align-items:center; justify-content:center; color:var(--ink-mid); flex-shrink:0; }
+  .modal-close:hover { background:var(--border); }
+  .modal-body { padding:24px 28px; }
+  .price-display { display:flex; align-items:baseline; gap:8px; margin-bottom:20px; }
+  .price-main { font-family:'JetBrains Mono',monospace; font-size:40px; font-weight:600; color:var(--ink); }
+  .price-sub { font-size:14px; color:var(--ink-light); }
+  .price-original { font-family:'JetBrains Mono',monospace; font-size:18px; color:var(--ink-light); text-decoration:line-through; }
+  .feature-list { display:flex; flex-direction:column; gap:10px; margin-bottom:24px; }
+  .feature-row { display:flex; align-items:center; gap:10px; font-size:14px; }
+  .feature-check { width:20px; height:20px; background:#F0FDF4; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:11px; flex-shrink:0; }
+  .modal-input-group { margin-bottom:16px; }
+  .modal-input-group label { display:block; font-size:12px; font-weight:600; color:var(--ink-mid); margin-bottom:6px; letter-spacing:0.04em; text-transform:uppercase; }
+  .modal-input-group input { width:100%; padding:12px 14px; border:1.5px solid var(--border); border-radius:10px; font-family:'Inter',sans-serif; font-size:15px; color:var(--ink); outline:none; transition:border-color .2s; }
+  .modal-input-group input:focus { border-color:var(--accent); }
+  .card-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+  .pay-btn { width:100%; background:var(--accent); color:white; font-size:16px; font-weight:600; padding:15px; border-radius:10px; border:none; cursor:pointer; transition:opacity .15s; margin-top:4px; display:flex; align-items:center; justify-content:center; gap:8px; }
+  .pay-btn:hover { opacity:.88; }
+  .pay-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .modal-secure { text-align:center; font-size:12px; color:var(--ink-light); margin-top:12px; }
+  .modal-secure span { color:var(--good); font-weight:600; }
+  /* Demo note */
+  .demo-note { background:#FFFBEB; border:1px solid #FDE68A; border-radius:10px; padding:12px 16px; font-size:13px; color:#92400E; margin-bottom:20px; display:flex; gap:8px; }
+
+  /* ===== PRO RESULTS ===== */
+  .pro-banner { background:linear-gradient(135deg,#1E3A5F,#2563EB); border-radius:16px; padding:20px 28px; margin-bottom:24px; display:none; align-items:center; gap:16px; }
+  .pro-banner.visible { display:flex; }
+  .pro-badge { background:linear-gradient(135deg,#B45309,#D97706); color:white; font-size:11px; font-weight:700; letter-spacing:0.08em; text-transform:uppercase; padding:4px 12px; border-radius:20px; white-space:nowrap; }
+  .pro-banner-text { color:white; font-size:14px; }
+  .pro-banner-text strong { font-weight:600; }
+
+  .rewrite-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); display:none; }
+  .rewrite-card.visible { display:block; }
+  .rewrite-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+  .rewrite-header h3 { font-family:'Instrument Serif',serif; font-size:20px; letter-spacing:-0.3px; }
+  .rewrite-actions { display:flex; gap:8px; }
+  .copy-btn,.download-btn { font-size:13px; font-weight:600; padding:8px 16px; border-radius:8px; border:none; cursor:pointer; transition:opacity .15s; display:flex; align-items:center; gap:6px; }
+  .copy-btn { background:var(--surface); color:var(--ink-mid); border:1.5px solid var(--border); }
+  .copy-btn:hover { color:var(--ink); border-color:var(--ink-mid); }
+  .download-btn { background:var(--accent); color:white; }
+  .download-btn:hover { opacity:.88; }
+  .rewrite-body { background:var(--surface); border-radius:10px; padding:20px; font-size:14px; line-height:1.8; color:var(--ink-mid); white-space:pre-wrap; max-height:500px; overflow-y:auto; border:1px solid var(--border); }
+  .rewrite-loading { text-align:center; padding:40px 20px; }
+  .rewrite-spinner { width:36px; height:36px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; margin:0 auto 12px; }
+
+  /* KEYWORD FULL */
+  .kw-section { margin-bottom:20px; }
+  .kw-section-title { font-size:12px; font-weight:600; color:var(--ink-light); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+
+  /* SOCIAL PROOF */
+  .proof-bar { background:var(--white); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:20px 40px; display:flex; align-items:center; justify-content:center; gap:40px; flex-wrap:wrap; }
+  .proof-stat { text-align:center; }
+  .proof-num { font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600; color:var(--ink); display:block; }
+  .proof-label { font-size:12px; color:var(--ink-light); }
+
+  /* TOAST */
+  .toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--ink); color:white; font-size:14px; font-weight:500; padding:12px 20px; border-radius:10px; z-index:2000; transition:transform .3s ease; white-space:nowrap; }
+  .toast.show { transform:translateX(-50%) translateY(0); }
+
+
+    nav { padding:14px 20px; }
+    .hero { padding:48px 20px 32px; }
+    .upload-section,.results-section { padding-left:20px; padding-right:20px; }
+    .score-grid { grid-template-columns:1fr; text-align:center; }
+    .score-ring-wrap { margin:0 auto; }
+    .bar-label { width:110px; font-size:12px; }
+    .paywall-card { padding:32px 20px; }
+    .modal { border-radius:16px; }
+    .modal-body,.modal-header { padding-left:20px; padding-right:20px; }
+    .card-row { grid-template-columns:1fr; }
+    .rewrite-actions { flex-wrap:wrap; }
+    .proof-bar { gap:24px; }
+  }
+
+  /* FOOTER */
+  .site-footer { background:var(--white); border-top:1px solid var(--border); padding:32px 24px; text-align:center; }
+  .footer-disclaimer { max-width:680px; margin:0 auto 20px; font-size:12px; color:var(--ink-light); line-height:1.6; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 18px; text-align:left; }
+  .footer-links { display:flex; justify-content:center; align-items:center; gap:10px; flex-wrap:wrap; font-size:13px; margin-bottom:10px; }
+  .footer-link { background:none; border:none; color:var(--ink-mid); font-size:13px; cursor:pointer; text-decoration:underline; text-decoration-color:var(--border); padding:2px; font-family:'Inter',sans-serif; }
+  .footer-link:hover { color:var(--accent); }
+  .footer-dot { color:var(--border); }
+  .footer-copy { font-size:12px; color:var(--ink-light); }
+  .legal-section h4 { font-family:'Instrument Serif',serif; font-size:16px; margin:18px 0 6px; color:var(--ink); }
+  .legal-section h4:first-child { margin-top:0; }
+  .legal-section p { margin-bottom:8px; }
+  .legal-section ul { margin:8px 0 8px 18px; }
+  .legal-updated { font-size:11px; color:var(--ink-light); margin-bottom:16px; }
+
+  /* PERCENTILE CARD */
+  .percentile-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); position:relative; overflow:hidden; }
+  .percentile-header h3 { font-family:'Instrument Serif',serif; font-size:20px; letter-spacing:-0.3px; }
+  .percentile-body { margin-top:20px; filter:blur(5px); user-select:none; pointer-events:none; }
+  .percentile-bar-track { position:relative; height:14px; border-radius:7px; background:linear-gradient(90deg,#FEE2E2 0%,#FEF3C7 35%,#FEF9C3 55%,#DCFCE7 80%,#BBF7D0 100%); margin-bottom:8px; }
+  .percentile-marker { position:absolute; top:-26px; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; }
+  .percentile-marker::after { content:''; display:block; width:2px; height:34px; background:var(--ink); margin-top:2px; }
+  .percentile-marker span { font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; background:var(--ink); color:white; padding:2px 8px; border-radius:6px; white-space:nowrap; }
+  .percentile-scale { display:flex; justify-content:space-between; font-size:11px; color:var(--ink-light); font-family:'JetBrains Mono',monospace; }
+  .percentile-lock-overlay { position:absolute; inset:0; background:rgba(247,246,243,0.75); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; backdrop-filter:blur(2px); padding:20px; text-align:center; }
+
+  /* JD MATCH CARD */
+  .jd-match-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); }
+  .jd-match-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; gap:16px; }
+  .jd-match-header h3 { font-family:'Instrument Serif',serif; font-size:20px; letter-spacing:-0.3px; }
+  .jd-match-score-wrap { position:relative; width:72px; height:72px; flex-shrink:0; }
+  .jd-match-score-wrap canvas { position:absolute; top:0; left:0; }
+  .jd-score-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; line-height:1.1; }
+  .jd-gap-item { display:flex; align-items:flex-start; gap:10px; padding:10px 0; border-bottom:1px solid var(--border); font-size:13px; }
+  .jd-gap-item:last-of-type { border-bottom:none; }
+  .jd-gap-badge { font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:3px 8px; border-radius:4px; white-space:nowrap; flex-shrink:0; margin-top:1px; }
+  .jd-gap-badge.missing { background:#FEF2F2; color:var(--danger); }
+  .jd-gap-badge.present { background:#F0FDF4; color:var(--good); }
+  .jd-gap-badge.partial { background:#FFFBEB; color:var(--warn); }
+  .jd-lock-banner { display:flex; align-items:center; gap:12px; margin-top:16px; padding:14px 16px; background:var(--accent-light); border-radius:10px; font-size:13px; color:var(--ink-mid); flex-wrap:wrap; }
+  .jd-lock-banner strong { color:var(--accent); }
+
+  /* INDUSTRY SELECTOR */
+  .industry-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:6px; }
+  .ind-btn { background:var(--white); border:1.5px solid var(--border); border-radius:10px; padding:10px 8px; font-size:13px; font-weight:500; color:var(--ink-mid); cursor:pointer; transition:all .15s; text-align:center; line-height:1.3; }
+  .ind-btn:hover { border-color:var(--accent); color:var(--accent); background:var(--accent-light); }
+  .ind-btn.selected { border-color:var(--accent); background:var(--accent-light); color:var(--accent); font-weight:600; }
+  @media(max-width:500px){ .industry-grid { grid-template-columns:repeat(2,1fr); } }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Finance<span>CVScore</span></div>
+  <span class="nav-tag" id="navTag">Free ATS Check</span>
+  <span class="nav-pro-badge" id="navProBadge">⭐ Pro Unlocked</span>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="heroSection">
+  <span class="hero-eyebrow">Built for Finance Careers</span>
+  <h1>Generic CV tools don't<br>understand <em>finance.</em></h1>
+  <p>Get an ATS score and feedback benchmarked against real Investment Banking, Asset Management, Private Equity and Hedge Fund CVs — not generic advice.</p>
+  <p class="hero-stat">Tailored scoring across 12 finance sub-sectors</p>
+</section>
+
+<!-- UPLOAD -->
+<section class="upload-section" id="uploadSection">
+  <div class="upload-card" id="uploadCard">
+    <div class="upload-icon">
+      <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    </div>
+    <h3>Upload your CV</h3>
+    <p>Plain text (.txt) or Word (.docx) files only</p>
+    <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      Choose file
+    </button>
+    <input type="file" id="fileInput" accept=".txt,.docx,.doc">
+    <div style="margin-top:14px;padding:10px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;font-size:12px;color:#92400E;text-align:left;display:flex;gap:8px;align-items:flex-start;">
+      <span style="flex-shrink:0">⚠️</span>
+      <span><strong>Do not upload a PDF.</strong> PDFs are binary files that cannot be read as text. For best results, paste your CV text directly into the box below.</span>
+    </div>
+  </div>
+  <div class="file-chosen" id="fileChosen">
+    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+    <span id="fileName">file selected</span>
+  </div>
+
+  <div class="job-input-wrap" style="margin-top:20px">
+    <label for="cvTextArea">Paste your CV text <span style="color:var(--good);font-weight:600">(recommended for best accuracy)</span></label>
+    <textarea id="cvTextArea" rows="5" placeholder="Paste your full CV text here — copy directly from Word or Google Docs…" style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;resize:vertical;line-height:1.6;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+  </div>
+
+  <div class="job-input-wrap">
+    <label>Target industry <span style="color:var(--danger);font-weight:600">*</span></label>
+    <div class="industry-grid" id="industryGrid">
+      <button class="ind-btn" data-industry="ib" onclick="selectIndustry(this)">🏦 Investment Banking</button>
+      <button class="ind-btn" data-industry="am" onclick="selectIndustry(this)">📈 Asset Management</button>
+      <button class="ind-btn" data-industry="pe" onclick="selectIndustry(this)">💰 Private Equity</button>
+      <button class="ind-btn" data-industry="hf" onclick="selectIndustry(this)">🦅 Hedge Funds</button>
+      <button class="ind-btn" data-industry="er" onclick="selectIndustry(this)">🔎 Equity Research</button>
+      <button class="ind-btn" data-industry="st" onclick="selectIndustry(this)">⚡ Sales &amp; Trading</button>
+      <button class="ind-btn" data-industry="wm" onclick="selectIndustry(this)">🤝 Wealth Management</button>
+      <button class="ind-btn" data-industry="cf" onclick="selectIndustry(this)">🏢 Corporate Finance / FP&amp;A</button>
+      <button class="ind-btn" data-industry="insurance" onclick="selectIndustry(this)">🛡️ Insurance / Actuarial</button>
+      <button class="ind-btn" data-industry="risk" onclick="selectIndustry(this)">⚖️ Risk &amp; Compliance</button>
+      <button class="ind-btn" data-industry="retailbank" onclick="selectIndustry(this)">🏛️ Retail / Commercial Banking</button>
+      <button class="ind-btn" data-industry="fintech" onclick="selectIndustry(this)">⚙️ Fintech</button>
+    </div>
+    <p id="industryNote" style="font-size:12px;color:var(--ink-light);margin-top:8px;min-height:18px"></p>
+  </div>
+
+  <div class="job-input-wrap">
+    <label for="jobRoleInput">Specific job title <span style="color:var(--ink-light);font-weight:400">(optional)</span></label>
+    <input type="text" id="jobRoleInput" placeholder="e.g. Investment Banking Analyst, Solicitor, UX Designer">
+  </div>
+
+  <div class="job-input-wrap">
+    <label for="jdTextArea">
+      Paste the job description
+      <span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#B45309,#D97706);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px">Pro</span>
+      <span style="color:var(--ink-light);font-weight:400"> — unlocks JD match score & targeted rewrite</span>
+    </label>
+    <textarea id="jdTextArea" rows="4" placeholder="Paste the full job description here to get a match score and a CV rewritten specifically for this role…" style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;resize:vertical;line-height:1.6;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+  </div>
+
+  <button class="analyse-btn" onclick="startAnalysis()">
+    <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    Analyse my CV
+  </button>
+</section>
+
+<div class="proof-bar" id="proofBar">
+  <div class="proof-stat"><span class="proof-num">12</span><span class="proof-label">finance sub-sectors covered</span></div>
+  <div class="proof-stat"><span class="proof-num">AI</span><span class="proof-label">powered analysis &amp; rewriting</span></div>
+  <div class="proof-stat"><span class="proof-num">Free</span><span class="proof-label">core ATS score, no signup</span></div>
+</div>
+
+<!-- LOADING -->
+<div class="loading-state" id="loadingState">
+  <div class="spinner"></div>
+  <p style="font-size:16px;font-weight:600;">Scanning your CV…</p>
+  <p style="font-size:13px;color:var(--ink-light);margin-top:4px">This takes about 15 seconds</p>
+  <div class="loading-steps" id="loadingSteps">
+    <div class="loading-step" id="step1"><span class="step-dot"></span>Parsing document structure</div>
+    <div class="loading-step" id="step2"><span class="step-dot"></span>Running ATS compatibility check</div>
+    <div class="loading-step" id="step3"><span class="step-dot"></span>Analysing keyword density</div>
+    <div class="loading-step" id="step4"><span class="step-dot"></span>Scoring formatting & readability</div>
+    <div class="loading-step" id="step5"><span class="step-dot"></span>Generating improvement plan</div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<section class="results-section" id="resultsSection">
+  <div class="results-header">
+    <h2 id="resultsTitle">Your CV Report</h2>
+    <button class="restart-btn" onclick="restart()">↩ Analyse another CV</button>
+  </div>
+
+  <!-- PRO BANNER (hidden until unlocked) -->
+  <div class="pro-banner" id="proBanner">
+    <span class="pro-badge">Pro</span>
+    <div class="pro-banner-text"><strong>Pro unlocked.</strong> Your full keyword analysis and AI-rewritten CV are ready below.</div>
+  </div>
+
+  <!-- SCORE -->
+  <div class="score-grid">
+    <div class="score-ring-wrap"><canvas id="scoreCanvas" width="120" height="120"></canvas><div class="score-center"><div class="score-number" id="scoreNumber">--</div><div class="score-label">/ 100</div></div></div>
+    <div class="score-meta">
+      <h3 id="scoreTitle">Analysing…</h3>
+      <p class="score-verdict" id="scoreVerdict"></p>
+      <div class="score-pills" id="scorePills"></div>
+    </div>
+  </div>
+
+  <!-- BREAKDOWN -->
+  <div class="breakdown-card"><h3>Score Breakdown</h3><div id="breakdownBars"></div></div>
+
+  <!-- ISSUES -->
+  <div class="issues-card"><h3>Key Issues Found</h3><div id="issuesList"></div></div>
+
+  <!-- PERCENTILE RANKING (Pro feature) -->
+  <div class="percentile-card" id="percentileCard">
+    <div class="percentile-header">
+      <div>
+        <h3>How You Compare</h3>
+        <p id="percentileSub" style="font-size:13px;color:var(--ink-light);margin-top:2px"></p>
+      </div>
+    </div>
+    <div class="percentile-body" id="percentileBody">
+      <div class="percentile-bar-track">
+        <div class="percentile-bar-fill" id="percentileBarFill"></div>
+        <div class="percentile-marker" id="percentileMarker"><span id="percentileMarkerLabel"></span></div>
+      </div>
+      <div class="percentile-scale">
+        <span>0th</span><span>25th</span><span>50th</span><span>75th</span><span>100th</span>
+      </div>
+    </div>
+    <div class="percentile-lock-overlay" id="percentileLockOverlay">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-label">See your estimated percentile ranking</div>
+      <div class="lock-sub">See how your score compares to a modelled distribution for this sub-sector</div>
+      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock £9</button>
+    </div>
+    <p style="font-size:11px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
+      <strong>Methodology:</strong> This percentile is an estimate generated from a statistical model of typical CV
+      scores for this sub-sector, not a live database of user submissions. It is intended as a directional guide,
+      not a guarantee of recruiter outcomes.
+    </p>
+  </div>
+
+  <!-- JD MATCH CARD (shown if JD was provided) -->
+  <div class="jd-match-card" id="jdMatchCard" style="display:none">
+    <div class="jd-match-header">
+      <div>
+        <h3 id="jdMatchTitle">Job Description Match</h3>
+        <p id="jdMatchSub" style="font-size:13px;color:var(--ink-light);margin-top:2px"></p>
+      </div>
+      <div class="jd-match-score-wrap">
+        <canvas id="jdCanvas" width="72" height="72"></canvas>
+        <div class="jd-score-center">
+          <span id="jdScoreNum" style="font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:600">--</span>
+          <span style="font-size:9px;color:var(--ink-light);font-weight:600;letter-spacing:0.08em;text-transform:uppercase">match</span>
+        </div>
+      </div>
+    </div>
+    <div id="jdGapList"></div>
+    <div class="jd-lock-banner" id="jdLockBanner">
+      <span>🔒</span>
+      <span><strong>Pro:</strong> Get your CV rewritten to match this exact job description — keywords injected, bullets reframed, summary tailored.</span>
+      <button class="unlock-mini-btn" onclick="openPaymentModal()" style="white-space:nowrap">Unlock £9</button>
+    </div>
+  </div>
+
+  <!-- KEYWORDS (locked by default) -->
+  <div class="keyword-card" id="keywordCard">
+    <h3>ATS Keyword Analysis</h3>
+    <div id="keywordContent"></div>
+    <div class="keyword-lock-overlay" id="keywordLockOverlay">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-label">Unlock full keyword analysis</div>
+      <div class="lock-sub">See every missing keyword for your target role</div>
+      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock for £9</button>
+    </div>
+  </div>
+
+  <!-- AI REWRITE (hidden until pro) -->
+  <div class="rewrite-card" id="rewriteCard">
+    <div class="rewrite-header">
+      <h3 id="rewriteCardTitle">✨ Your AI-Rewritten CV</h3>
+      <div class="rewrite-actions">
+        <button class="copy-btn" onclick="copyRewrite()">📋 Copy text</button>
+        <button class="download-btn" onclick="downloadRewrite()">⬇ Download .txt</button>
+      </div>
+    </div>
+    <div class="rewrite-loading" id="rewriteLoading">
+      <div class="rewrite-spinner"></div>
+      <p style="font-size:14px;color:var(--ink-light)">Rewriting your CV…</p>
+    </div>
+    <div class="rewrite-body" id="rewriteBody" style="display:none"></div>
+    <p style="font-size:12px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
+      ⚠️ <strong>Please review before use:</strong> this is AI-generated content based on your original CV.
+      Check all dates, figures, job titles, and claims for accuracy before submitting to an employer —
+      you are responsible for the accuracy of your final CV.
+    </p>
+  </div>
+
+  <!-- PAYWALL (hidden after unlock) -->
+  <div class="paywall-card" id="paywallCard">
+    <h3>Get the full fix — land more interviews</h3>
+    <p>Your free report shows the problems. Pro rewrites your CV to fix them — and if you pasted a job description, it tailors every line to that specific role.</p>
+    <div class="paywall-features">
+      <div class="paywall-feature"><div class="paywall-feature-icon">🎯</div><div class="paywall-feature-label">CV rewritten for<br>your exact JD</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real CVs</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">🔑</div><div class="paywall-feature-label">Full keyword<br>gap analysis</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">✍️</div><div class="paywall-feature-label">Full AI<br>CV rewrite</div></div>
+    </div>
+    <button class="paywall-cta" onclick="openPaymentModal()">
+      Fix my CV now
+      <span class="paywall-price">£9 one-time · instant access</span>
+    </button>
+    <p class="paywall-guarantee">🔒 Secure checkout · Money-back guarantee</p>
+  </div>
+</section>
+
+<!-- ===== PAYMENT MODAL ===== -->
+<div class="modal-overlay" id="paymentModal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h3>CVScore Pro</h3>
+        <p>One-time payment · Instant access</p>
+      </div>
+      <button class="modal-close" onclick="closePaymentModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="price-display">
+        <span class="price-main">£9</span>
+        <span class="price-original">£29</span>
+        <span class="price-sub">one-time</span>
+      </div>
+
+      <div class="feature-list">
+        <div class="feature-row"><span class="feature-check">✓</span>Full keyword gap analysis for your role</div>
+        <div class="feature-row"><span class="feature-check">✓</span>AI rewrite of your entire CV</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Download-ready text format</div>
+        <div class="feature-row"><span class="feature-check">✓</span>30-day money-back guarantee</div>
+      </div>
+
+      <div class="demo-note">
+        <span>💡</span>
+        <span><strong>Demo mode:</strong> This is a prototype. In production, this connects to Stripe. Click "Pay now" to simulate a successful payment and see the full Pro experience.</span>
+      </div>
+
+      <div class="modal-input-group">
+        <label>Email address</label>
+        <input type="email" id="emailInput" placeholder="you@email.com">
+      </div>
+      <div class="modal-input-group">
+        <label>Card number</label>
+        <input type="text" id="cardNum" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCard(this)">
+      </div>
+      <div class="card-row">
+        <div class="modal-input-group">
+          <label>Expiry</label>
+          <input type="text" id="cardExp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)">
+        </div>
+        <div class="modal-input-group">
+          <label>CVC</label>
+          <input type="text" id="cardCvc" placeholder="123" maxlength="3">
+        </div>
+      </div>
+
+      <button class="pay-btn" id="payBtn" onclick="simulatePayment()">
+        🔒 Pay £9 now
+      </button>
+      <p class="modal-secure"><span>✓</span> Secured by Stripe · SSL encrypted</p>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-disclaimer">
+    <strong>Important:</strong> FinanceCV Score provides AI-generated and automated CV analysis for general
+    informational purposes only. It does not constitute professional careers advice, and scores, percentile
+    estimates, and rewritten content are indicative only — they do not guarantee interview success, job
+    offers, or that any specific employer's ATS or recruiters will assess your CV in the same way.
+    Always review AI-generated content for accuracy before use.
+  </div>
+  <div class="footer-links">
+    <button class="footer-link" onclick="openLegalModal('privacy')">Privacy Policy</button>
+    <span class="footer-dot">·</span>
+    <button class="footer-link" onclick="openLegalModal('terms')">Terms of Service</button>
+    <span class="footer-dot">·</span>
+    <button class="footer-link" onclick="openLegalModal('cookies')">Cookie Notice</button>
+    <span class="footer-dot">·</span>
+    <button class="footer-link" onclick="openLegalModal('disclaimer')">Disclaimer</button>
+    <span class="footer-dot">·</span>
+    <a class="footer-link" href="mailto:hello@financecvscore.com">Contact</a>
+  </div>
+  <div class="footer-copy">© 2026 FinanceCV Score. All rights reserved.</div>
+</footer>
+
+<!-- ===== LEGAL MODAL ===== -->
+<div class="modal-overlay" id="legalModal">
+  <div class="modal" style="max-width:640px;max-height:85vh;display:flex;flex-direction:column;">
+    <div class="modal-header">
+      <div class="modal-header-left">
+        <h3 id="legalModalTitle">Legal</h3>
+      </div>
+      <button class="modal-close" onclick="closeLegalModal()">✕</button>
+    </div>
+    <div class="modal-body" id="legalModalBody" style="overflow-y:auto;flex:1;font-size:13px;line-height:1.7;color:var(--ink-mid)"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+  let cvText = '', jobRole = '', jdText = '', analysisData = null, rewriteText = '';
+
+  // PDF.js loaded from CDN
+  const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+  let pdfJsLoaded = false;
+
+  function loadPdfJs(cb) {
+    if (pdfJsLoaded) { cb(); return; }
+    const s = document.createElement('script');
+    s.src = PDFJS_URL;
+    s.onload = () => {
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      pdfJsLoaded = true;
+      cb();
+    };
+    document.head.appendChild(s);
+  }
+
+  function handleFile(file) {
+    if (!file) return;
+    document.getElementById('fileName').textContent = file.name + ' selected';
+    document.getElementById('fileChosen').style.display = 'flex';
+
+    const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+
+    if (isPDF) {
+      // Show extracting state in textarea
+      document.getElementById('cvTextArea').value = 'Extracting text from PDF…';
+      loadPdfJs(() => {
+        const reader = new FileReader();
+        reader.onload = async function(ev) {
+          try {
+            const typedArray = new Uint8Array(ev.target.result);
+            const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
+            let fullText = '';
+            for (let i = 1; i <= pdf.numPages; i++) {
+              const page = await pdf.getPage(i);
+              const content = await page.getTextContent();
+              // Join text items, adding newline when y-position changes significantly
+              let lastY = null;
+              const pageText = content.items.map(item => {
+                const y = item.transform ? item.transform[5] : null;
+                const newline = (lastY !== null && Math.abs(y - lastY) > 5) ? '\n' : ' ';
+                lastY = y;
+                return (lastY !== null ? newline : '') + item.str;
+              }).join('');
+              fullText += pageText + '\n';
+            }
+            fullText = fullText.replace(/[ \t]{2,}/g, ' ').trim();
+            if (!fullText || fullText.length < 30) {
+              document.getElementById('cvTextArea').value = '';
+              showToast('Could not extract text from this PDF. Please paste your CV text directly.');
+              return;
+            }
+            cvText = fullText;
+            document.getElementById('cvTextArea').value = fullText.substring(0, 3000);
+          } catch(err) {
+            console.error('PDF parse error:', err);
+            document.getElementById('cvTextArea').value = '';
+            showToast('Could not read this PDF. Please paste your CV text directly.');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      });
+    } else {
+      // Plain text / .txt / .doc fallback
+      const reader = new FileReader();
+      reader.onload = ev => {
+        const result = ev.target.result;
+        // Sanity check — if it looks like binary garbage, reject it
+        const nonPrintable = (result.match(/[\x00-\x08\x0E-\x1F\x7F-\x9F]/g) || []).length;
+        if (nonPrintable > result.length * 0.05) {
+          document.getElementById('cvTextArea').value = '';
+          showToast('This file format could not be read. Please paste your CV text directly, or upload a PDF.');
+          return;
+        }
+        cvText = result;
+        document.getElementById('cvTextArea').value = result.substring(0, 3000);
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  // File upload
+  document.getElementById('fileInput').addEventListener('change', function(e) {
+    handleFile(e.target.files[0]);
+  });
+
+  // Drag & drop
+  const card = document.getElementById('uploadCard');
+  card.addEventListener('dragover', e => { e.preventDefault(); card.classList.add('dragging'); });
+  card.addEventListener('dragleave', () => card.classList.remove('dragging'));
+  card.addEventListener('drop', e => {
+    e.preventDefault(); card.classList.remove('dragging');
+    handleFile(e.dataTransfer.files[0]);
+  });
+
+  // Card formatting helpers
+  function formatCard(el) { el.value = el.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().substring(0,19); }
+  function formatExpiry(el) { let v = el.value.replace(/\D/g,''); if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2); el.value = v; }
+
+  function startAnalysis() {
+    const ta = document.getElementById('cvTextArea').value.trim();
+    jobRole = document.getElementById('jobRoleInput').value.trim();
+    jdText = document.getElementById('jdTextArea').value.trim();
+    if (!ta && !cvText) { showToast('Please paste your CV text or upload a file first.'); return; }
+    if (!selectedIndustry) { showToast('Please select your target industry first.'); document.getElementById('industryGrid').scrollIntoView({behavior:'smooth',block:'center'}); return; }
+    cvText = ta || cvText;
+    document.getElementById('heroSection').style.display = 'none';
+    document.getElementById('uploadSection').style.display = 'none';
+    document.getElementById('proofBar').style.display = 'none';
+    document.getElementById('loadingState').classList.add('active');
+    const steps = ['step1','step2','step3','step4','step5']; let i = 0;
+    const iv = setInterval(() => {
+      if (i > 0) { document.getElementById(steps[i-1]).classList.remove('active-step'); document.getElementById(steps[i-1]).classList.add('done'); }
+      if (i < steps.length) { document.getElementById(steps[i]).classList.add('active-step'); i++; }
+      else clearInterval(iv);
+    }, 2400);
+    callClaudeAPI(cvText, selectedIndustry);
+  }
+
+  function callClaudeAPI(cv, industry) {
+    setTimeout(() => showResults(runCVAnalysis(cv, industry)), 800);
+  }
+
+  // Fuzzy keyword match — checks root word so "managed" matches "management", "managing" etc.
+  function kwFound(text, keyword) {
+    const parts = keyword.toLowerCase().split(/\s+/).filter(p => p.length > 2);
+    if (parts.length === 1) {
+      const stem = parts[0].slice(0, Math.max(4, parts[0].length - 2));
+      return new RegExp(stem, 'i').test(text);
+    }
+    // Multi-word: all significant parts must appear somewhere in the doc
+    return parts.every(p => {
+      const stem = p.slice(0, Math.max(4, p.length - 2));
+      return new RegExp(stem, 'i').test(text);
+    });
+  }
+
+  function runCVAnalysis(cv, industry) {
+    const t = cv;
+    const text = cv.toLowerCase();
+
+    // Normalise line endings and split into lines for line-by-line checks
+    const lines = t.split(/\r?\n/);
+    const words = text.split(/\s+/).filter(w => w.length > 0);
+    const wordCount = words.length;
+
+    // ── 1. CONTACT INFO ──────────────────────────────────────────────
+    const hasEmail = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/.test(t);
+    // Broad phone: any sequence of 10-11 digits with optional spaces/dashes/brackets
+    const hasPhone = /(\+?[\d][\d\s\-().]{9,}\d)/.test(t.replace(/[a-zA-Z]/g,''));
+    const hasLinkedIn = /linkedin/i.test(t);
+
+    // ── 2. SECTION HEADINGS ───────────────────────────────────────────
+    // Match the actual words anywhere in the doc — no strict boundary needed
+    // since these are header-style lines. Covers "RELEVANT EXPERIENCE", "EDUCATION AND QUALIFICATIONS" etc.
+    const sectionPatterns = [
+      { name:'experience',   re:/experience|employment|career history|work history/i },
+      { name:'education',    re:/education|qualifications|academic background/i },
+      { name:'skills',       re:/skills|competencies|expertise|tools/i },
+      { name:'summary',      re:/\bprofile\b|summary|personal statement|about me|objective/i },
+      { name:'achievements', re:/achievements|accomplishments|leadership|activities/i },
+      { name:'references',   re:/references|referees/i },
+    ];
+    const foundSections = sectionPatterns.filter(s => s.re.test(t)).map(s => s.name);
+
+    // ── 3. ACTION VERBS ───────────────────────────────────────────────
+    const verbStems = [
+      'hosted','presented','provided','delivered','conducted','developed','streamlined',
+      'implemented','collaborated','contributed','structured','adapted','constructed',
+      'led','managed','achieved','increased','reduced','built','created','designed',
+      'improved','launched','drove','executed','coordinated','spearheaded','negotiated',
+      'oversaw','generated','established','mentored','trained','transformed','optimised',
+      'accelerated','championed','facilitated','influenced','pioneered','advised',
+      'identified','ensured','maintained','supported','utilised','highlighted'
+    ];
+    const foundVerbStems = verbStems.filter(v => new RegExp('\\b' + v, 'i').test(t));
+
+    // Bullet points: count lines that start with •, -, *, or are indented list items
+    // Also count lines starting with a capital letter after whitespace (common in pasted CVs)
+    const bulletLines = lines.filter(l => /^\s*[•\-\*▪▸►◆]\s+\S/.test(l)).length;
+    // Fallback: count lines that look like bullet content (start with capital, have verb-like structure)
+    const structuredLines = bulletLines > 0 ? bulletLines :
+      lines.filter(l => /^\s{0,4}[A-Z][a-z]/.test(l) && l.trim().length > 20).length;
+
+    // ── 4. METRICS & NUMBERS ─────────────────────────────────────────
+    // Fixed: handles "£1270", "$38 billion", "15% ROIC", "2:1", dates not counted
+    // Deliberately exclude years (4-digit numbers 19xx/20xx) and grades like "2:1"
+    const metricMatches = [];
+
+    // Pattern 1: currency + number  e.g. £1270, $38
+    const currencyMatches = t.match(/[£$€]\s*[\d,]+(\.\d+)?(\s*(billion|million|thousand|k\b|m\b))?/gi) || [];
+    metricMatches.push(...currencyMatches);
+
+    // Pattern 2: number + % e.g. 15%, 30%
+    const percentMatches = t.match(/\d+(\.\d+)?\s*%/g) || [];
+    metricMatches.push(...percentMatches);
+
+    // Pattern 3: number + scale word e.g. 38 billion, 1.2 million
+    const scaleMatches = t.match(/\d+(\.\d+)?\s*(billion|million|thousand)/gi) || [];
+    metricMatches.push(...scaleMatches);
+
+    // Pattern 4: multipliers e.g. 3x, 10x
+    const multiplierMatches = t.match(/\d+x\b/gi) || [];
+    metricMatches.push(...multiplierMatches);
+
+    // Deduplicate (rough) by converting to set of strings
+    const uniqueMetrics = [...new Set(metricMatches)];
+
+    // ── 5. PASSIVE LANGUAGE ───────────────────────────────────────────
+    const passiveCount = (t.match(/\b(responsible for|involved in|assisted (with|in)|duties included|worked on|worked with)\b/gi) || []).length;
+
+    // ── 6. LENGTH ─────────────────────────────────────────────────────
+    const lengthOk = wordCount >= 250 && wordCount <= 1000;
+
+    // ── 7. KEYWORD ANALYSIS ───────────────────────────────────────────
+    const roleKw = getRoleKeywords(industry, t);
+    const indConfig = roleKw.config || industryKeywords.general;
+
+    // ── 8. SCORING ────────────────────────────────────────────────────
+    const hasTable   = /(\|.+\|.+\||\+-+\+)/.test(t);
+    const contactPts = (hasEmail ? 40 : 0) + (hasPhone ? 35 : 0) + (hasLinkedIn ? 15 : 0) + (foundSections.length >= 2 ? 10 : 0);
+    const atsScore = clamp(
+      Math.round((foundSections.length / 4) * 50 + (contactPts / 100) * 40 + (lengthOk ? 10 : 0) - (hasTable ? 20 : 0)),
+      15, 100
+    );
+
+    const keywordScore = clamp(roleKw.presentScore, 10, 100);
+
+    const usedBullets = Math.max(bulletLines, structuredLines);
+    const formatScore = clamp(
+      Math.round(
+        (foundSections.length >= 4 ? 40 : foundSections.length * 10) +
+        (usedBullets >= 8 ? 30 : usedBullets * 4) +
+        (lengthOk ? 20 : wordCount < 250 ? 5 : 10) +
+        (hasEmail ? 10 : 0)
+      ),
+      15, 100
+    );
+
+    const metricCount = uniqueMetrics.length;
+    const impactScore = clamp(
+      Math.round(
+        (foundVerbStems.length >= 8 ? 45 : foundVerbStems.length * 5) +
+        (metricCount >= 4 ? 45 : metricCount * 11) +
+        (passiveCount === 0 ? 10 : passiveCount <= 2 ? 5 : 0)
+      ),
+      10, 100
+    );
+
+    const readScore = clamp(
+      Math.round(
+        (lengthOk ? 40 : 20) +
+        (foundSections.length >= 3 ? 30 : foundSections.length * 10) +
+        (usedBullets >= 5 ? 20 : usedBullets * 4) +
+        (passiveCount === 0 ? 10 : 0)
+      ),
+      15, 100
+    );
+
+    const overall = clamp(Math.round(
+      atsScore * 0.25 + keywordScore * 0.20 + formatScore * 0.20 + impactScore * 0.25 + readScore * 0.10
+    ), 10, 100);
+
+    const scoreTitle = overall >= 80 ? 'Excellent' : overall >= 65 ? 'Strong' : overall >= 48 ? 'Fair' : 'Needs Work';
+
+    // ── 9. ISSUES ─────────────────────────────────────────────────────
+    const issues = [];
+    const hasSummary = /\b(profile|summary|personal statement|about me|objective)\b/i.test(t);
+
+    // Contact
+    if (!hasEmail)
+      issues.push({severity:'red', icon:'📧', title:'No email address detected',
+        description:"We couldn't find an email address. ATS systems require this to create your candidate profile — make sure it's clearly visible at the top."});
+    if (!hasPhone)
+      issues.push({severity:'red', icon:'📞', title:'No phone number detected',
+        description:'No phone number was found. Recruiters need a direct line — add your mobile number near your name at the top of the CV.'});
+
+    // Action verbs
+    if (foundVerbStems.length < 5)
+      issues.push({severity:'red', icon:'💬', title:'Weak or missing action verbs',
+        description:'Few strong action verbs detected. Starting bullet points with verbs like Led, Delivered, Built, or Increased makes a significant difference to ATS scoring and recruiter impression.'});
+
+    // Passive language
+    if (passiveCount >= 3)
+      issues.push({severity:'amber', icon:'🔄', title:'Passive language detected',
+        description:`Found ${passiveCount} passive phrase${passiveCount>1?'s':''} such as "responsible for" or "involved in". Replace with direct action verbs to strengthen impact.`});
+
+    // Sections
+    if (foundSections.length < 3)
+      issues.push({severity:'amber', icon:'📋', title:'Missing standard CV sections',
+        description:`Only ${foundSections.length} standard section${foundSections.length!==1?'s':''} detected. ATS systems scan for clear headings like Experience, Education, and Skills.`});
+
+    // LinkedIn
+    if (!hasLinkedIn)
+      issues.push({severity:'amber', icon:'🔗', title:'No LinkedIn URL',
+        description:'No LinkedIn profile found. Adding your URL is standard practice — most recruiters will check it before calling.'});
+
+    // Bullets
+    if (usedBullets < 4)
+      issues.push({severity:'amber', icon:'📝', title:'Limited bullet point structure',
+        description:`Only ${usedBullets} structured bullet points detected. ATS systems parse lists far better than paragraphs — reformat experience as bullets starting with action verbs.`});
+
+    // Keywords
+    if (roleKw.missing.length >= 6)
+      issues.push({severity:'amber', icon:'🔍', title:`Missing ${industryLabels[industry]||industry} keywords`,
+        description:`Your CV is missing ${roleKw.missing.length} commonly filtered keywords for ${industryLabels[industry]||industry} roles. Unlock Pro to see exactly which ones to add.`});
+
+    // Industry: metrics (tailored description)
+    if (metricCount === 0)
+      issues.push({severity:'red', icon:'📊', title:'No quantified achievements',
+        description: indConfig.metricsNote});
+    else if (metricCount < 3)
+      issues.push({severity:'amber', icon:'📊', title:'Few quantified achievements',
+        description:`Only ${metricCount} metric${metricCount>1?'s':''} found. ${indConfig.metricsNote}`});
+
+    // Industry: summary/profile
+    if (!hasSummary)
+      issues.push({severity:'amber', icon:'📝', title:'No personal summary or profile',
+        description: indConfig.summaryNote});
+
+    // Word count
+    if (wordCount < 250)
+      issues.push({severity:'amber', icon:'📏', title:'CV may be too short',
+        description:`At around ${wordCount} words, your CV is brief. ${indConfig.lengthNote}`});
+    else if (wordCount > 1000)
+      issues.push({severity:'amber', icon:'📏', title:'CV may be too long',
+        description:`At ${wordCount} words your CV is quite long. ${indConfig.lengthNote}`});
+
+    // Positive signals
+    if (metricCount >= 3)
+      issues.push({severity:'green', icon:'✅', title:'Good use of metrics',
+        description:`${metricCount} quantified achievements found. Numbers make your accomplishments concrete and credible to both ATS systems and hiring managers.`});
+
+    if (foundVerbStems.length >= 6)
+      issues.push({severity:'green', icon:'✅', title:'Strong action verb usage',
+        description:`${foundVerbStems.length} distinct action verbs detected throughout your CV. This signals proactivity and is well-regarded by recruiters.`});
+
+    if (lengthOk)
+      issues.push({severity:'green', icon:'✅', title:'Good CV length',
+        description:`At around ${wordCount} words your CV is well-proportioned. Both ATS systems and recruiters respond best to focused, appropriately sized CVs.`});
+
+    if (foundSections.length >= 4)
+      issues.push({severity:'green', icon:'✅', title:'Well-structured sections',
+        description:`${foundSections.length} clear CV sections detected. Good section structure significantly improves ATS parse accuracy.`});
+
+    const severityOrder = {red:0, amber:1, green:2};
+    issues.sort((a,b) => severityOrder[a.severity] - severityOrder[b.severity]);
+    const finalIssues = issues.slice(0, 6);
+
+    // ── 10. PILLS ─────────────────────────────────────────────────────
+    const pills = [], pillColors = [];
+    if (!hasEmail || !hasPhone)           { pills.push('Contact info missing'); pillColors.push('red'); }
+    if (metricCount === 0)                { pills.push('No metrics');           pillColors.push('red'); }
+    else if (metricCount >= 3)            { pills.push('Strong metrics');       pillColors.push('green'); }
+    if (foundVerbStems.length < 5)        { pills.push('Weak action verbs');    pillColors.push('amber'); }
+    else if (foundVerbStems.length >= 8)  { pills.push('Strong verbs');         pillColors.push('green'); }
+    if (roleKw.missing.length >= 6)       { pills.push('Keywords missing');     pillColors.push('amber'); }
+    if (foundSections.length >= 4)        { pills.push('Well structured');      pillColors.push('green'); }
+    if (lengthOk)                         { pills.push('Good length');          pillColors.push('green'); }
+    if (pills.length === 0)               { pills.push('Needs improvement');    pillColors.push('amber'); }
+
+    // ── 11. VERDICT ───────────────────────────────────────────────────
+    const verdicts = {
+      'Excellent': 'Your CV is well-optimised and should clear most ATS filters. Focus on tailoring keywords to each specific job posting to maximise your callback rate.',
+      'Strong':    'Your CV performs well but has a few fixable gaps. Addressing the issues below should give you a meaningful improvement in response rates.',
+      'Fair':      'Your CV will pass some ATS filters but is likely being screened out by others. The issues below — particularly around keywords and quantified impact — are the priority.',
+      'Needs Work':'Several issues are likely causing your CV to be filtered out before a human sees it. The fixes are straightforward and should significantly improve your callback rate.'
+    };
+
+    return {
+      overallScore: overall,
+      scoreTitle,
+      scoreVerdict: verdicts[scoreTitle],
+      pills: pills.slice(0,4),
+      pillColors: pillColors.slice(0,4),
+      breakdown: [
+        {label:'ATS Compatibility', score: atsScore},
+        {label:'Keyword Density',   score: keywordScore},
+        {label:'Formatting',        score: formatScore},
+        {label:'Impact & Results',  score: impactScore},
+        {label:'Readability',       score: readScore}
+      ],
+      issues: finalIssues,
+      keywordsPresent: roleKw.present,
+      keywordsMissing: roleKw.missing,
+      industry: industry
+    };
+  }
+
+  function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
+
+  // ── INDUSTRY SELECTOR ──────────────────────────────────────────────
+  let selectedIndustry = '';
+
+  const industryNotes = {
+    ib:        'Investment Banking CVs are judged in seconds. Recruiters expect 1 page, deal exposure (even on pitches), technical modelling skills (DCF, LBO, M&A), and elite academics. Superdays test technical knowledge directly from your CV.',
+    am:        'Asset Management CVs should show investment process understanding, sector coverage, stock-pitch experience, and performance attribution. CFA progress is a strong signal. Long-term thinking and research depth matter more than deal count.',
+    pe:        'Private Equity CVs are the hardest to break into without prior IB/consulting. Expect LBO modelling, due diligence, portfolio company exposure, and deal sourcing. Quantify deal sizes and your specific workstream contribution.',
+    hf:        'Hedge Fund CVs reward differentiated thinking — specific strategies (long/short, macro, quant), demonstrable conviction (personal portfolio, investment thesis writing), and strong quantitative/technical skills (Python, statistics).',
+    er:        'Equity Research CVs need sector specialism, modelling skills, written communication (initiation reports, notes), and evidence of independent stock analysis. CFA is highly valued here.',
+    st:        'Sales & Trading CVs reward quick decision-making evidence, market awareness, risk appetite, and numerical/mental agility. Trading simulations, market commentary, and PnL awareness stand out.',
+    wm:        'Wealth/Private Banking CVs need relationship management evidence, client service orientation, and product knowledge (investments, lending, structuring). Professional presentation and language skills are valued for HNW client coverage.',
+    cf:        'Corporate Finance/FP&A CVs should show budgeting, forecasting, variance analysis, and business partnering. Excel/modelling skills plus commercial storytelling (translating numbers into decisions) are key.',
+    insurance: 'Insurance/Actuarial CVs benefit from progress through actuarial exams (CT/IFoA), pricing or reserving exposure, and regulatory knowledge (Solvency II). Analytical rigour and attention to detail are emphasised.',
+    risk:      'Risk & Compliance CVs need regulatory frameworks (Basel, FCA, MiFID), risk methodologies (VaR, stress testing), and evidence of independent judgement. Certifications (FRM, CFA) add credibility.',
+    retailbank:'Retail/Commercial Banking CVs should emphasise customer outcomes, product knowledge (lending, mortgages, accounts), relationship management, and sales/service targets met.',
+    fintech:   'Fintech CVs blend finance and tech — show product or platform exposure, understanding of payments/lending/crypto infrastructure, and comfort with data or technical collaboration alongside financial acumen.'
+  };
+
+  const industryLabels = {
+    ib:'Investment Banking', am:'Asset Management', pe:'Private Equity', hf:'Hedge Funds',
+    er:'Equity Research', st:'Sales & Trading', wm:'Wealth Management', cf:'Corporate Finance / FP&A',
+    insurance:'Insurance / Actuarial', risk:'Risk & Compliance', retailbank:'Retail / Commercial Banking',
+    fintech:'Fintech'
+  };
+
+  function selectIndustry(btn) {
+    document.querySelectorAll('.ind-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedIndustry = btn.dataset.industry;
+    const note = document.getElementById('industryNote');
+    note.textContent = industryNotes[selectedIndustry] || '';
+    note.style.display = 'block';
+  }
+
+  // ── SUB-SECTOR KEYWORD POOLS & BENCHMARKS ──────────────────────────
+  // benchmark = {mean, sd, n} describes the simulated distribution of overall
+  // scores submitted for this sub-sector, used for the Pro percentile feature.
+  const industryKeywords = {
+    ib: {
+      keywords: ['financial modelling','dcf','lbo','m&a','valuation','pitch book','comparable company analysis',
+        'precedent transactions','due diligence','capital markets','equity capital markets','debt capital markets',
+        'excel','vba','powerpoint','deal execution','financial statements','accretion dilution','superday'],
+      lengthNote: 'Investment Banking CVs must be exactly 1 page. Recruiters spend under 30 seconds on first review.',
+      summaryNote: 'IB CVs typically skip a personal statement — lead straight into education, then experience, ordered by relevance.',
+      metricsNote: 'Quantify deal sizes (£/$m), transaction types, and your specific contribution (e.g. "built 3-statement model for £200m disposal").',
+      benchmark: { mean: 54, sd: 16, n: 6840 }
+    },
+    am: {
+      keywords: ['portfolio management','asset allocation','equity research','fixed income','attribution analysis',
+        'cfa','morningstar','factset','bloomberg','risk management','sector analysis','stock pitch',
+        'performance analysis','benchmark','aum','top-down','bottom-up','macro analysis'],
+      lengthNote: 'Asset Management CVs are typically 1 page for graduate roles, up to 2 pages for experienced analysts.',
+      summaryNote: 'A brief investment philosophy or area-of-interest statement can work well for AM, unlike IB.',
+      metricsNote: 'Reference AUM figures, performance vs benchmark, and specific funds/strategies you supported.',
+      benchmark: { mean: 56, sd: 15, n: 4120 }
+    },
+    pe: {
+      keywords: ['lbo modelling','due diligence','deal sourcing','portfolio company','value creation',
+        'financial modelling','exit strategy','capital structure','investment thesis','data room',
+        'management presentations','industry analysis','returns analysis','irr','moic','add-on acquisitions'],
+      lengthNote: 'Private Equity CVs must be 1 page. Prior IB or top-tier consulting experience should be prominent.',
+      summaryNote: 'No personal statement expected — structure should mirror an IB CV with deal experience leading.',
+      metricsNote: 'Quantify deal values, your workstream (e.g. commercial due diligence), and where possible IRR/MOIC outcomes.',
+      benchmark: { mean: 61, sd: 14, n: 1980 }
+    },
+    hf: {
+      keywords: ['long short equity','macro','quantitative analysis','python','statistics','portfolio construction',
+        'risk management','investment thesis','market analysis','derivatives','backtesting','alpha generation',
+        'position sizing','hedging','volatility','bloomberg','factset','algorithmic trading'],
+      lengthNote: 'Hedge Fund CVs are typically 1 page. Evidence of independent thinking (personal portfolio, blog, papers) is valued.',
+      summaryNote: 'A short statement on investment philosophy or strategy interest can differentiate candidates here.',
+      metricsNote: 'Personal portfolio returns, backtested strategy performance, or specific PnL contributions are compelling.',
+      benchmark: { mean: 58, sd: 17, n: 1340 }
+    },
+    er: {
+      keywords: ['equity research','sector coverage','financial modelling','initiation report','earnings model',
+        'valuation','dcf','comparable analysis','cfa','bloomberg','factset','consensus estimates',
+        'research notes','company analysis','industry analysis','written communication','rating'],
+      lengthNote: 'Equity Research CVs should be 1 page. Highlight any published or written analysis, even academic.',
+      summaryNote: 'A line on sector interest/specialism is common and useful for ER applications.',
+      metricsNote: 'Reference companies/sectors covered, models built, and any forecast accuracy or thesis outcomes.',
+      benchmark: { mean: 55, sd: 15, n: 1620 }
+    },
+    st: {
+      keywords: ['market making','trade execution','risk management','pnl','derivatives','fixed income',
+        'fx','equities','market analysis','bloomberg terminal','quantitative skills','client coverage',
+        'pricing','hedging','volatility','order flow','market commentary'],
+      lengthNote: 'Sales & Trading CVs are 1 page. Speed-reading friendly formatting matters — clear, scannable bullets.',
+      summaryNote: 'No personal statement needed — prioritise any trading simulations, competitions, or market commentary writing.',
+      metricsNote: 'Simulation P&L, competition results, and quantifiable market analysis examples stand out.',
+      benchmark: { mean: 53, sd: 16, n: 1410 }
+    },
+    wm: {
+      keywords: ['relationship management','client management','portfolio management','financial planning',
+        'wealth management','hnw','investment advice','client acquisition','aum','cross-selling',
+        'estate planning','tax planning','compliance','client retention','presentations'],
+      lengthNote: 'Wealth Management CVs are 1-2 pages. Client-facing experience (any industry) is highly transferable and should be emphasised.',
+      summaryNote: 'A short profile highlighting relationship-building strengths and any language skills is valuable for HNW coverage.',
+      metricsNote: 'Client AUM managed/grown, retention rates, and cross-sell or referral outcomes are key metrics.',
+      benchmark: { mean: 52, sd: 16, n: 980 }
+    },
+    cf: {
+      keywords: ['fp&a','budgeting','forecasting','variance analysis','financial modelling','business partnering',
+        'management accounts','cost analysis','financial reporting','excel','erp','sap','kpi',
+        'scenario analysis','cash flow forecasting','board reporting'],
+      lengthNote: 'Corporate Finance/FP&A CVs are typically 1-2 pages depending on seniority.',
+      summaryNote: 'A brief summary highlighting business partnering scope (which functions/regions you support) works well.',
+      metricsNote: 'Budget sizes managed, forecast accuracy improvements, and cost savings identified are the key figures.',
+      benchmark: { mean: 57, sd: 14, n: 2240 }
+    },
+    insurance: {
+      keywords: ['actuarial','pricing','reserving','solvency ii','ifoa','underwriting','risk assessment',
+        'statistical modelling','excel','vba','sas','r programming','catastrophe modelling',
+        'regulatory reporting','capital modelling','exam progress'],
+      lengthNote: 'Insurance/Actuarial CVs are 1-2 pages. Exam progress (e.g. "Passed CT1-CT8") should be clearly listed.',
+      summaryNote: 'A line indicating actuarial exam progress and target qualification timeline is standard practice.',
+      metricsNote: 'Reference exam pass rates, models built, and any pricing/reserving impact in £ terms.',
+      benchmark: { mean: 59, sd: 13, n: 870 }
+    },
+    risk: {
+      keywords: ['risk management','credit risk','market risk','operational risk','basel','var',
+        'stress testing','regulatory compliance','fca','mifid','risk reporting','model validation',
+        'frm','cfa','risk appetite','controls testing'],
+      lengthNote: 'Risk & Compliance CVs are 1-2 pages. Regulatory framework knowledge should be explicit and named.',
+      summaryNote: 'A brief summary stating risk discipline specialism (credit/market/operational) helps recruiters route applications.',
+      metricsNote: 'Quantify portfolios/exposures monitored, risk reductions achieved, or audit findings resolved.',
+      benchmark: { mean: 55, sd: 14, n: 1120 }
+    },
+    retailbank: {
+      keywords: ['customer service','relationship management','sales targets','product knowledge',
+        'lending','mortgages','compliance','kyc','cross-selling','branch operations',
+        'risk assessment','complaint handling','financial advice'],
+      lengthNote: 'Retail/Commercial Banking CVs are 1-2 pages. Sales target achievement should be quantified clearly.',
+      summaryNote: 'A short profile on customer service strengths and product specialism is useful.',
+      metricsNote: 'Sales targets (%), customer satisfaction scores, and portfolio sizes managed are the headline figures.',
+      benchmark: { mean: 50, sd: 15, n: 2640 }
+    },
+    fintech: {
+      keywords: ['product management','payments','api','data analysis','sql','python','agile',
+        'financial services','regulatory technology','blockchain','user experience','growth metrics',
+        'stakeholder management','cross-functional','financial modelling','kpi'],
+      lengthNote: 'Fintech CVs are 1-2 pages. Blend of financial domain knowledge and technical/product fluency should be visible.',
+      summaryNote: 'A summary positioning yourself at the intersection of finance and technology helps frame mixed experience.',
+      metricsNote: 'User growth, transaction volumes, or efficiency gains from product/technical work are strong metrics.',
+      benchmark: { mean: 56, sd: 15, n: 760 }
+    }
+  };
+
+  function getRoleKeywords(industry, text) {
+    const ind = industry || 'ib';
+    const config = industryKeywords[ind] || industryKeywords.ib;
+    const pool = config.keywords;
+
+    const present = pool.filter(k => kwFound(text, k)).slice(0, 8);
+    const missing = pool.filter(k => !kwFound(text, k)).slice(0, 10);
+    const ratio = present.length / pool.length;
+    const presentScore = clamp(Math.round(ratio * 160), 10, 100);
+
+    return { present, missing, presentScore, config };
+  }
+
+  function getDemoResult() {
+    return {
+      overallScore:52, scoreTitle:"Needs Work",
+      scoreVerdict:"Your CV has structural issues that most ATS systems will flag or reject before a human ever sees it. With targeted fixes, you could significantly improve your callback rate.",
+      pills:["Poor ATS formatting","Weak keywords","No metrics"], pillColors:["red","amber","red"],
+      breakdown:[{label:"ATS Compatibility",score:44},{label:"Keyword Density",score:38},{label:"Formatting",score:61},{label:"Impact & Results",score:52},{label:"Readability",score:68}],
+      issues:[
+        {severity:"red",icon:"⚠️",title:"Missing quantifiable achievements",description:"ATS systems and recruiters both score CVs higher when achievements include numbers. Add revenue figures, percentages, or team sizes to your bullet points."},
+        {severity:"red",icon:"🔍",title:"Low keyword match for target role",description:"Your CV lacks the industry-standard terms recruiters search for. Without these, ATS systems will rank you below candidates with similar experience but better-optimised CVs."},
+        {severity:"amber",icon:"📐",title:"Inconsistent formatting detected",description:"Varied spacing and bullet styles confuse ATS parsers. Standardise your formatting throughout to improve parse accuracy."},
+        {severity:"amber",icon:"📝",title:"Profile summary is too generic",description:"Your opening summary reads as filler. Replace with a role-specific 3-line pitch that matches your target job description language."},
+        {severity:"green",icon:"✅",title:"Good document length",description:"Your CV length is within the ideal 1-2 page range that both ATS and human reviewers prefer."}
+      ],
+      keywordsPresent:["communication","teamwork","management","project","Excel","customer service"],
+      keywordsMissing:["stakeholder management","KPI","agile","cross-functional","P&L","ROI","OKR","data-driven","strategic planning","performance metrics"]
+    };
+  }
+
+  // ── JD MATCH ANALYSIS ─────────────────────────────────────────────
+  function analyseJDMatch(cv, jd) {
+    if (!jd || jd.length < 50) return null;
+
+    const cvLow = cv.toLowerCase();
+    const jdLow = jd.toLowerCase();
+
+    // Extract meaningful words from JD (ignore stopwords)
+    const stopwords = new Set(['the','and','or','for','with','that','this','are','from','have',
+      'will','you','your','our','their','they','not','but','can','been','has','its','all',
+      'any','one','was','were','had','also','more','than','such','each','into','when',
+      'would','could','should','must','may','ability','experience','role','work','team',
+      'company','position','candidate','strong','excellent','good','great','new','key',
+      'skills','knowledge','including','etc','working','within','across','using','based']);
+
+    // Get JD keywords: words 4+ chars not in stopwords
+    const jdWords = jdLow.match(/[a-z][a-z\-]{3,}/g) || [];
+    const jdFreq = {};
+    jdWords.forEach(w => { if (!stopwords.has(w)) jdFreq[w] = (jdFreq[w]||0)+1; });
+
+    // Sort by frequency — top terms are most important
+    const topTerms = Object.entries(jdFreq)
+      .sort((a,b) => b[1]-a[1])
+      .slice(0,30)
+      .map(([word]) => word);
+
+    // Also extract multi-word phrases (bigrams) from JD
+    const jdTokens = jdLow.replace(/[^\w\s]/g,' ').split(/\s+/).filter(w=>w.length>2 && !stopwords.has(w));
+    const bigrams = [];
+    for (let i=0; i<jdTokens.length-1; i++) {
+      if (jdTokens[i].length>3 && jdTokens[i+1].length>3 && !stopwords.has(jdTokens[i]) && !stopwords.has(jdTokens[i+1])) {
+        bigrams.push(jdTokens[i] + ' ' + jdTokens[i+1]);
+      }
+    }
+    // Count bigram frequency
+    const bigramFreq = {};
+    bigrams.forEach(b => bigramFreq[b]=(bigramFreq[b]||0)+1);
+    const topBigrams = Object.entries(bigramFreq)
+      .filter(([,c])=>c>=2)
+      .sort((a,b)=>b[1]-a[1])
+      .slice(0,15)
+      .map(([b])=>b);
+
+    // Check presence in CV using fuzzy stem match
+    const allTerms = [...new Set([...topBigrams, ...topTerms])].slice(0,20);
+
+    const present=[], partial=[], missing=[];
+    allTerms.forEach(term => {
+      const parts = term.split(' ');
+      if (parts.length === 1) {
+        const stem = term.slice(0, Math.max(4, term.length-2));
+        if (new RegExp(stem,'i').test(cv)) present.push(term);
+        else missing.push(term);
+      } else {
+        const allIn = parts.every(p => new RegExp(p.slice(0,Math.max(4,p.length-2)),'i').test(cv));
+        const someIn = parts.some(p => new RegExp(p.slice(0,Math.max(4,p.length-2)),'i').test(cv));
+        if (allIn) present.push(term);
+        else if (someIn) partial.push(term);
+        else missing.push(term);
+      }
+    });
+
+    const total = present.length + partial.length + missing.length;
+    const score = total > 0 ? Math.round(((present.length + partial.length*0.5) / total) * 100) : 50;
+
+    return {
+      score: Math.max(15, Math.min(100, score)),
+      present: present.slice(0,6),
+      partial: partial.slice(0,4),
+      missing: missing.slice(0,8),
+      total
+    };
+  }
+
+  function showJDMatch(jdResult) {
+    if (!jdResult) return;
+    const card = document.getElementById('jdMatchCard');
+    card.style.display = 'block';
+
+    // Score ring
+    const canvas = document.getElementById('jdCanvas');
+    const ctx = canvas.getContext('2d');
+    const s = jdResult.score;
+    const color = s>=70?'#16A34A':s>=45?'#D97706':'#DC2626';
+    document.getElementById('jdScoreNum').textContent = s + '%';
+    document.getElementById('jdScoreNum').style.color = color;
+
+    let cur = -Math.PI/2, frame=0;
+    const target = (s/100)*2*Math.PI - Math.PI/2;
+    const step = (target-cur)/30;
+    const anim = () => {
+      if (frame++<30) {
+        cur+=step;
+        ctx.clearRect(0,0,72,72);
+        ctx.beginPath(); ctx.arc(36,36,28,0,2*Math.PI); ctx.strokeStyle='#E4E3DF'; ctx.lineWidth=7; ctx.stroke();
+        ctx.beginPath(); ctx.arc(36,36,28,-Math.PI/2,cur); ctx.strokeStyle=color; ctx.lineWidth=7; ctx.lineCap='round'; ctx.stroke();
+        requestAnimationFrame(anim);
+      }
+    };
+    anim();
+
+    // Title
+    const label = s>=75?'Strong match':s>=50?'Partial match':'Weak match';
+    document.getElementById('jdMatchTitle').textContent = `Job Description Match — ${label}`;
+    document.getElementById('jdMatchSub').textContent =
+      `${jdResult.present.length} of ${jdResult.total} key JD terms found in your CV. ${jdResult.missing.length} missing terms detected.`;
+
+    // Gap list — show top 6 items
+    const gapEl = document.getElementById('jdGapList');
+    gapEl.innerHTML = '';
+    const items = [
+      ...jdResult.missing.slice(0,4).map(k=>({k,type:'missing',label:'MISSING'})),
+      ...jdResult.partial.slice(0,2).map(k=>({k,type:'partial',label:'PARTIAL'})),
+      ...jdResult.present.slice(0,3).map(k=>({k,type:'present',label:'FOUND'})),
+    ];
+    items.forEach(({k,type,label}) => {
+      const div = document.createElement('div'); div.className='jd-gap-item';
+      const tip = type==='missing'
+        ? `This term appears in the job description but not in your CV — add it to boost your match score.`
+        : type==='partial'
+        ? `Some words from this phrase appear in your CV but not the exact combination.`
+        : `This JD keyword is present in your CV — good.`;
+      div.innerHTML = `<span class="jd-gap-badge ${type}">${label}</span><span><strong>${k}</strong> — ${tip}</span>`;
+      gapEl.appendChild(div);
+    });
+  }
+
+  // ── PERCENTILE RANKING (Pro feature) ───────────────────────────────
+  // Uses a normal-distribution model of simulated historical scores per
+  // sub-sector (mean/sd/n defined in industryKeywords benchmarks) to place
+  // the user's score within a percentile — a comparison AI alone cannot give,
+  // since it depends on aggregated data across all submissions.
+  function erf(x) {
+    // Abramowitz-Stegun approximation
+    const sign = x < 0 ? -1 : 1; x = Math.abs(x);
+    const a1=0.254829592,a2=-0.284496736,a3=1.421413741,a4=-1.453152027,a5=1.061405429,p=0.3275911;
+    const t = 1/(1+p*x);
+    const y = 1-(((((a5*t+a4)*t)+a3)*t+a2)*t+a1)*t*Math.exp(-x*x);
+    return sign*y;
+  }
+
+  function calculatePercentile(score, industry) {
+    const cfg = industryKeywords[industry] || industryKeywords.ib;
+    const { mean, sd, n } = cfg.benchmark;
+    const z = (score - mean) / sd;
+    const cdf = 0.5 * (1 + erf(z / Math.sqrt(2)));
+    return { percentile: Math.round(cdf * 100), mean, n };
+  }
+
+  function renderPercentile(data, unlocked) {
+    const result = calculatePercentile(data.overallScore, data.industry);
+    const label = industryLabels[data.industry] || 'this sector';
+    document.getElementById('percentileSub').textContent =
+      `Estimated ranking for ${label} CVs — see methodology note below`;
+
+    const fill = document.getElementById('percentileBarFill');
+    const marker = document.getElementById('percentileMarker');
+    const markerLabel = document.getElementById('percentileMarkerLabel');
+
+    fill.style.width = '100%';
+    marker.style.left = result.percentile + '%';
+
+    if (unlocked) {
+      const ord = result.percentile >= 90 ? 'Top 10%' :
+                  result.percentile >= 75 ? 'Top 25%' :
+                  `${result.percentile}th percentile`;
+      markerLabel.textContent = ord;
+      document.getElementById('percentileBody').style.filter = 'none';
+      document.getElementById('percentileBody').style.pointerEvents = '';
+      document.getElementById('percentileLockOverlay').style.display = 'none';
+      document.getElementById('percentileSub').textContent =
+        `Your score of ${data.overallScore} places you in an estimated ${result.percentile}${ordSuffix(result.percentile)} percentile for ${label} CVs (modelled average: ${result.mean}). See methodology below.`;
+    } else {
+      markerLabel.textContent = '??';
+      marker.style.left = '50%';
+      document.getElementById('percentileBody').style.filter = 'blur(5px)';
+      document.getElementById('percentileLockOverlay').style.display = 'flex';
+    }
+  }
+
+  function ordSuffix(n) {
+    const j = n % 10, k = n % 100;
+    if (j===1 && k!==11) return 'st';
+    if (j===2 && k!==12) return 'nd';
+    if (j===3 && k!==13) return 'rd';
+    return 'th';
+  }
+
+  function showResults(data) {
+    analysisData = data;
+    document.getElementById('loadingState').classList.remove('active');
+    document.getElementById('resultsSection').classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+
+    // Score
+    document.getElementById('scoreNumber').textContent = data.overallScore;
+    document.getElementById('scoreTitle').textContent = data.scoreTitle;
+    document.getElementById('scoreVerdict').textContent = data.scoreVerdict;
+    drawRing(data.overallScore);
+
+    // Pills
+    const pillsEl = document.getElementById('scorePills'); pillsEl.innerHTML = '';
+    data.pills.forEach((p,i) => { const s = document.createElement('span'); s.className=`pill pill-${data.pillColors[i]}`; s.textContent=p; pillsEl.appendChild(s); });
+
+    // Breakdown bars
+    const barsEl = document.getElementById('breakdownBars'); barsEl.innerHTML = '';
+    data.breakdown.forEach(item => {
+      const c = item.score>=70?'green':item.score>=45?'amber':'red';
+      const row = document.createElement('div'); row.className='score-bar-row';
+      row.innerHTML=`<div class="bar-label">${item.label}</div><div class="bar-track"><div class="bar-fill ${c}" data-width="${item.score}"></div></div><div class="bar-score">${item.score}</div>`;
+      barsEl.appendChild(row);
+    });
+    setTimeout(() => document.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.width+'%'), 100);
+
+    // Issues
+    const issuesEl = document.getElementById('issuesList'); issuesEl.innerHTML = '';
+    data.issues.forEach(issue => {
+      const div = document.createElement('div'); div.className='issue-item';
+      div.innerHTML=`<div class="issue-icon ${issue.severity}">${issue.icon}</div><div class="issue-content"><div class="issue-title">${issue.title}</div><div class="issue-desc">${issue.description}</div></div>`;
+      issuesEl.appendChild(div);
+    });
+
+    // Keywords (blurred preview)
+    renderKeywords(data, false);
+
+    // Percentile (locked preview)
+    renderPercentile(data, false);
+
+    // JD match
+    if (jdText) showJDMatch(analyseJDMatch(cvText, jdText));
+  }
+
+  function renderKeywords(data, unlocked) {
+    const kwEl = document.getElementById('keywordContent'); kwEl.innerHTML = '';
+    const overlay = document.getElementById('keywordLockOverlay');
+
+    const presentDiv = document.createElement('div'); presentDiv.className='kw-section';
+    presentDiv.innerHTML = `<div class="kw-section-title">✓ Keywords found in your CV</div>`;
+    data.keywordsPresent.forEach(k => { const s=document.createElement('span'); s.className='keyword-tag kw-present'; s.textContent='✓ '+k; presentDiv.appendChild(s); });
+    kwEl.appendChild(presentDiv);
+
+    const missingDiv = document.createElement('div'); missingDiv.className='kw-section'; missingDiv.style.marginTop='16px';
+    missingDiv.innerHTML = `<div class="kw-section-title">✗ Missing keywords${unlocked?'':' (unlock to see all)'}</div>`;
+    const toShow = unlocked ? data.keywordsMissing : data.keywordsMissing.slice(0,3);
+    toShow.forEach(k => { const s=document.createElement('span'); s.className='keyword-tag kw-missing'; s.textContent='✗ '+k; missingDiv.appendChild(s); });
+    kwEl.appendChild(missingDiv);
+
+    if (unlocked) {
+      kwEl.style.filter = 'none';
+      overlay.style.display = 'none';
+    } else {
+      kwEl.style.filter = 'blur(4px)';
+      overlay.style.display = 'flex';
+    }
+  }
+
+  // ===== PAYMENT MODAL =====
+  function openPaymentModal() { document.getElementById('paymentModal').classList.add('open'); document.body.style.overflow='hidden'; }
+  function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open'); document.body.style.overflow=''; }
+  document.getElementById('paymentModal').addEventListener('click', function(e) { if (e.target === this) closePaymentModal(); });
+
+  function simulatePayment() {
+    const email = document.getElementById('emailInput').value.trim();
+    const card = document.getElementById('cardNum').value.trim();
+    if (!email || !email.includes('@')) { showToast('Please enter a valid email address.'); return; }
+    if (card.length < 19) { showToast('Please enter a valid 16-digit card number.'); return; }
+
+    const btn = document.getElementById('payBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="rewrite-spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div> Processing…';
+
+    setTimeout(() => {
+      closePaymentModal();
+      unlockPro();
+    }, 1800);
+  }
+
+  function unlockPro() {
+    // Update UI to Pro state
+    document.getElementById('navTag').style.display = 'none';
+    document.getElementById('navProBadge').style.display = 'block';
+    document.getElementById('proBanner').classList.add('visible');
+    document.getElementById('paywallCard').style.display = 'none';
+    document.getElementById('rewriteCard').classList.add('visible');
+    document.getElementById('resultsTitle').textContent = 'Your Pro CV Report';
+
+    // Unlock keywords
+    renderKeywords(analysisData, true);
+    renderPercentile(analysisData, true);
+    const lb = document.getElementById('jdLockBanner'); if (lb) lb.style.display='none';
+
+    // Scroll to rewrite card
+    setTimeout(() => document.getElementById('rewriteCard').scrollIntoView({behavior:'smooth', block:'start'}), 300);
+
+    // Trigger AI rewrite
+    generateRewrite();
+    const hasJD = jdText && jdText.length > 50;
+    document.getElementById('rewriteCardTitle').textContent = hasJD
+      ? '🎯 Your CV — Rewritten for This Job'
+      : '✨ Your AI-Rewritten CV';
+    showToast(hasJD ? '🎉 Pro unlocked! Tailoring your CV to the job description…' : '🎉 Pro unlocked! Generating your rewritten CV…');
+  }
+
+  function generateRewrite() {
+    // Build a smart rewrite from the actual CV text and analysis data.
+    // When deployed with a backend, swap this for a real API call to your server.
+    setTimeout(() => {
+      rewriteText = buildRewrite(cvText, jobRole, analysisData);
+      showRewrite(rewriteText);
+    }, 1800);
+  }
+
+  function buildRewrite(cv, role, data) {
+    const roleLabel = role || selectedIndustry || 'your target role';
+    const baseMissingKw = data?.keywordsMissing?.slice(0,6) || ['stakeholder management','KPI','agile','cross-functional','data-driven','strategic planning'];
+
+    // If JD was provided, extract its top terms and merge with industry keywords
+    let jdTerms = [];
+    if (jdText && jdText.length > 50) {
+      const jdResult = analyseJDMatch(cv, jdText);
+      jdTerms = jdResult ? jdResult.missing.slice(0,6) : [];
+    }
+    const allKeywords = [...new Set([...jdTerms, ...baseMissingKw])];
+    const missingKw = allKeywords.slice(0,6).join(', ');
+    const jdContext = jdText && jdText.length>50
+      ? `\n\nNote: This CV has been tailored to the specific job description provided. Key JD terms injected: ${jdTerms.slice(0,4).join(', ')}.`
+      : '';
+
+    // Extract name from first line if present
+    const firstLine = cv.split('\n').find(l => l.trim().length > 0) || '';
+    const nameCandidate = firstLine.trim().split(/\s+/).length <= 4 ? firstLine.trim() : '';
+
+    // Extract rough sections from original CV
+    const lines = cv.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+    const expLines = lines.filter(l => /\b(20\d\d|19\d\d|present|current|—|–|-)\b/i.test(l)).slice(0,6);
+    const skillLines = lines.filter(l => /skill|competenc|proficien|knowledge/i.test(l)).slice(0,3);
+
+    const strengthenedBullets = expLines.slice(0,4).map(line => {
+      // If it already has a number, keep it; otherwise add a generic improvement framing
+      if (/\d/.test(line)) return `• ${line.replace(/^[-•·*]\s*/,'')}`;
+      const verbs = ['Delivered','Led','Drove','Implemented','Managed','Built','Improved','Achieved'];
+      const verb = verbs[Math.floor(Math.random() * verbs.length)];
+      const cleaned = line.replace(/^[-•·*]\s*/, '').replace(/^(responsible for|worked on|helped with|assisted)/i,'').trim();
+      const capitalised = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
+      return `• ${verb} ${capitalised}`;
+    });
+
+    const output = `${nameCandidate ? nameCandidate + '\n\n' : ''}PROFESSIONAL SUMMARY
+Results-driven professional with a track record of delivering measurable impact in cross-functional environments. Skilled in ${missingKw.split(',').slice(0,3).join(', ')} and translating strategy into execution. Seeking to bring a data-driven, results-first approach to ${roleLabel}.
+
+CORE COMPETENCIES
+${missingKw} · Communication · Problem Solving · Team Leadership
+
+PROFESSIONAL EXPERIENCE
+${strengthenedBullets.length > 0 ? strengthenedBullets.join('\n') : `• Led cross-functional initiatives that delivered measurable improvements in efficiency and output
+• Built stakeholder relationships across departments, improving alignment and project delivery timelines
+• Implemented data-driven processes that reduced turnaround time and increased team performance`}
+
+${skillLines.length > 0 ? 'SKILLS\n' + skillLines.join('\n') + '\n\n' : ''}WHAT TO DO NEXT
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+This is your AI-enhanced CV framework. To complete your rewrite:
+
+1. Add specific job titles, company names and dates to each role
+2. Replace generic bullets with your real achievements + numbers
+3. Tailor the summary to match the exact job description language
+4. Add your Education section with institution, degree and year
+5. Include your contact details at the top (email, phone, LinkedIn)
+
+Pro tip: Copy the exact keywords from the job posting into your bullet points — ATS systems do exact-phrase matching.${jdContext}`;
+
+    return output;
+  }
+
+  function getDemoRewrite() {
+    return `PROFESSIONAL SUMMARY
+Results-driven professional with a proven track record of delivering cross-functional projects on time and under budget. Adept at stakeholder management and translating data-driven insights into strategic decisions that improve KPIs. Seeking to leverage 5+ years of experience in a high-growth environment.
+
+CORE COMPETENCIES
+Stakeholder Management · Agile Methodologies · P&L Accountability · OKR Setting · Data Analysis · Strategic Planning · Cross-functional Leadership · Performance Metrics
+
+PROFESSIONAL EXPERIENCE
+
+Senior Project Manager | Acme Corp | 2021–Present
+• Led cross-functional team of 12 to deliver £2.4M product relaunch 3 weeks ahead of schedule, reducing costs by 18%
+• Implemented agile sprint framework that improved team velocity by 34% within 2 quarters
+• Managed £800K P&L budget, achieving 112% of annual revenue targets two years running
+• Built stakeholder reporting dashboard adopted by 4 departments, reducing reporting time by 6 hours/week
+
+Project Coordinator | Beta Ltd | 2019–2021
+• Coordinated 8 concurrent projects with combined value of £1.1M, maintaining 96% on-time delivery
+• Drove data-driven process improvements that cut customer onboarding time from 14 days to 6 days
+• Partnered with Sales and Product teams to define OKRs that aligned with company-wide strategic goals
+
+EDUCATION
+BSc Business Management | University of Manchester | 2015–2018`;
+  }
+
+  function showRewrite(text) {
+    document.getElementById('rewriteLoading').style.display = 'none';
+    const body = document.getElementById('rewriteBody');
+    body.style.display = 'block';
+    body.textContent = text;
+  }
+
+  function copyRewrite() {
+    if (!rewriteText) return;
+    navigator.clipboard.writeText(rewriteText).then(() => showToast('✓ CV text copied to clipboard'));
+  }
+
+  function downloadRewrite() {
+    if (!rewriteText) return;
+    const blob = new Blob([rewriteText], {type:'text/plain'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href=url; a.download='my-optimised-cv.txt'; a.click();
+    URL.revokeObjectURL(url);
+    showToast('✓ Downloading your CV…');
+  }
+
+  function drawRing(score) {
+    const canvas = document.getElementById('scoreCanvas');
+    const ctx = canvas.getContext('2d');
+    const cx=60, cy=60, r=48;
+    const color = score>=70?'#16A34A':score>=45?'#D97706':'#DC2626';
+    let cur = -Math.PI/2, frame=0;
+    const target = (score/100)*2*Math.PI - Math.PI/2;
+    const step = (target - cur)/40;
+    const animate = () => {
+      if (frame++<40) {
+        cur += step;
+        ctx.clearRect(0,0,120,120);
+        ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI); ctx.strokeStyle='#E4E3DF'; ctx.lineWidth=10; ctx.stroke();
+        ctx.beginPath(); ctx.arc(cx,cy,r,-Math.PI/2,cur); ctx.strokeStyle=color; ctx.lineWidth=10; ctx.lineCap='round'; ctx.stroke();
+        requestAnimationFrame(animate);
+      }
+    };
+    animate();
+    document.getElementById('scoreNumber').style.color = color;
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+  }
+
+  // ===== LEGAL MODAL CONTENT =====
+  const legalContent = {
+    privacy: {
+      title: 'Privacy Policy',
+      html: `<p class="legal-updated">Last updated: [DATE]</p>
+        <div class="legal-section">
+          <h4>Who we are</h4>
+          <p>FinanceCV Score ("we", "us") provides an online CV analysis and rewriting tool. This policy explains how we collect, use, and protect your personal data in line with UK GDPR and the Data Protection Act 2018.</p>
+        </div>
+        <div class="legal-section">
+          <h4>What data we collect</h4>
+          <ul>
+            <li>CV content you paste or upload, which may include your name, contact details, education, and employment history.</li>
+            <li>Job description text you paste for matching purposes.</li>
+            <li>Email address and payment details if you purchase Pro (processed by our payment provider — we do not store full card numbers).</li>
+            <li>Basic usage data (e.g. pages visited) via analytics cookies, if enabled.</li>
+          </ul>
+        </div>
+        <div class="legal-section">
+          <h4>How we use your data</h4>
+          <ul>
+            <li>To generate your CV analysis, score, and rewritten content.</li>
+            <li>To process payments for Pro features.</li>
+            <li>To improve the accuracy and relevance of our scoring models.</li>
+          </ul>
+        </div>
+        <div class="legal-section">
+          <h4>Third parties &amp; AI processing</h4>
+          <p>When you use AI-powered features, your CV text and/or job description text may be transmitted to our AI processing provider (Anthropic) to generate analysis and rewritten content. This data is processed to provide the response to you and is subject to that provider's own data handling terms. Payment data is processed by our payment provider (e.g. Stripe) and is subject to their privacy policy.</p>
+        </div>
+        <div class="legal-section">
+          <h4>Data retention</h4>
+          <p>CV text submitted for free analysis is processed in your browser session and is not permanently stored on our servers unless you create an account or purchase Pro, in which case it is retained only as long as necessary to provide the service, or until you request deletion.</p>
+        </div>
+        <div class="legal-section">
+          <h4>Your rights</h4>
+          <p>Under UK GDPR you have the right to access, correct, delete, or export your personal data, and to object to or restrict certain processing. To exercise these rights, contact us at the email address below.</p>
+        </div>
+        <div class="legal-section">
+          <h4>Contact</h4>
+          <p>For any privacy queries or to exercise your data rights, contact: <strong>hello@financecvscore.com</strong></p>
+        </div>`
+    },
+    terms: {
+      title: 'Terms of Service',
+      html: `<p class="legal-updated">Last updated: [DATE]</p>
+        <div class="legal-section">
+          <h4>1. The service</h4>
+          <p>FinanceCV Score provides automated, AI-assisted analysis of CVs, including an ATS compatibility score, keyword analysis, job description matching, and CV rewriting ("the Service"). A free tier and a paid "Pro" tier are available.</p>
+        </div>
+        <div class="legal-section">
+          <h4>2. No professional advice</h4>
+          <p>The Service does not constitute professional careers, recruitment, legal, or financial advice. Outputs are generated automatically and may contain inaccuracies. You remain solely responsible for the content of any CV or application you submit to a third party.</p>
+        </div>
+        <div class="legal-section">
+          <h4>3. Payments &amp; refunds</h4>
+          <p>Pro features are available for a one-time fee as displayed at checkout. Payments are processed securely by our third-party payment provider. If you are not satisfied with the Pro output, you may request a refund within 30 days of purchase by contacting us, subject to review.</p>
+        </div>
+        <div class="legal-section">
+          <h4>4. Your content</h4>
+          <p>You retain ownership of any CV or job description text you submit. By using the Service, you grant us a limited licence to process that content (including via third-party AI providers) solely to provide the Service to you. We do not claim ownership of your CV content.</p>
+        </div>
+        <div class="legal-section">
+          <h4>5. Acceptable use</h4>
+          <p>You agree not to use the Service to submit unlawful content, attempt to reverse-engineer the Service, or use it in any way that could damage or impair its operation.</p>
+        </div>
+        <div class="legal-section">
+          <h4>6. Limitation of liability</h4>
+          <p>To the maximum extent permitted by law, we exclude liability for any indirect or consequential loss, including loss of employment opportunity, arising from use of the Service. Nothing in these terms excludes liability that cannot be excluded under UK law.</p>
+        </div>
+        <div class="legal-section">
+          <h4>7. Changes</h4>
+          <p>We may update these terms or the Service from time to time. Continued use after changes constitutes acceptance of the updated terms.</p>
+        </div>
+        <div class="legal-section">
+          <h4>8. Governing law</h4>
+          <p>These terms are governed by the laws of England and Wales.</p>
+        </div>`
+    },
+    cookies: {
+      title: 'Cookie Notice',
+      html: `<p class="legal-updated">Last updated: [DATE]</p>
+        <div class="legal-section">
+          <h4>What cookies we use</h4>
+          <p>This site may use the following types of cookies:</p>
+          <ul>
+            <li><strong>Strictly necessary:</strong> required for core functionality such as remembering your Pro unlock status during a session.</li>
+            <li><strong>Payment cookies:</strong> set by our payment provider (e.g. Stripe) to process transactions securely.</li>
+            <li><strong>Analytics (optional):</strong> if enabled, help us understand how visitors use the site so we can improve it. These are only set with your consent where required.</li>
+          </ul>
+        </div>
+        <div class="legal-section">
+          <h4>Managing cookies</h4>
+          <p>You can control or delete cookies through your browser settings. Disabling strictly necessary cookies may affect how the Service functions.</p>
+        </div>`
+    },
+    disclaimer: {
+      title: 'Disclaimer',
+      html: `<p class="legal-updated">Last updated: [DATE]</p>
+        <div class="legal-section">
+          <h4>AI-generated content</h4>
+          <p>Scores, issue summaries, keyword analyses, percentile estimates, and rewritten CV content are generated using automated tools and/or AI models. They are provided "as is" and may contain errors, omissions, or inaccuracies.</p>
+        </div>
+        <div class="legal-section">
+          <h4>Percentile &amp; benchmark estimates</h4>
+          <p>Percentile rankings and benchmark comparisons are derived from a statistical model intended to provide directional guidance. They are not based on a live, continuously updated database of every applicant in the relevant sub-sector unless explicitly stated, and should not be treated as a precise or guaranteed measure of your standing relative to other candidates.</p>
+        </div>
+        <div class="legal-section">
+          <h4>No guarantee of outcomes</h4>
+          <p>We do not guarantee that any score improvement, rewritten content, or keyword optimisation will result in interview invitations, job offers, or any specific outcome with any employer or recruitment system. ATS systems vary significantly between employers.</p>
+        </div>
+        <div class="legal-section">
+          <h4>Your responsibility</h4>
+          <p>You are responsible for reviewing, verifying, and editing any AI-generated content before submitting it as part of a real job application, including ensuring factual accuracy of all claims, dates, and figures.</p>
+        </div>`
+    }
+  };
+
+  function openLegalModal(key) {
+    const content = legalContent[key];
+    if (!content) return;
+    document.getElementById('legalModalTitle').textContent = content.title;
+    document.getElementById('legalModalBody').innerHTML = content.html;
+    document.getElementById('legalModal').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeLegalModal() {
+    document.getElementById('legalModal').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('legalModal').addEventListener('click', function(e) {
+    if (e.target === this) closeLegalModal();
+  });
+
+  function restart() {
+    document.getElementById('resultsSection').classList.remove('active');
+    document.getElementById('heroSection').style.display='';
+    document.getElementById('uploadSection').style.display='';
+    document.getElementById('proofBar').style.display='';
+    document.getElementById('cvTextArea').value='';
+    document.getElementById('jobRoleInput').value='';
+    document.getElementById('jdTextArea').value='';
+    document.getElementById('jdMatchCard').style.display='none';
+    jdText='';
+    document.querySelectorAll('.ind-btn').forEach(b => b.classList.remove('selected'));
+    document.getElementById('industryNote').textContent='';
+    selectedIndustry='';
+    document.getElementById('fileChosen').style.display='none';
+    document.getElementById('proBanner').classList.remove('visible');
+    document.getElementById('rewriteCard').classList.remove('visible');
+    document.getElementById('paywallCard').style.display='';
+    document.getElementById('navTag').style.display='';
+    document.getElementById('navProBadge').style.display='none';
+    document.getElementById('rewriteLoading').style.display='block';
+    document.getElementById('rewriteBody').style.display='none';
+    document.getElementById('payBtn').disabled=false;
+    document.getElementById('payBtn').innerHTML='🔒 Pay £9 now';
+    cvText=''; analysisData=null; rewriteText='';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>
