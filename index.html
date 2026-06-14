@@ -703,6 +703,10 @@
   function formatCard(el) { el.value = el.value.replace(/\D/g,'').replace(/(.{4})/g,'$1 ').trim().substring(0,19); }
   function formatExpiry(el) { let v = el.value.replace(/\D/g,''); if (v.length >= 2) v = v.substring(0,2) + ' / ' + v.substring(2); el.value = v; }
 
+  function trackEvent(name, props) {
+    if (window.va) { try { window.va('event', { name, ...(props||{}) }); } catch(e) {} }
+  }
+
   function startAnalysis() {
     const ta = document.getElementById('cvTextArea').value.trim();
     jobRole = document.getElementById('jobRoleInput').value.trim();
@@ -721,6 +725,7 @@
       else clearInterval(iv);
     }, 2400);
     callClaudeAPI(cvText, selectedIndustry);
+    trackEvent('cv_analysed', { industry: selectedIndustry, has_jd: !!jdText });
   }
 
   function callClaudeAPI(cv, industry) {
@@ -1431,7 +1436,7 @@
   }
 
   // ===== PAYMENT MODAL =====
-  function openPaymentModal() { document.getElementById('paymentModal').classList.add('open'); document.body.style.overflow='hidden'; }
+  function openPaymentModal() { document.getElementById('paymentModal').classList.add('open'); document.body.style.overflow='hidden'; trackEvent('payment_modal_opened', { industry: selectedIndustry }); }
   function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open'); document.body.style.overflow=''; }
   document.getElementById('paymentModal').addEventListener('click', function(e) { if (e.target === this) closePaymentModal(); });
 
@@ -1452,6 +1457,7 @@
   }
 
   function unlockPro() {
+    trackEvent('pro_unlocked', { industry: selectedIndustry, has_jd: !!jdText });
     // Update UI to Pro state
     document.getElementById('navTag').style.display = 'none';
     document.getElementById('navProBadge').style.display = 'block';
@@ -1780,5 +1786,11 @@ BSc Business Management | University of Manchester | 2015–2018`;
     window.scrollTo({top:0,behavior:'smooth'});
   }
 </script>
+
+<!-- Vercel Analytics -->
+<script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 </html>
