@@ -471,7 +471,7 @@
       <h3 id="rewriteCardTitle">✨ Your AI-Rewritten CV</h3>
       <div class="rewrite-actions">
         <button class="copy-btn" onclick="copyRewrite()">📋 Copy text</button>
-        <button class="download-btn" onclick="downloadRewrite()">⬇ Download .txt</button>
+        <button class="download-btn" onclick="downloadRewrite()">⬇ Download Word (.doc)</button>
       </div>
     </div>
     <div class="rewrite-loading" id="rewriteLoading">
@@ -1503,77 +1503,196 @@
     showToast(hasJD ? '🎉 Pro unlocked! Tailoring your CV to the job description…' : '🎉 Pro unlocked! Generating your rewritten CV…');
   }
 
-  function generateRewrite() {
-    // Build a smart rewrite from the actual CV text and analysis data.
-    // When deployed with a backend, swap this for a real API call to your server.
-    setTimeout(() => {
-      rewriteText = buildRewrite(cvText, jobRole, analysisData);
-      showRewrite(rewriteText);
-    }, 1800);
-  }
+    async function generateRewrite() {
+    const indLabel = industryLabels[selectedIndustry] || selectedIndustry || 'finance';
+    const roleLabel = jobRole || indLabel;
+    const missingKw = (analysisData?.keywordsMissing || []).slice(0,8).join(', ');
 
-  function buildRewrite(cv, role, data) {
-    const roleLabel = role || selectedIndustry || 'your target role';
-    const baseMissingKw = data?.keywordsMissing?.slice(0,6) || ['stakeholder management','KPI','agile','cross-functional','data-driven','strategic planning'];
-
-    // If JD was provided, extract its top terms and merge with industry keywords
-    let jdTerms = [];
+    // Build JD context if provided
+    let jdSection = '';
     if (jdText && jdText.length > 50) {
-      const jdResult = analyseJDMatch(cv, jdText);
-      jdTerms = jdResult ? jdResult.missing.slice(0,6) : [];
+      const jdResult = analyseJDMatch(cvText, jdText);
+      const missing = jdResult ? jdResult.missing.slice(0,6).join(', ') : '';
+      jdSection = missing ? `\n\nJob description keywords to weave in naturally: ${missing}` : '';
     }
-    const allKeywords = [...new Set([...jdTerms, ...baseMissingKw])];
-    const missingKw = allKeywords.slice(0,6).join(', ');
-    const jdContext = jdText && jdText.length>50
-      ? `\n\nNote: This CV has been tailored to the specific job description provided. Key JD terms injected: ${jdTerms.slice(0,4).join(', ')}.`
-      : '';
 
-    // Extract name from first line if present
-    const firstLine = cv.split('\n').find(l => l.trim().length > 0) || '';
-    const nameCandidate = firstLine.trim().split(/\s+/).length <= 4 ? firstLine.trim() : '';
+    const prompt = `You are an elite finance CV writer with 15 years of experience placing candidates at top-tier investment banks, asset managers, and private equity firms. You know exactly what Goldman Sachs, Blackrock, KKR, and similar firms look for.
 
-    // Extract rough sections from original CV
-    const lines = cv.split('\n').map(l => l.trim()).filter(l => l.length > 0);
-    const expLines = lines.filter(l => /\b(20\d\d|19\d\d|present|current|—|–|-)\b/i.test(l)).slice(0,6);
-    const skillLines = lines.filter(l => /skill|competenc|proficien|knowledge/i.test(l)).slice(0,3);
+Rewrite the following CV for a ${roleLabel} role. Follow these rules precisely:
 
-    const strengthenedBullets = expLines.slice(0,4).map(line => {
-      // If it already has a number, keep it; otherwise add a generic improvement framing
-      if (/\d/.test(line)) return `• ${line.replace(/^[-•·*]\s*/,'')}`;
-      const verbs = ['Delivered','Led','Drove','Implemented','Managed','Built','Improved','Achieved'];
-      const verb = verbs[Math.floor(Math.random() * verbs.length)];
-      const cleaned = line.replace(/^[-•·*]\s*/, '').replace(/^(responsible for|worked on|helped with|assisted)/i,'').trim();
-      const capitalised = cleaned.charAt(0).toUpperCase() + cleaned.slice(1);
-      return `• ${verb} ${capitalised}`;
-    });
+STRUCTURE (in this exact order, no deviations):
+1. Candidate name (large, prominent)
+2. Contact details on one line (phone | email | LinkedIn if present)
+3. EDUCATION (for finance, education comes before experience for graduates/early career — include all institutions, grades, and relevant modules)
+4. RELEVANT EXPERIENCE (each role: Company | Title | Location | Dates, then 3-5 bullet points)
+5. ACADEMIC ACHIEVEMENTS AND LEADERSHIP (if present)
+6. SKILLS AND TOOLS (certifications, languages, tools)
 
-    const output = `${nameCandidate ? nameCandidate + '\n\n' : ''}PROFESSIONAL SUMMARY
-Results-driven professional with a track record of delivering measurable impact in cross-functional environments. Skilled in ${missingKw.split(',').slice(0,3).join(', ')} and translating strategy into execution. Seeking to bring a data-driven, results-first approach to ${roleLabel}.
+RULES:
+- Keep every real fact from the original CV — do not invent or remove any company names, dates, qualifications, or achievements
+- Every bullet point must start with a strong action verb
+- Quantify every achievement where a number already exists in the original — do not invent numbers
+- Inject these missing keywords naturally where truthful and relevant: ${missingKw}
+- For ${indLabel}: ${indLabel === 'Investment Banking' ? 'lead with deal exposure and technical skills, keep to exactly 1 page worth of content' : indLabel === 'Asset Management' ? 'emphasise investment process, portfolio work, and tools like Bloomberg/FactSet/Morningstar' : 'emphasise relevant technical and analytical skills for this sub-sector'}
+- Output plain text only — no markdown, no asterisks, no bold markers, no headers with # symbols
+- Use ALL CAPS for section headings
+- Use • for bullet points
+- This must be a COMPLETE, SUBMISSION-READY CV — not a framework or template${jdSection}
 
-CORE COMPETENCIES
-${missingKw} · Communication · Problem Solving · Team Leadership
+ORIGINAL CV:
+${cvText}
 
-PROFESSIONAL EXPERIENCE
-${strengthenedBullets.length > 0 ? strengthenedBullets.join('\n') : `• Led cross-functional initiatives that delivered measurable improvements in efficiency and output
-• Built stakeholder relationships across departments, improving alignment and project delivery timelines
-• Implemented data-driven processes that reduced turnaround time and increased team performance`}
+Output the complete rewritten CV now, starting directly with the candidate's name:`;
 
-${skillLines.length > 0 ? 'SKILLS\n' + skillLines.join('\n') + '\n\n' : ''}WHAT TO DO NEXT
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-This is your AI-enhanced CV framework. To complete your rewrite:
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 1000,
+          messages: [{ role: 'user', content: prompt }]
+        })
+      });
 
-1. Add specific job titles, company names and dates to each role
-2. Replace generic bullets with your real achievements + numbers
-3. Tailor the summary to match the exact job description language
-4. Add your Education section with institution, degree and year
-5. Include your contact details at the top (email, phone, LinkedIn)
+      let d;
+      try { d = await res.json(); } catch(_) { d = null; }
 
-Pro tip: Copy the exact keywords from the job posting into your bullet points — ATS systems do exact-phrase matching.${jdContext}`;
-
-    return output;
+      if (d && !d.error && Array.isArray(d.content)) {
+        const text = d.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
+        if (text && text.length > 200) {
+          rewriteText = text;
+          showRewrite(rewriteText);
+          return;
+        }
+      }
+      // API unavailable in this context — fall through to smart local rewrite
+      rewriteText = buildSmartRewrite(cvText, roleLabel, missingKw, indLabel);
+      showRewrite(rewriteText);
+    } catch(e) {
+      console.error('Rewrite error:', e);
+      rewriteText = buildSmartRewrite(cvText, roleLabel, missingKw, indLabel);
+      showRewrite(rewriteText);
+    }
   }
 
-  function getDemoRewrite() {
+  function buildSmartRewrite(cv, roleLabel, missingKw, indLabel) {
+    // Intelligent section-aware rewrite using the actual CV content
+    const lines = cv.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+
+    // Extract name (first non-empty line that looks like a name)
+    const name = lines[0] || 'Your Name';
+
+    // Extract contact line
+    const contactLine = lines.find(l => /@/.test(l) || /07\d{9}|\+44/.test(l)) || '';
+
+    // Split into sections by ALL CAPS headings
+    const sections = {};
+    let currentSection = 'header';
+    sections[currentSection] = [];
+    for (const line of lines.slice(1)) {
+      if (/^[A-Z][A-Z\s&]{5,}$/.test(line) && line.length < 60) {
+        currentSection = line;
+        sections[currentSection] = [];
+      } else {
+        if (!sections[currentSection]) sections[currentSection] = [];
+        sections[currentSection].push(line);
+      }
+    }
+
+    // Find education section
+    const eduKey = Object.keys(sections).find(k => /EDUC|QUAL/i.test(k)) || '';
+    const eduLines = eduKey ? sections[eduKey] : [];
+
+    // Find experience section
+    const expKey = Object.keys(sections).find(k => /EXPERI|EMPLOY|CAREER/i.test(k)) || '';
+    const expLines = expKey ? sections[expKey] : [];
+
+    // Find achievements section
+    const achKey = Object.keys(sections).find(k => /ACHIEV|LEADER|ACADEM/i.test(k)) || '';
+    const achLines = achKey ? sections[achKey] : [];
+
+    // Find skills section
+    const skillKey = Object.keys(sections).find(k => /SKILL|TOOL|EXTRA/i.test(k)) || '';
+    const skillLines = skillKey ? sections[skillKey] : [];
+
+    // Strengthen bullet points
+    const strongVerbs = ['Led','Delivered','Drove','Developed','Implemented','Managed','Built','Achieved','Streamlined','Executed','Conducted','Presented','Collaborated','Provided','Structured'];
+    function strengthenBullet(line) {
+      const clean = line.replace(/^[•\-\*]\s*/,'').trim();
+      if (!clean) return '';
+      // Already starts with strong verb
+      if (/^(Led|Delivered|Drove|Developed|Implemented|Managed|Built|Achieved|Streamlined|Executed|Conducted|Presented|Collaborated|Provided|Structured|Hosted|Adapted|Constructed|Created|Designed)/i.test(clean)) {
+        return '• ' + clean;
+      }
+      // Remove weak openers
+      const stripped = clean.replace(/^(Responsible for|Worked on|Helped|Assisted with|Involved in)/i,'').trim();
+      const verb = strongVerbs[Math.floor(Math.random() * strongVerbs.length)];
+      const result = stripped.charAt(0).toUpperCase() + stripped.slice(1);
+      return '• ' + (stripped !== clean ? verb + ' ' + result.charAt(0).toLowerCase() + result.slice(1) : result);
+    }
+
+    // Build output
+    let out = '';
+
+    // Header
+    out += name + '\n';
+    if (contactLine) out += contactLine + '\n';
+    out += '\n';
+
+    // Education first (finance convention)
+    if (eduLines.length > 0) {
+      out += 'EDUCATION AND QUALIFICATIONS\n';
+      eduLines.forEach(l => { out += l + '\n'; });
+      out += '\n';
+    }
+
+    // Experience
+    if (expLines.length > 0) {
+      out += 'RELEVANT EXPERIENCE\n';
+      expLines.forEach(l => {
+        if (/^•/.test(l) || /^[-\*]/.test(l)) {
+          const strengthened = strengthenBullet(l);
+          if (strengthened) out += strengthened + '\n';
+        } else {
+          out += l + '\n';
+        }
+      });
+      out += '\n';
+    }
+
+    // Achievements
+    if (achLines.length > 0) {
+      out += (achKey || 'ACADEMIC ACHIEVEMENTS AND LEADERSHIP') + '\n';
+      achLines.forEach(l => {
+        if (/^[•\-\*]/.test(l)) {
+          out += strengthenBullet(l) + '\n';
+        } else {
+          out += l + '\n';
+        }
+      });
+      out += '\n';
+    }
+
+    // Skills
+    if (skillLines.length > 0) {
+      out += (skillKey || 'SKILLS AND TOOLS') + '\n';
+      skillLines.forEach(l => { out += l + '\n'; });
+      out += '\n';
+    }
+
+    // Add keywords note at bottom
+    if (missingKw) {
+      out += '─────────────────────────────────────────\n';
+      out += 'KEYWORDS TO ADD FOR ' + indLabel.toUpperCase() + ' ROLES:\n';
+      out += missingKw + '\n';
+      out += 'Weave these into your bullet points where truthful and relevant.\n';
+    }
+
+    return out.trim();
+  }
+
+function getDemoRewrite() {
     return `PROFESSIONAL SUMMARY
 Results-driven professional with a proven track record of delivering cross-functional projects on time and under budget. Adept at stakeholder management and translating data-driven insights into strategic decisions that improve KPIs. Seeking to leverage 5+ years of experience in a high-growth environment.
 
@@ -1611,11 +1730,62 @@ BSc Business Management | University of Manchester | 2015–2018`;
 
   function downloadRewrite() {
     if (!rewriteText) return;
-    const blob = new Blob([rewriteText], {type:'text/plain'});
+
+    // Build a properly formatted Word-compatible HTML document
+    const lines = rewriteText.split(/\r?\n/);
+    let bodyHtml = '';
+
+    for (const line of lines) {
+      const t = line.trim();
+      if (!t) {
+        bodyHtml += '<p style="margin:0;line-height:1.2">&nbsp;</p>';
+      } else if (/^[A-Z][A-Z\s&\/]{4,}$/.test(t) && t.length < 70) {
+        // Section heading — ALL CAPS
+        bodyHtml += `<p style="font-family:Arial,sans-serif;font-size:11pt;font-weight:bold;text-transform:uppercase;border-bottom:1px solid #000;margin:12pt 0 4pt 0;padding-bottom:2pt">${t}</p>`;
+      } else if (t.startsWith('•')) {
+        // Bullet point
+        bodyHtml += `<p style="font-family:Arial,sans-serif;font-size:10pt;margin:2pt 0 2pt 12pt">${t}</p>`;
+      } else if (/^[─━]+$/.test(t)) {
+        // Horizontal rule
+        bodyHtml += `<hr style="border:none;border-top:1px solid #ccc;margin:8pt 0">`;
+      } else if (lines.indexOf(line) < 3) {
+        // Name / contact header lines
+        const fontSize = lines.indexOf(line) === 0 ? '14pt' : '10pt';
+        const weight = lines.indexOf(line) === 0 ? 'bold' : 'normal';
+        bodyHtml += `<p style="font-family:Arial,sans-serif;font-size:${fontSize};font-weight:${weight};margin:2pt 0;text-align:center">${t}</p>`;
+      } else {
+        // Role/company lines and body text
+        bodyHtml += `<p style="font-family:Arial,sans-serif;font-size:10pt;margin:3pt 0">${t}</p>`;
+      }
+    }
+
+    const html = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office"
+            xmlns:w="urn:schemas-microsoft-com:office:word"
+            xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8">
+        <!--[if gte mso 9]>
+        <xml><w:WordDocument><w:View>Normal</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml>
+        <![endif]-->
+        <style>
+          @page { margin: 1.8cm 1.5cm; size: A4; }
+          body { font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.4; }
+        </style>
+      </head>
+      <body>${bodyHtml}</body>
+      </html>`;
+
+    const blob = new Blob([html], { type: 'application/msword' });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a'); a.href=url; a.download='my-optimised-cv.txt'; a.click();
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'FinanceCVScore_Optimised_CV.doc';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('✓ Downloading your CV…');
+    showToast('✓ Downloading as Word document…');
   }
 
   function drawRing(score) {
