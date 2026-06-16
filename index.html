@@ -381,7 +381,7 @@
   <!-- PRO BANNER (hidden until unlocked) -->
   <div class="pro-banner" id="proBanner">
     <span class="pro-badge">Pro</span>
-    <div class="pro-banner-text"><strong>Pro unlocked.</strong> Your full keyword analysis and AI-rewritten CV are ready below.</div>
+    <div class="pro-banner-text"><strong>Pro unlocked.</strong> Your full keyword analysis and percentile ranking are ready below. AI rewrite included free when v2 launches.</div>
   </div>
 
   <!-- SCORE -->
@@ -480,25 +480,24 @@
     </div>
     <div class="rewrite-body" id="rewriteBody" style="display:none"></div>
     <p style="font-size:12px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
-      ⚠️ <strong>Please review before use:</strong> this is AI-generated content based on your original CV.
-      Check all dates, figures, job titles, and claims for accuracy before submitting to an employer —
-      you are responsible for the accuracy of your final CV.
+      🔜 <strong>Full AI rewrite coming in v2</strong> — your Pro access will automatically include it at no extra cost when it launches.
+      The download below is a structured framework based on your CV. ⚠️ Review all content for accuracy before submitting to an employer.
     </p>
   </div>
 
   <!-- PAYWALL (hidden after unlock) -->
   <div class="paywall-card" id="paywallCard">
-    <h3>Get the full fix — land more interviews</h3>
-    <p>Your free report shows the problems. Pro rewrites your CV to fix them — and if you pasted a job description, it tailors every line to that specific role.</p>
+    <h3>See exactly where you rank — and how to move up</h3>
+    <p>Your free score shows the problems. Pro unlocks your full keyword gap analysis and shows you exactly how your CV compares to other finance candidates in your sub-sector.</p>
     <div class="paywall-features">
-      <div class="paywall-feature"><div class="paywall-feature-icon">🎯</div><div class="paywall-feature-label">CV rewritten for<br>your exact JD</div></div>
-      <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real CVs</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real finance CVs</div></div>
       <div class="paywall-feature"><div class="paywall-feature-icon">🔑</div><div class="paywall-feature-label">Full keyword<br>gap analysis</div></div>
-      <div class="paywall-feature"><div class="paywall-feature-icon">✍️</div><div class="paywall-feature-label">Full AI<br>CV rewrite</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">🎯</div><div class="paywall-feature-label">JD match score<br>fully unlocked</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">✍️</div><div class="paywall-feature-label">AI rewrite<br>coming in v2</div></div>
     </div>
     <button class="paywall-cta" onclick="openPaymentModal()">
-      Fix my CV now
-      <span class="paywall-price">£9 one-time · instant access</span>
+      Unlock Pro
+      <span class="paywall-price">£5 one-time · instant access</span>
     </button>
     <p class="paywall-guarantee">🔒 Secure checkout · Money-back guarantee</p>
   </div>
@@ -509,24 +508,24 @@
   <div class="modal">
     <div class="modal-header">
       <div class="modal-header-left">
-        <h3>CVScore Pro</h3>
+        <h3>FinanceCV Score — Pro</h3>
         <p>One-time payment · Instant access</p>
       </div>
       <button class="modal-close" onclick="closePaymentModal()">✕</button>
     </div>
     <div class="modal-body">
       <div class="price-display">
-        <span class="price-main">£9</span>
-        <span class="price-original">£29</span>
+        <span class="price-main">£5</span>
+        <span class="price-original">£9</span>
         <span class="price-sub">one-time · no subscription</span>
       </div>
 
       <div class="feature-list">
         <div class="feature-row"><span class="feature-check">✓</span>Percentile ranking vs real finance CVs</div>
         <div class="feature-row"><span class="feature-check">✓</span>Full keyword gap analysis for your sub-sector</div>
-        <div class="feature-row"><span class="feature-check">✓</span>AI CV rewrite tailored to your job description</div>
-        <div class="feature-row"><span class="feature-check">✓</span>Download-ready text file</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Full JD match score and missing terms</div>
         <div class="feature-row"><span class="feature-check">✓</span>30-day money-back guarantee</div>
+        <div class="feature-row" style="color:var(--ink-light);font-size:13px"><span style="width:20px;display:inline-block">🔜</span>AI CV rewrite — included free when v2 launches</div>
       </div>
 
       <div class="modal-input-group" style="margin-bottom:8px">
@@ -540,7 +539,7 @@
       </div>
 
       <button class="pay-btn" id="payBtn" onclick="simulatePayment()">
-        🔒 Pay £9 — Secure Checkout
+        🔒 Pay £5 — Secure Checkout
       </button>
       <p class="modal-secure"><span>✓</span> Powered by Stripe · SSL encrypted · 30-day guarantee</p>
     </div>
@@ -1456,7 +1455,7 @@
   function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open'); document.body.style.overflow=''; }
   document.getElementById('paymentModal').addEventListener('click', function(e) { if (e.target === this) closePaymentModal(); });
 
-  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_5kQ6oH2zGbJJf0f6Mi9k400';
+  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_4gMaEX1vCbJJdWb6Mi9k401';
 
   function simulatePayment() {
     const email = document.getElementById('emailInput').value.trim();
