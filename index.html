@@ -291,15 +291,15 @@
       <svg width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
     </div>
     <h3>Upload your CV</h3>
-    <p>Plain text (.txt) or Word (.docx) files only</p>
+    <p>Word (.docx) or plain text (.txt) — best results</p>
     <button class="upload-btn" onclick="document.getElementById('fileInput').click()">
       <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
       Choose file
     </button>
-    <input type="file" id="fileInput" accept=".txt,.docx,.doc">
+    <input type="file" id="fileInput" accept=".docx,.doc,.txt">
     <div style="margin-top:14px;padding:10px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;font-size:12px;color:#92400E;text-align:left;display:flex;gap:8px;align-items:flex-start;">
       <span style="flex-shrink:0">⚠️</span>
-      <span><strong>Do not upload a PDF.</strong> PDFs are binary files that cannot be read as text. For best results, paste your CV text directly into the box below.</span>
+      <span><strong>Word .docx files work best.</strong> If you only have a PDF, open it in Google Docs (File → Open), then copy and paste the text below.</span>
     </div>
   </div>
   <div class="file-chosen" id="fileChosen">
@@ -603,85 +603,79 @@
 <script>
   let cvText = '', jobRole = '', jdText = '', analysisData = null, rewriteText = '';
 
-  // PDF.js loaded from CDN
-  const PDFJS_URL = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-  let pdfJsLoaded = false;
-
-  function loadPdfJs(cb) {
-    if (pdfJsLoaded) { cb(); return; }
-    const s = document.createElement('script');
-    s.src = PDFJS_URL;
-    s.onload = () => {
-      pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      pdfJsLoaded = true;
-      cb();
-    };
-    document.head.appendChild(s);
+  // Mammoth.js for .docx — loads on demand with CDN fallback
+  let mammothLoaded = false;
+  function loadMammoth(cb) {
+    if (mammothLoaded) { cb(); return; }
+    function tryLoad(urls, i) {
+      if (i >= urls.length) {
+        showToast('Could not load Word parser. Please paste your CV text directly.');
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = urls[i];
+      s.onload = () => { mammothLoaded = true; cb(); };
+      s.onerror = () => tryLoad(urls, i + 1);
+      document.head.appendChild(s);
+    }
+    tryLoad([
+      'https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.11.0/mammoth.browser.min.js',
+      'https://cdn.jsdelivr.net/npm/mammoth@1.11.0/mammoth.browser.min.js'
+    ], 0);
   }
 
   function handleFile(file) {
     if (!file) return;
+    const name = file.name.toLowerCase();
     document.getElementById('fileName').textContent = file.name + ' selected';
     document.getElementById('fileChosen').style.display = 'flex';
+    document.getElementById('cvTextArea').value = 'Reading file…';
 
-    const isPDF = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-
-    if (isPDF) {
-      // Show extracting state in textarea
-      document.getElementById('cvTextArea').value = 'Extracting text from PDF…';
-      loadPdfJs(() => {
+    if (name.endsWith('.docx') || name.endsWith('.doc')) {
+      loadMammoth(() => {
         const reader = new FileReader();
         reader.onload = async function(ev) {
           try {
-            const typedArray = new Uint8Array(ev.target.result);
-            const pdf = await pdfjsLib.getDocument({ data: typedArray }).promise;
-            let fullText = '';
-            for (let i = 1; i <= pdf.numPages; i++) {
-              const page = await pdf.getPage(i);
-              const content = await page.getTextContent();
-              // Join text items, adding newline when y-position changes significantly
-              let lastY = null;
-              const pageText = content.items.map(item => {
-                const y = item.transform ? item.transform[5] : null;
-                const newline = (lastY !== null && Math.abs(y - lastY) > 5) ? '\n' : ' ';
-                lastY = y;
-                return (lastY !== null ? newline : '') + item.str;
-              }).join('');
-              fullText += pageText + '\n';
-            }
-            fullText = fullText.replace(/[ \t]{2,}/g, ' ').trim();
-            if (!fullText || fullText.length < 30) {
+            const result = await mammoth.extractRawText({ arrayBuffer: ev.target.result });
+            const text = result.value.trim();
+            if (!text || text.length < 30) {
               document.getElementById('cvTextArea').value = '';
-              showToast('Could not extract text from this PDF. Please paste your CV text directly.');
+              showToast('Could not extract text. Please paste your CV text directly.');
               return;
             }
-            cvText = fullText;
-            document.getElementById('cvTextArea').value = fullText.substring(0, 3000);
+            cvText = text;
+            document.getElementById('cvTextArea').value = text.substring(0, 3000);
+            showToast('✓ Word document read successfully');
           } catch(err) {
-            console.error('PDF parse error:', err);
+            console.error('Mammoth error:', err);
             document.getElementById('cvTextArea').value = '';
-            showToast('Could not read this PDF. Please paste your CV text directly.');
+            showToast('Could not read this Word file. Please paste your CV text directly.');
           }
         };
         reader.readAsArrayBuffer(file);
       });
-    } else {
-      // Plain text / .txt / .doc fallback
+    } else if (name.endsWith('.txt')) {
       const reader = new FileReader();
       reader.onload = ev => {
-        const result = ev.target.result;
-        // Sanity check — if it looks like binary garbage, reject it
-        const nonPrintable = (result.match(/[\x00-\x08\x0E-\x1F\x7F-\x9F]/g) || []).length;
-        if (nonPrintable > result.length * 0.05) {
+        const text = ev.target.result.trim();
+        if (!text || text.length < 30) {
           document.getElementById('cvTextArea').value = '';
-          showToast('This file format could not be read. Please paste your CV text directly, or upload a PDF.');
+          showToast('File appears empty. Please paste your CV text directly.');
           return;
         }
-        cvText = result;
-        document.getElementById('cvTextArea').value = result.substring(0, 3000);
+        cvText = text;
+        document.getElementById('cvTextArea').value = text.substring(0, 3000);
+        showToast('✓ File read successfully');
       };
       reader.readAsText(file);
+    } else if (name.endsWith('.pdf')) {
+      document.getElementById('cvTextArea').value = '';
+      document.getElementById('fileChosen').style.display = 'none';
+      showToast('PDFs extract poorly. Open in Word or Google Docs and paste the text instead for best results.');
+    } else {
+      document.getElementById('cvTextArea').value = '';
+      document.getElementById('fileChosen').style.display = 'none';
+      showToast('Unsupported file type. Please upload .docx or .txt, or paste your CV text directly.');
     }
   }
 
@@ -1629,7 +1623,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
   const legalContent = {
     privacy: {
       title: 'Privacy Policy',
-      html: `<p class="legal-updated">Last updated: [DATE]</p>
+      html: `<p class="legal-updated">Last updated: 16 June 2026</p>
         <div class="legal-section">
           <h4>Who we are</h4>
           <p>FinanceCV Score ("we", "us") provides an online CV analysis and rewriting tool. This policy explains how we collect, use, and protect your personal data in line with UK GDPR and the Data Protection Act 2018.</p>
@@ -1660,8 +1654,14 @@ BSc Business Management | University of Manchester | 2015–2018`;
           <p>CV text submitted for free analysis is processed in your browser session and is not permanently stored on our servers unless you create an account or purchase Pro, in which case it is retained only as long as necessary to provide the service, or until you request deletion.</p>
         </div>
         <div class="legal-section">
+          <h4>Lawful basis for processing</h4>
+          <p>We process your personal data on the following lawful bases: <strong>contract</strong> (to provide the Service you have requested or paid for); <strong>legitimate interests</strong> (to improve the Service and prevent misuse); and <strong>consent</strong> (for optional marketing communications, where you have explicitly opted in).</p>
+
           <h4>Your rights</h4>
-          <p>Under UK GDPR you have the right to access, correct, delete, or export your personal data, and to object to or restrict certain processing. To exercise these rights, contact us at the email address below.</p>
+          <p>Under UK GDPR you have the right to: access a copy of your personal data; correct inaccurate data; request deletion of your data; restrict or object to processing; and data portability. To exercise any of these rights, contact us at the email address below. You also have the right to lodge a complaint with the UK Information Commissioner's Office (ICO) at <strong>ico.org.uk</strong> if you believe your data has been handled unlawfully.</p>
+
+          <h4>Minimum age</h4>
+          <p>This Service is intended for users aged 18 and over. By using the Service, you confirm that you meet this requirement.</p>
         </div>
         <div class="legal-section">
           <h4>Contact</h4>
@@ -1670,7 +1670,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
     },
     terms: {
       title: 'Terms of Service',
-      html: `<p class="legal-updated">Last updated: [DATE]</p>
+      html: `<p class="legal-updated">Last updated: 16 June 2026</p>
         <div class="legal-section">
           <h4>1. The service</h4>
           <p>FinanceCV Score provides automated, AI-assisted analysis of CVs, including an ATS compatibility score, keyword analysis, job description matching, and CV rewriting ("the Service"). A free tier and a paid "Pro" tier are available.</p>
@@ -1682,6 +1682,9 @@ BSc Business Management | University of Manchester | 2015–2018`;
         <div class="legal-section">
           <h4>3. Payments &amp; refunds</h4>
           <p>Pro features are available for a one-time fee as displayed at checkout. Payments are processed securely by our third-party payment provider. If you are not satisfied with the Pro output, you may request a refund within 30 days of purchase by contacting us, subject to review.</p>
+
+          <h4>3a. Marketing communications</h4>
+          <p>If you opt in to marketing emails, you may unsubscribe at any time by clicking the unsubscribe link in any email we send, or by contacting us directly. We will never send marketing communications without your prior consent and will never sell your email address to third parties.</p>
         </div>
         <div class="legal-section">
           <h4>4. Your content</h4>
@@ -1706,7 +1709,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
     },
     cookies: {
       title: 'Cookie Notice',
-      html: `<p class="legal-updated">Last updated: [DATE]</p>
+      html: `<p class="legal-updated">Last updated: 16 June 2026</p>
         <div class="legal-section">
           <h4>What cookies we use</h4>
           <p>This site may use the following types of cookies:</p>
@@ -1717,13 +1720,16 @@ BSc Business Management | University of Manchester | 2015–2018`;
           </ul>
         </div>
         <div class="legal-section">
+          <h4>Your consent</h4>
+          <p>Strictly necessary cookies do not require your consent as they are essential for the Service to function. For any non-essential cookies (such as analytics), we will seek your consent before setting them where required under UK PECR. You can withdraw consent at any time by adjusting your browser settings.</p>
+
           <h4>Managing cookies</h4>
-          <p>You can control or delete cookies through your browser settings. Disabling strictly necessary cookies may affect how the Service functions.</p>
+          <p>You can control or delete cookies through your browser settings. Disabling strictly necessary cookies may affect how the Service functions. For more information on managing cookies visit <strong>allaboutcookies.org</strong>.</p>
         </div>`
     },
     disclaimer: {
       title: 'Disclaimer',
-      html: `<p class="legal-updated">Last updated: [DATE]</p>
+      html: `<p class="legal-updated">Last updated: 16 June 2026</p>
         <div class="legal-section">
           <h4>AI-generated content</h4>
           <p>Scores, issue summaries, keyword analyses, percentile estimates, and rewritten CV content are generated using automated tools and/or AI models. They are provided "as is" and may contain errors, omissions, or inaccuracies.</p>
