@@ -518,44 +518,31 @@
       <div class="price-display">
         <span class="price-main">£9</span>
         <span class="price-original">£29</span>
-        <span class="price-sub">one-time</span>
+        <span class="price-sub">one-time · no subscription</span>
       </div>
 
       <div class="feature-list">
-        <div class="feature-row"><span class="feature-check">✓</span>Full keyword gap analysis for your role</div>
-        <div class="feature-row"><span class="feature-check">✓</span>AI rewrite of your entire CV</div>
-        <div class="feature-row"><span class="feature-check">✓</span>Download-ready text format</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Percentile ranking vs real finance CVs</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Full keyword gap analysis for your sub-sector</div>
+        <div class="feature-row"><span class="feature-check">✓</span>AI CV rewrite tailored to your job description</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Download-ready text file</div>
         <div class="feature-row"><span class="feature-check">✓</span>30-day money-back guarantee</div>
       </div>
 
-      <div class="demo-note">
-        <span>💡</span>
-        <span><strong>Demo mode:</strong> This is a prototype. In production, this connects to Stripe. Click "Pay now" to simulate a successful payment and see the full Pro experience.</span>
-      </div>
-
-      <div class="modal-input-group">
-        <label>Email address</label>
+      <div class="modal-input-group" style="margin-bottom:8px">
+        <label>Your email <span style="color:var(--ink-light);font-weight:400;font-size:11px">(pre-fills checkout)</span></label>
         <input type="email" id="emailInput" placeholder="you@email.com">
       </div>
-      <div class="modal-input-group">
-        <label>Card number</label>
-        <input type="text" id="cardNum" placeholder="4242 4242 4242 4242" maxlength="19" oninput="formatCard(this)">
-      </div>
-      <div class="card-row">
-        <div class="modal-input-group">
-          <label>Expiry</label>
-          <input type="text" id="cardExp" placeholder="MM / YY" maxlength="7" oninput="formatExpiry(this)">
-        </div>
-        <div class="modal-input-group">
-          <label>CVC</label>
-          <input type="text" id="cardCvc" placeholder="123" maxlength="3">
-        </div>
+
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;font-size:12px;color:var(--ink-light)">
+        <input type="checkbox" id="marketingOptIn" style="margin-top:2px;flex-shrink:0">
+        <label for="marketingOptIn" style="cursor:pointer;line-height:1.4">Send me occasional updates about new features and offers (you can unsubscribe anytime)</label>
       </div>
 
       <button class="pay-btn" id="payBtn" onclick="simulatePayment()">
-        🔒 Pay £9 now
+        🔒 Pay £9 — Secure Checkout
       </button>
-      <p class="modal-secure"><span>✓</span> Secured by Stripe · SSL encrypted</p>
+      <p class="modal-secure"><span>✓</span> Powered by Stripe · SSL encrypted · 30-day guarantee</p>
     </div>
   </div>
 </div>
@@ -602,6 +589,35 @@
 
 <script>
   let cvText = '', jobRole = '', jdText = '', analysisData = null, rewriteText = '';
+
+  // ── AUTO-UNLOCK ON RETURN FROM STRIPE ──────────────────────────────
+  // Stripe redirects back to /?paid=true after successful payment
+  (function checkPaidReturn() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('paid') === 'true') {
+      // Clean the URL so refreshing doesn't re-trigger
+      window.history.replaceState({}, '', window.location.pathname);
+
+      // Restore email if we stored it
+      try {
+        const savedEmail = sessionStorage.getItem('fcvs_email');
+        if (savedEmail) document.getElementById('emailInput') && (document.getElementById('emailInput').value = savedEmail);
+        sessionStorage.removeItem('fcvs_email');
+      } catch(e) {}
+
+      // Show a welcome message — user needs to run analysis first if they haven't
+      showToast('🎉 Payment successful! Run your CV analysis below, then Pro will unlock automatically.');
+      trackEvent('pro_purchased');
+
+      // If analysis has already been run in this session, unlock immediately
+      if (analysisData) {
+        unlockPro();
+      } else {
+        // Flag so unlockPro fires automatically after analysis completes
+        window._pendingProUnlock = true;
+      }
+    }
+  })();
 
   // Mammoth.js for .docx — loads on demand with CDN fallback
   let mammothLoaded = false;
@@ -1403,6 +1419,12 @@
 
     // JD match
     if (jdText) showJDMatch(analyseJDMatch(cvText, jdText));
+
+    // Auto-unlock if returning from Stripe payment
+    if (window._pendingProUnlock) {
+      window._pendingProUnlock = false;
+      setTimeout(() => unlockPro(), 600);
+    }
   }
 
   function renderKeywords(data, unlocked) {
@@ -1434,20 +1456,24 @@
   function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open'); document.body.style.overflow=''; }
   document.getElementById('paymentModal').addEventListener('click', function(e) { if (e.target === this) closePaymentModal(); });
 
+  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_5kQ6oH2zGbJJf0f6Mi9k400';
+
   function simulatePayment() {
     const email = document.getElementById('emailInput').value.trim();
-    const card = document.getElementById('cardNum').value.trim();
     if (!email || !email.includes('@')) { showToast('Please enter a valid email address.'); return; }
-    if (card.length < 19) { showToast('Please enter a valid 16-digit card number.'); return; }
 
     const btn = document.getElementById('payBtn');
     btn.disabled = true;
-    btn.innerHTML = '<div class="rewrite-spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div> Processing…';
+    btn.innerHTML = '<div class="rewrite-spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div> Redirecting to checkout…';
 
+    // Store email so we can pre-fill Stripe checkout and capture it on return
+    try { sessionStorage.setItem('fcvs_email', email); } catch(e) {}
+
+    // Small delay for UX then redirect to Stripe
     setTimeout(() => {
-      closePaymentModal();
-      unlockPro();
-    }, 1800);
+      const url = STRIPE_PAYMENT_LINK + '?prefilled_email=' + encodeURIComponent(email);
+      window.location.href = url;
+    }, 800);
   }
 
   function unlockPro() {
@@ -1787,7 +1813,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
     document.getElementById('rewriteLoading').style.display='block';
     document.getElementById('rewriteBody').style.display='none';
     document.getElementById('payBtn').disabled=false;
-    document.getElementById('payBtn').innerHTML='🔒 Pay £9 now';
+    document.getElementById('payBtn').innerHTML='🔒 Pay £9 — Secure Checkout';
     cvText=''; analysisData=null; rewriteText='';
     window.scrollTo({top:0,behavior:'smooth'});
   }
