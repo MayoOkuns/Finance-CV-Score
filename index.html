@@ -650,10 +650,8 @@
               return;
             }
             cvText = text;
-            document.getElementById('cvTextArea').value = text.length > 5000 ? text.substring(0, 5000) + '
-
-[Preview truncated - full CV loaded for analysis]' : text;
-            showToast('✓ Word document read successfully');
+            document.getElementById('cvTextArea').value = text.length > 5000 ? text.substring(0, 5000) + '\n\n[Preview truncated - full document loaded for analysis]' : text;
+            showToast('\u2713 Word document read successfully');
           } catch(err) {
             console.error('Mammoth error:', err);
             document.getElementById('cvTextArea').value = '';
@@ -672,10 +670,8 @@
           return;
         }
         cvText = text;
-        document.getElementById('cvTextArea').value = text.length > 5000 ? text.substring(0, 5000) + '
-
-[Preview truncated - full CV loaded for analysis]' : text;
-        showToast('✓ File read successfully');
+        document.getElementById('cvTextArea').value = text.length > 5000 ? text.substring(0, 5000) + '\n\n[Preview truncated - full document loaded for analysis]' : text;
+        showToast('\u2713 File read successfully');
       };
       reader.readAsText(file);
     } else if (name.endsWith('.pdf')) {
