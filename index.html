@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FinanceCV Score — Built for Finance Careers</title>
+<title>FinanceCV Score — Get Interviews at Top Finance Firms</title>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -272,15 +272,15 @@
 
 <nav>
   <div class="logo">Finance<span>CVScore</span></div>
-  <span class="nav-tag" id="navTag">Free ATS Check</span>
+  <span class="nav-tag" id="navTag">Free Interview Probability Score</span>
   <span class="nav-pro-badge" id="navProBadge">⭐ Pro Unlocked</span>
 </nav>
 
 <!-- HERO -->
 <section class="hero" id="heroSection">
   <span class="hero-eyebrow">Built for Finance Careers</span>
-  <h1>Generic CV tools don't<br>understand <em>finance.</em></h1>
-  <p>Get an ATS score and feedback benchmarked against real Investment Banking, Asset Management, Private Equity and Hedge Fund CVs — not generic advice.</p>
+  <h1>Increase your probability of getting <em>interviews</em> at top finance firms.</h1>
+  <p>The only CV tool built specifically for Investment Banking, Asset Management, Private Equity and Hedge Fund applications — with employer-level benchmarking, not generic advice.</p>
   <p class="hero-stat">Tailored scoring across 12 finance sub-sectors</p>
 </section>
 
@@ -487,8 +487,8 @@
 
   <!-- PAYWALL (hidden after unlock) -->
   <div class="paywall-card" id="paywallCard">
-    <h3>See exactly where you rank — and how to move up</h3>
-    <p>Your free score shows the problems. Pro unlocks your full keyword gap analysis and shows you exactly how your CV compares to other finance candidates in your sub-sector.</p>
+    <h3>Find out what's stopping you from getting interviews</h3>
+    <p>Your free score shows where you stand. Pro unlocks your full keyword gap analysis and exact percentile ranking — so you know precisely what to fix to reach interview stage at your target firms.</p>
     <div class="paywall-features">
       <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real finance CVs</div></div>
       <div class="paywall-feature"><div class="paywall-feature-icon">🔑</div><div class="paywall-feature-label">Full keyword<br>gap analysis</div></div>
@@ -881,7 +881,7 @@
       atsScore * 0.25 + keywordScore * 0.20 + formatScore * 0.20 + impactScore * 0.25 + readScore * 0.10
     ), 10, 100);
 
-    const scoreTitle = overall >= 80 ? 'Excellent' : overall >= 65 ? 'Strong' : overall >= 48 ? 'Fair' : 'Needs Work';
+    const scoreTitle = overall >= 80 ? 'High Interview Probability' : overall >= 65 ? 'Good Interview Probability' : overall >= 48 ? 'Low-Medium Probability' : 'Low Interview Probability';
 
     // ── 9. ISSUES ─────────────────────────────────────────────────────
     const issues = [];
@@ -932,6 +932,9 @@
     else if (metricCount < 3)
       issues.push({severity:'amber', icon:'📊', title:'Few quantified achievements',
         description:`Only ${metricCount} metric${metricCount>1?'s':''} found. ${indConfig.metricsNote}`});
+    else
+      issues.push({severity:'green', icon:'✅', title:`${metricCount} quantified achievements found`,
+        description:`Good use of numbers and metrics. For ${industryLabels[industry]||industry} roles specifically: ${indConfig.metricsNote}`});
 
     // Industry: summary/profile
     if (!hasSummary)
@@ -981,10 +984,10 @@
 
     // ── 11. VERDICT ───────────────────────────────────────────────────
     const verdicts = {
-      'Excellent': 'Your CV is well-optimised and should clear most ATS filters. Focus on tailoring keywords to each specific job posting to maximise your callback rate.',
-      'Strong':    'Your CV performs well but has a few fixable gaps. Addressing the issues below should give you a meaningful improvement in response rates.',
-      'Fair':      'Your CV will pass some ATS filters but is likely being screened out by others. The issues below — particularly around keywords and quantified impact — are the priority.',
-      'Needs Work':'Several issues are likely causing your CV to be filtered out before a human sees it. The fixes are straightforward and should significantly improve your callback rate.'
+      'High Interview Probability': 'Your CV is well-positioned to reach interview stage at top finance firms. Focus on tailoring keywords to each specific job posting and matching the exact language of the job description to maximise your interview probability.',
+      'Good Interview Probability': 'Your CV has a good interview probability but a few fixable gaps are likely costing you at the most competitive firms. Addressing the issues below could meaningfully increase your chances at firms like BlackRock, Goldman, and JPMorgan.',
+      'Low-Medium Probability': 'Your CV has a below-average interview probability for top finance roles. The issues below — particularly around keywords and quantified impact — are likely causing your applications to be screened out before reaching a hiring manager.',
+      'Low Interview Probability': 'Your CV as it stands has a low interview probability at most top finance firms. The good news: the fixes are straightforward and could significantly increase your chances of reaching interview stage.'
     };
 
     return {
@@ -1172,7 +1175,7 @@
 
   function getDemoResult() {
     return {
-      overallScore:52, scoreTitle:"Needs Work",
+      overallScore:52, scoreTitle:"Low Interview Probability",
       scoreVerdict:"Your CV has structural issues that most ATS systems will flag or reject before a human ever sees it. With targeted fixes, you could significantly improve your callback rate.",
       pills:["Poor ATS formatting","Weak keywords","No metrics"], pillColors:["red","amber","red"],
       breakdown:[{label:"ATS Compatibility",score:44},{label:"Keyword Density",score:38},{label:"Formatting",score:61},{label:"Impact & Results",score:52},{label:"Readability",score:68}],
@@ -1973,7 +1976,11 @@ BSc Business Management | University of Manchester | 2015–2018`;
     document.querySelectorAll('.ind-btn').forEach(b => b.classList.remove('selected'));
     document.getElementById('industryNote').textContent='';
     selectedIndustry='';
+    // Reset file input so re-uploading same file triggers change event
+    const fi = document.getElementById('fileInput');
+    fi.value = '';
     document.getElementById('fileChosen').style.display='none';
+    document.getElementById('fileName').textContent='file selected';
     document.getElementById('proBanner').classList.remove('visible');
     document.getElementById('rewriteCard').classList.remove('visible');
     document.getElementById('paywallCard').style.display='';
