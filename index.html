@@ -590,33 +590,24 @@
   let cvText = '', jobRole = '', jdText = '', analysisData = null, rewriteText = '';
 
   // ── AUTO-UNLOCK ON RETURN FROM STRIPE ──────────────────────────────
-  // Stripe redirects back to /?paid=true after successful payment
-  (function checkPaidReturn() {
+  // Called at bottom of script after all functions are defined
+  function checkPaidReturn() {
     const params = new URLSearchParams(window.location.search);
     if (params.get('paid') === 'true') {
-      // Clean the URL so refreshing doesn't re-trigger
       window.history.replaceState({}, '', window.location.pathname);
-
-      // Restore email if we stored it
       try {
         const savedEmail = sessionStorage.getItem('fcvs_email');
-        if (savedEmail) document.getElementById('emailInput') && (document.getElementById('emailInput').value = savedEmail);
+        if (savedEmail && document.getElementById('emailInput')) {
+          document.getElementById('emailInput').value = savedEmail;
+        }
         sessionStorage.removeItem('fcvs_email');
       } catch(e) {}
-
-      // Show a welcome message — user needs to run analysis first if they haven't
       showToast('🎉 Payment successful! Run your CV analysis below, then Pro will unlock automatically.');
       trackEvent('pro_purchased');
-
-      // If analysis has already been run in this session, unlock immediately
-      if (analysisData) {
-        unlockPro();
-      } else {
-        // Flag so unlockPro fires automatically after analysis completes
-        window._pendingProUnlock = true;
-      }
+      if (analysisData) { unlockPro(); }
+      else { window._pendingProUnlock = true; }
     }
-  })();
+  }
 
   // Mammoth.js for .docx — loads on demand with CDN fallback
   let mammothLoaded = false;
@@ -659,7 +650,9 @@
               return;
             }
             cvText = text;
-            document.getElementById('cvTextArea').value = text.substring(0, 3000);
+            document.getElementById('cvTextArea').value = text.length > 5000 ? text.substring(0, 5000) + '
+
+[Preview truncated - full CV loaded for analysis]' : text;
             showToast('✓ Word document read successfully');
           } catch(err) {
             console.error('Mammoth error:', err);
@@ -679,7 +672,9 @@
           return;
         }
         cvText = text;
-        document.getElementById('cvTextArea').value = text.substring(0, 3000);
+        document.getElementById('cvTextArea').value = text.length > 5000 ? text.substring(0, 5000) + '
+
+[Preview truncated - full CV loaded for analysis]' : text;
         showToast('✓ File read successfully');
       };
       reader.readAsText(file);
@@ -722,7 +717,15 @@
     jdText = document.getElementById('jdTextArea').value.trim();
     if (!ta && !cvText) { showToast('Please paste your CV text or upload a file first.'); return; }
     if (!selectedIndustry) { showToast('Please select your target industry first.'); document.getElementById('industryGrid').scrollIntoView({behavior:'smooth',block:'center'}); return; }
-    cvText = ta || cvText;
+
+    // If a file was uploaded, cvText holds the full untruncated content — don't overwrite
+    // it with the textarea which only shows a 3000-char preview.
+    // Only use textarea content if no file was uploaded (i.e. user pasted directly).
+    if (!cvText || ta.length > cvText.length) {
+      // User pasted more text than what came from the file, or no file uploaded
+      cvText = ta;
+    }
+    // If cvText is already set from a file upload and textarea is just the preview, keep cvText as-is
     document.getElementById('heroSection').style.display = 'none';
     document.getElementById('uploadSection').style.display = 'none';
     document.getElementById('proofBar').style.display = 'none';
@@ -2000,6 +2003,9 @@ BSc Business Management | University of Manchester | 2015–2018`;
     cvText=''; analysisData=null; rewriteText='';
     window.scrollTo({top:0,behavior:'smooth'});
   }
+
+  // Run after all functions defined
+  checkPaidReturn();
 </script>
 
 <!-- Vercel Analytics -->
