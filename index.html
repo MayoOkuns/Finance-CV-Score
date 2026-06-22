@@ -2046,11 +2046,9 @@ BSc Business Management | University of Manchester | 2015–2018`;
   checkPaidReturn();
 
   // ── WAITLIST SUBMISSION ──────────────────────────────────────────────
-  // Tracks a local count in localStorage and submits to Brevo when key is set
-  const BREVO_API_KEY = ''; // Paste your Brevo API key here once you have it
-  const BREVO_LIST_ID = 0;  // Paste your Brevo list ID here
+  // Calls /api/waitlist serverless function which reads Brevo keys from
+  // Vercel environment variables — API key never exposed in browser
 
-  // Show a count of signups (from localStorage — purely local, not real server count)
   (function initWaitlistCount() {
     try {
       const count = parseInt(localStorage.getItem('wl_count') || '0');
@@ -2072,47 +2070,44 @@ BSc Business Management | University of Manchester | 2015–2018`;
     }
 
     btn.disabled = true;
-    btn.textContent = 'Joining…';
+    btn.textContent = 'Joining\u2026';
 
-    // Increment local count
     try {
-      const count = parseInt(localStorage.getItem('wl_count') || '0') + 1;
-      localStorage.setItem('wl_count', count);
-      if (count > 3) {
-        document.getElementById('waitlistCount').textContent =
-          count + ' people have joined the waitlist';
-      }
-    } catch(e) {}
+      const res = await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
 
-    // Submit to Brevo if API key is set
-    if (BREVO_API_KEY && BREVO_LIST_ID) {
-      try {
-        await fetch('https://api.brevo.com/v3/contacts', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'api-key': BREVO_API_KEY
-          },
-          body: JSON.stringify({
-            email: email,
-            listIds: [BREVO_LIST_ID],
-            updateEnabled: true,
-            attributes: {
-              SOURCE: 'waitlist_banner',
-              SIGNUP_DATE: new Date().toISOString().split('T')[0]
-            }
-          })
-        });
-      } catch(e) {
-        console.error('Brevo error:', e);
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        // Increment local count for social proof
+        try {
+          const count = parseInt(localStorage.getItem('wl_count') || '0') + 1;
+          localStorage.setItem('wl_count', count);
+          if (count > 3) {
+            document.getElementById('waitlistCount').textContent =
+              count + ' people have joined the waitlist';
+          }
+        } catch(e) {}
+
+        // Show success state
+        btn.style.display = 'none';
+        document.getElementById('waitlistEmail').style.display = 'none';
+        success.style.display = 'block';
+        trackEvent('waitlist_signup');
+      } else {
+        showToast('Something went wrong. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Join waitlist';
       }
+    } catch(err) {
+      console.error('Waitlist error:', err);
+      showToast('Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Join waitlist';
     }
-
-    // Show success regardless (better UX, and email is captured)
-    btn.style.display = 'none';
-    document.getElementById('waitlistEmail').style.display = 'none';
-    success.style.display = 'block';
-    trackEvent('waitlist_signup');
   }
 </script>
 
