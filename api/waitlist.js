@@ -1,30 +1,43 @@
+
 export default async function handler(req, res) {
-  // Only allow POST requests
+  // Handle CORS preflight
+  const origin = req.headers.origin || '';
+  const allowed = ['https://financecvscore.com','https://www.financecvscore.com','https://finance-cv-score-index-git-main-mayowa-project.vercel.app'];
+  res.setHeader('Access-Control-Allow-Origin', allowed.includes(origin) ? origin : allowed[0]);
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+ 
+  if (req.method === 'OPTIONS') {
+    return res.status(200).end();
+  }
+ 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
+ 
   // CORS headers so the browser can call this from financecvscore.com
-  res.setHeader('Access-Control-Allow-Origin', 'https://financecvscore.com');
+  const origin = req.headers.origin || '';
+  const allowed = ['https://financecvscore.com','https://www.financecvscore.com','https://finance-cv-score-index-git-main-mayowa-project.vercel.app'];
+  res.setHeader('Access-Control-Allow-Origin', allowed.includes(origin) ? origin : allowed[0]);
   res.setHeader('Access-Control-Allow-Methods', 'POST');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-
+ 
   const { email } = req.body;
-
+ 
   // Basic email validation
   if (!email || !email.includes('@') || !email.includes('.')) {
     return res.status(400).json({ error: 'Invalid email address' });
   }
-
+ 
   // Read keys from Vercel environment variables (never exposed to browser)
   const apiKey  = process.env.BREVO_API_KEY;
   const listId  = parseInt(process.env.BREVO_LIST_ID || '0');
-
+ 
   if (!apiKey || !listId) {
     console.error('Missing Brevo environment variables');
     return res.status(500).json({ error: 'Server configuration error' });
   }
-
+ 
   try {
     const response = await fetch('https://api.brevo.com/v3/contacts', {
       method: 'POST',
@@ -42,23 +55,23 @@ export default async function handler(req, res) {
         }
       })
     });
-
+ 
     // 204 = already exists (Brevo returns this when contact is updated)
     // 201 = created successfully
     if (response.status === 201 || response.status === 204) {
       return res.status(200).json({ success: true });
     }
-
+ 
     const data = await response.json();
-
+ 
     // Brevo error code 'duplicate_parameter' means email already on list — treat as success
     if (data.code === 'duplicate_parameter') {
       return res.status(200).json({ success: true, message: 'already_subscribed' });
     }
-
+ 
     console.error('Brevo API error:', data);
     return res.status(500).json({ error: 'Failed to add contact' });
-
+ 
   } catch (err) {
     console.error('Fetch error:', err);
     return res.status(500).json({ error: 'Network error' });
