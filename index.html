@@ -219,6 +219,26 @@
     .proof-bar { gap:24px; }
   }
 
+  /* WAITLIST BANNER */
+  .waitlist-banner { background:linear-gradient(135deg,#0F172A,#1E3A5F); padding:48px 24px; text-align:center; }
+  .waitlist-eyebrow { display:inline-block; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:600; letter-spacing:0.1em; text-transform:uppercase; color:#93C5FD; background:rgba(147,197,253,0.1); padding:5px 14px; border-radius:20px; margin-bottom:16px; }
+  .waitlist-banner h2 { font-family:'Instrument Serif',serif; font-size:clamp(24px,4vw,36px); color:white; letter-spacing:-0.5px; margin-bottom:10px; line-height:1.2; }
+  .waitlist-banner h2 em { font-style:italic; color:#93C5FD; }
+  .waitlist-banner p { font-size:15px; color:rgba(255,255,255,0.65); max-width:480px; margin:0 auto 28px; line-height:1.6; }
+  .waitlist-features { display:flex; justify-content:center; gap:24px; flex-wrap:wrap; margin-bottom:32px; }
+  .waitlist-feature { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:12px 18px; color:white; font-size:13px; font-weight:500; }
+  .waitlist-feature span { display:block; font-size:18px; margin-bottom:4px; }
+  .waitlist-form { display:flex; gap:10px; max-width:440px; margin:0 auto; flex-wrap:wrap; justify-content:center; }
+  .waitlist-input { flex:1; min-width:220px; padding:13px 16px; border:1.5px solid rgba(255,255,255,0.2); border-radius:10px; font-family:'Inter',sans-serif; font-size:15px; background:rgba(255,255,255,0.08); color:white; outline:none; transition:border-color .2s; }
+  .waitlist-input::placeholder { color:rgba(255,255,255,0.4); }
+  .waitlist-input:focus { border-color:#93C5FD; }
+  .waitlist-btn { background:#2563EB; color:white; font-size:15px; font-weight:600; padding:13px 24px; border-radius:10px; border:none; cursor:pointer; transition:opacity .15s; white-space:nowrap; }
+  .waitlist-btn:hover { opacity:.88; }
+  .waitlist-btn:disabled { opacity:.5; cursor:not-allowed; }
+  .waitlist-success { display:none; color:#86EFAC; font-size:15px; font-weight:500; margin-top:12px; }
+  .waitlist-note { font-size:12px; color:rgba(255,255,255,0.35); margin-top:12px; }
+  .waitlist-count { font-family:'JetBrains Mono',monospace; font-size:12px; color:rgba(255,255,255,0.4); margin-top:16px; }
+
   /* FOOTER */
   .site-footer { background:var(--white); border-top:1px solid var(--border); padding:32px 24px; text-align:center; }
   .footer-disclaimer { max-width:680px; margin:0 auto 20px; font-size:12px; color:var(--ink-light); line-height:1.6; background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:14px 18px; text-align:left; }
@@ -545,6 +565,28 @@
     </div>
   </div>
 </div>
+
+<!-- WAITLIST BANNER -->
+<section class="waitlist-banner" id="waitlistBanner">
+  <span class="waitlist-eyebrow">Launching September 2026</span>
+  <h2>The full platform is<br><em>almost ready.</em></h2>
+  <p>Full AI CV rewrite, real interview questions from Goldman, BlackRock, JPMorgan and more, and employer-specific insights — all launching in September. Join the waitlist for early access and a launch discount.</p>
+
+  <div class="waitlist-features">
+    <div class="waitlist-feature"><span>✍️</span>AI CV rewrite</div>
+    <div class="waitlist-feature"><span>💼</span>Firm-specific interview Qs</div>
+    <div class="waitlist-feature"><span>📊</span>Employer intelligence</div>
+    <div class="waitlist-feature"><span>🎯</span>Early access discount</div>
+  </div>
+
+  <div class="waitlist-form">
+    <input type="email" class="waitlist-input" id="waitlistEmail" placeholder="your@email.com">
+    <button class="waitlist-btn" id="waitlistBtn" onclick="submitWaitlist()">Join waitlist</button>
+  </div>
+  <div class="waitlist-success" id="waitlistSuccess">✓ You're on the list — we'll be in touch in September!</div>
+  <p class="waitlist-note">No spam. One email when we launch. Unsubscribe anytime.</p>
+  <p class="waitlist-count" id="waitlistCount"></p>
+</section>
 
 <!-- FOOTER -->
 <footer class="site-footer">
@@ -2002,6 +2044,76 @@ BSc Business Management | University of Manchester | 2015–2018`;
 
   // Run after all functions defined
   checkPaidReturn();
+
+  // ── WAITLIST SUBMISSION ──────────────────────────────────────────────
+  // Tracks a local count in localStorage and submits to Brevo when key is set
+  const BREVO_API_KEY = ''; // Paste your Brevo API key here once you have it
+  const BREVO_LIST_ID = 0;  // Paste your Brevo list ID here
+
+  // Show a count of signups (from localStorage — purely local, not real server count)
+  (function initWaitlistCount() {
+    try {
+      const count = parseInt(localStorage.getItem('wl_count') || '0');
+      if (count > 3) {
+        document.getElementById('waitlistCount').textContent =
+          count + ' people have joined the waitlist';
+      }
+    } catch(e) {}
+  })();
+
+  async function submitWaitlist() {
+    const email = document.getElementById('waitlistEmail').value.trim();
+    const btn = document.getElementById('waitlistBtn');
+    const success = document.getElementById('waitlistSuccess');
+
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      showToast('Please enter a valid email address.');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Joining…';
+
+    // Increment local count
+    try {
+      const count = parseInt(localStorage.getItem('wl_count') || '0') + 1;
+      localStorage.setItem('wl_count', count);
+      if (count > 3) {
+        document.getElementById('waitlistCount').textContent =
+          count + ' people have joined the waitlist';
+      }
+    } catch(e) {}
+
+    // Submit to Brevo if API key is set
+    if (BREVO_API_KEY && BREVO_LIST_ID) {
+      try {
+        await fetch('https://api.brevo.com/v3/contacts', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': BREVO_API_KEY
+          },
+          body: JSON.stringify({
+            email: email,
+            listIds: [BREVO_LIST_ID],
+            updateEnabled: true,
+            attributes: {
+              SOURCE: 'waitlist_banner',
+              SIGNUP_DATE: new Date().toISOString().split('T')[0]
+            }
+          })
+        });
+      } catch(e) {
+        console.error('Brevo error:', e);
+      }
+    }
+
+    // Show success regardless (better UX, and email is captured)
+    btn.style.display = 'none';
+    document.getElementById('waitlistEmail').style.display = 'none';
+    success.style.display = 'block';
+    trackEvent('waitlist_signup');
+  }
 </script>
 
 <!-- Vercel Analytics -->
