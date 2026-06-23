@@ -771,8 +771,34 @@
     trackEvent('cv_analysed', { industry: selectedIndustry, has_jd: !!jdText });
   }
 
-  function callClaudeAPI(cv, industry) {
-    setTimeout(() => showResults(runCVAnalysis(cv, industry)), 800);
+  async function callClaudeAPI(cv, industry) {
+    try {
+      const res = await fetch('/api/analyse', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cvText: cv,
+          industry: industry,
+          jobRole: jobRole,
+          jdText: jdText
+        })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success && data.result) {
+        // Real AI result — show it
+        setTimeout(() => showResults(data.result), 400);
+      } else {
+        // API failed — fall back to heuristic
+        console.warn('API analyse failed, using heuristic:', data.error);
+        setTimeout(() => showResults(runCVAnalysis(cv, industry)), 400);
+      }
+    } catch(err) {
+      // Network error — fall back to heuristic
+      console.warn('API call failed, using heuristic:', err.message);
+      setTimeout(() => showResults(runCVAnalysis(cv, industry)), 400);
+    }
   }
 
   // Fuzzy keyword match — checks root word so "managed" matches "management", "managing" etc.
@@ -1549,75 +1575,37 @@
     async function generateRewrite() {
     const indLabel = industryLabels[selectedIndustry] || selectedIndustry || 'finance';
     const roleLabel = jobRole || indLabel;
-    const missingKw = (analysisData?.keywordsMissing || []).slice(0,8).join(', ');
-
-    // Build JD context if provided
-    let jdSection = '';
-    if (jdText && jdText.length > 50) {
-      const jdResult = analyseJDMatch(cvText, jdText);
-      const missing = jdResult ? jdResult.missing.slice(0,6).join(', ') : '';
-      jdSection = missing ? `\n\nJob description keywords to weave in naturally: ${missing}` : '';
-    }
-
-    const prompt = `You are an elite finance CV writer with 15 years of experience placing candidates at top-tier investment banks, asset managers, and private equity firms. You know exactly what Goldman Sachs, Blackrock, KKR, and similar firms look for.
-
-Rewrite the following CV for a ${roleLabel} role. Follow these rules precisely:
-
-STRUCTURE (in this exact order, no deviations):
-1. Candidate name (large, prominent)
-2. Contact details on one line (phone | email | LinkedIn if present)
-3. EDUCATION (for finance, education comes before experience for graduates/early career — include all institutions, grades, and relevant modules)
-4. RELEVANT EXPERIENCE (each role: Company | Title | Location | Dates, then 3-5 bullet points)
-5. ACADEMIC ACHIEVEMENTS AND LEADERSHIP (if present)
-6. SKILLS AND TOOLS (certifications, languages, tools)
-
-RULES:
-- Keep every real fact from the original CV — do not invent or remove any company names, dates, qualifications, or achievements
-- Every bullet point must start with a strong action verb
-- Quantify every achievement where a number already exists in the original — do not invent numbers
-- Inject these missing keywords naturally where truthful and relevant: ${missingKw}
-- For ${indLabel}: ${indLabel === 'Investment Banking' ? 'lead with deal exposure and technical skills, keep to exactly 1 page worth of content' : indLabel === 'Asset Management' ? 'emphasise investment process, portfolio work, and tools like Bloomberg/FactSet/Morningstar' : 'emphasise relevant technical and analytical skills for this sub-sector'}
-- Output plain text only — no markdown, no asterisks, no bold markers, no headers with # symbols
-- Use ALL CAPS for section headings
-- Use • for bullet points
-- This must be a COMPLETE, SUBMISSION-READY CV — not a framework or template${jdSection}
-
-ORIGINAL CV:
-${cvText}
-
-Output the complete rewritten CV now, starting directly with the candidate's name:`;
 
     try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
+      const res = await fetch('/api/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1000,
-          messages: [{ role: 'user', content: prompt }]
+          cvText: cvText,
+          industry: selectedIndustry,
+          jobRole: jobRole,
+          jdText: jdText,
+          missingKeywords: analysisData?.keywordsMissing || []
         })
       });
 
-      let d;
-      try { d = await res.json(); } catch(_) { d = null; }
+      const data = await res.json();
 
-      if (d && !d.error && Array.isArray(d.content)) {
-        const text = d.content.filter(b => b.type === 'text').map(b => b.text).join('').trim();
-        if (text && text.length > 200) {
-          rewriteText = text;
-          showRewrite(rewriteText);
-          return;
-        }
+      if (res.ok && data.success && data.rewriteText) {
+        rewriteText = data.rewriteText;
+        showRewrite(rewriteText);
+      } else {
+        console.warn('Rewrite API failed, using smart fallback:', data.error);
+        rewriteText = buildSmartRewrite(cvText, roleLabel, (analysisData?.keywordsMissing || []).join(', '), indLabel);
+        showRewrite(rewriteText);
       }
-      // API unavailable in this context — fall through to smart local rewrite
-      rewriteText = buildSmartRewrite(cvText, roleLabel, missingKw, indLabel);
-      showRewrite(rewriteText);
-    } catch(e) {
-      console.error('Rewrite error:', e);
-      rewriteText = buildSmartRewrite(cvText, roleLabel, missingKw, indLabel);
+    } catch(err) {
+      console.warn('Rewrite network error, using smart fallback:', err.message);
+      rewriteText = buildSmartRewrite(cvText, roleLabel, (analysisData?.keywordsMissing || []).join(', '), indLabel);
       showRewrite(rewriteText);
     }
   }
+
 
   function buildSmartRewrite(cv, roleLabel, missingKw, indLabel) {
     // Intelligent section-aware rewrite using the actual CV content
