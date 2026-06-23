@@ -416,7 +416,7 @@
   <!-- PRO BANNER (hidden until unlocked) -->
   <div class="pro-banner" id="proBanner">
     <span class="pro-badge">Pro</span>
-    <div class="pro-banner-text"><strong>Pro unlocked.</strong> Your full keyword analysis and percentile ranking are ready below. AI rewrite included free when v2 launches.</div>
+    <div class="pro-banner-text"><strong>Pro unlocked.</strong> Your full keyword gap analysis, percentile ranking, and JD match are ready below.</div>
   </div>
 
   <!-- SCORE -->
@@ -500,25 +500,7 @@
     </div>
   </div>
 
-  <!-- AI REWRITE (hidden until pro) -->
-  <div class="rewrite-card" id="rewriteCard">
-    <div class="rewrite-header">
-      <h3 id="rewriteCardTitle">✨ Your AI-Rewritten CV</h3>
-      <div class="rewrite-actions">
-        <button class="copy-btn" onclick="copyRewrite()">📋 Copy text</button>
-        <button class="download-btn" onclick="downloadRewrite()">⬇ Download Word (.doc)</button>
-      </div>
-    </div>
-    <div class="rewrite-loading" id="rewriteLoading">
-      <div class="rewrite-spinner"></div>
-      <p style="font-size:14px;color:var(--ink-light)">Rewriting your CV…</p>
-    </div>
-    <div class="rewrite-body" id="rewriteBody" style="display:none"></div>
-    <p style="font-size:12px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
-      🔜 <strong>Full AI rewrite coming in v2</strong> — your Pro access will automatically include it at no extra cost when it launches.
-      The download below is a structured framework based on your CV. ⚠️ Review all content for accuracy before submitting to an employer.
-    </p>
-  </div>
+  <!-- CV rewrite removed — Pro features are keyword analysis, percentile ranking, and JD matching -->
 
   <!-- PAYWALL (hidden after unlock) -->
   <div class="paywall-card" id="paywallCard">
@@ -527,8 +509,8 @@
     <div class="paywall-features">
       <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real finance CVs</div></div>
       <div class="paywall-feature"><div class="paywall-feature-icon">🔑</div><div class="paywall-feature-label">Full keyword<br>gap analysis</div></div>
-      <div class="paywall-feature"><div class="paywall-feature-icon">🎯</div><div class="paywall-feature-label">JD match score<br>fully unlocked</div></div>
-      <div class="paywall-feature"><div class="paywall-feature-icon">✍️</div><div class="paywall-feature-label">AI rewrite<br>coming in v2</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">🎯</div><div class="paywall-feature-label">Full JD match<br>score + missing terms</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">🏦</div><div class="paywall-feature-label">Firm-specific<br>keyword tips</div></div>
     </div>
     <button class="paywall-cta" onclick="openPaymentModal()">
       Unlock Pro
@@ -558,9 +540,9 @@
       <div class="feature-list">
         <div class="feature-row"><span class="feature-check">✓</span>Percentile ranking vs real finance CVs</div>
         <div class="feature-row"><span class="feature-check">✓</span>Full keyword gap analysis for your sub-sector</div>
-        <div class="feature-row"><span class="feature-check">✓</span>Full JD match score and missing terms</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Full JD match score and all missing terms</div>
+        <div class="feature-row"><span class="feature-check">✓</span>Firm-specific keyword recommendations</div>
         <div class="feature-row"><span class="feature-check">✓</span>30-day money-back guarantee</div>
-        <div class="feature-row" style="color:var(--ink-light);font-size:13px"><span style="width:20px;display:inline-block">🔜</span>AI CV rewrite — included free when v2 launches</div>
       </div>
 
       <div class="modal-input-group" style="margin-bottom:8px">
@@ -1552,24 +1534,17 @@
     document.getElementById('navProBadge').style.display = 'block';
     document.getElementById('proBanner').classList.add('visible');
     document.getElementById('paywallCard').style.display = 'none';
-    document.getElementById('rewriteCard').classList.add('visible');
     document.getElementById('resultsTitle').textContent = 'Your Pro CV Report';
 
-    // Unlock keywords
+    // Unlock keywords, percentile and JD match
     renderKeywords(analysisData, true);
     renderPercentile(analysisData, true);
     const lb = document.getElementById('jdLockBanner'); if (lb) lb.style.display='none';
 
-    // Scroll to rewrite card
-    setTimeout(() => document.getElementById('rewriteCard').scrollIntoView({behavior:'smooth', block:'start'}), 300);
+    // Scroll to keyword section
+    setTimeout(() => document.getElementById('keywordCard').scrollIntoView({behavior:'smooth', block:'start'}), 300);
 
-    // Trigger AI rewrite
-    generateRewrite();
-    const hasJD = jdText && jdText.length > 50;
-    document.getElementById('rewriteCardTitle').textContent = hasJD
-      ? '🎯 Your CV — Rewritten for This Job'
-      : '✨ Your AI-Rewritten CV';
-    showToast(hasJD ? '🎉 Pro unlocked! Tailoring your CV to the job description…' : '🎉 Pro unlocked! Generating your rewritten CV…');
+    showToast('🎉 Pro unlocked! Your full keyword analysis and percentile ranking are ready.');
   }
 
     async function generateRewrite() {
@@ -2011,7 +1986,6 @@ BSc Business Management | University of Manchester | 2015–2018`;
     document.getElementById('fileChosen').style.display='none';
     document.getElementById('fileName').textContent='file selected';
     document.getElementById('proBanner').classList.remove('visible');
-    document.getElementById('rewriteCard').classList.remove('visible');
     document.getElementById('paywallCard').style.display='';
     document.getElementById('navTag').style.display='';
     document.getElementById('navProBadge').style.display='none';
