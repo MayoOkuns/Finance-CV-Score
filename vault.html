@@ -467,7 +467,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 const SUPABASE_URL = 'https://yweyfioiwwrvbawwuttk.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZXlmaW9pd3dydmJhd3d1dHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg0OTksImV4cCI6MjA5NzgwNDQ5OX0.aBfrXzVPpjju0UKpLo02dw-hy7xdiPr0l4If5CsZfbk';
 // Stripe subscription link — update when created
-const STRIPE_SUB_LINK = 'https://buy.stripe.com/test_placeholder';
+const STRIPE_SUB_LINK = 'https://buy.stripe.com/test_eVq6oH5LS7ttdWb7Qm9k402';
 
 let currentUser = null;
 let userProfile = null;
@@ -935,7 +935,24 @@ function showToast(msg) {
 }
 
 // ── START ────────────────────────────────────────────────────────────
-init();
+init().then(() => {
+  // Check if returning from Stripe subscription checkout
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('subscribed') === 'true') {
+    window.history.replaceState({}, '', '/vault.html');
+    showToast('🎉 Subscription active! You now have full access to the vault.');
+    // Refresh profile to pick up new subscription status
+    if (currentUser) {
+      supabaseClient.from('profiles')
+        .update({ subscription_status: 'active' })
+        .eq('id', currentUser.id)
+        .then(() => {
+          if (userProfile) userProfile.subscription_status = 'active';
+          renderFeed(allQuestions);
+        });
+    }
+  }
+});
 </script>
 </body>
 </html>
