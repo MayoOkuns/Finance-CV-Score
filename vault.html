@@ -1,0 +1,941 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Interview Vault — Real Finance Interview Questions | FinanceCV Score</title>
+<meta name="description" content="Real interview questions from Goldman Sachs, BlackRock, JPMorgan and more — submitted by candidates who've been through the process. Searchable by firm, role, and stage.">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0E0E0F;--ink-mid:#3A3A3C;--ink-light:#7A7A80;
+  --surface:#F7F6F3;--white:#FFFFFF;
+  --accent:#2563EB;--accent-light:#EFF4FF;
+  --danger:#DC2626;--warn:#D97706;--good:#16A34A;
+  --border:#E4E3DF;--gold:#B45309;
+  --navy:#0F172A;--navy-mid:#1E3A5F;
+}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh;font-size:15px;line-height:1.6}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:18px 40px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:'Instrument Serif',serif;font-size:22px;color:var(--ink);letter-spacing:-0.3px;text-decoration:none}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:20px}
+.nav-link{font-size:14px;font-weight:500;color:var(--ink-mid);text-decoration:none;transition:color .15s}
+.nav-link:hover{color:var(--accent)}
+.nav-link.active{color:var(--accent);font-weight:600}
+.nav-cta{background:var(--accent);color:white;font-size:13px;font-weight:600;padding:8px 16px;border-radius:8px;text-decoration:none;transition:opacity .15s}
+.nav-cta:hover{opacity:.88}
+
+/* HERO */
+.vault-hero{background:linear-gradient(135deg,var(--navy),var(--navy-mid));padding:56px 24px 48px;text-align:center}
+.vault-eyebrow{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#93C5FD;background:rgba(147,197,253,0.1);padding:5px 14px;border-radius:20px;margin-bottom:16px}
+.vault-hero h1{font-family:'Instrument Serif',serif;font-size:clamp(32px,5vw,48px);color:white;letter-spacing:-1px;line-height:1.15;margin-bottom:14px}
+.vault-hero h1 em{font-style:italic;color:#93C5FD}
+.vault-hero p{font-size:16px;color:rgba(255,255,255,.65);max-width:520px;margin:0 auto 28px;line-height:1.6}
+.vault-stats{display:flex;justify-content:center;gap:32px;flex-wrap:wrap;margin-top:8px}
+.vault-stat{text-align:center}
+.vault-stat-num{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;color:white;display:block}
+.vault-stat-label{font-size:12px;color:rgba(255,255,255,.5)}
+
+/* HOW IT WORKS BANNER */
+.how-it-works{background:var(--accent-light);border-bottom:1px solid #BFCFFF;padding:16px 40px;display:flex;align-items:center;justify-content:center;gap:32px;flex-wrap:wrap}
+.how-step{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--accent);font-weight:500}
+.how-step-num{width:22px;height:22px;background:var(--accent);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}
+.how-arrow{color:#BFCFFF;font-size:16px}
+
+/* MAIN LAYOUT */
+.vault-layout{max-width:1100px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
+@media(max-width:800px){.vault-layout{grid-template-columns:1fr}}
+
+/* SIDEBAR FILTERS */
+.filter-panel{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:24px;position:sticky;top:80px}
+.filter-panel h3{font-size:13px;font-weight:600;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-light);margin-bottom:16px}
+.filter-section{margin-bottom:20px}
+.filter-section label{display:block;font-size:12px;font-weight:600;color:var(--ink-mid);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.04em}
+.filter-select{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s;cursor:pointer}
+.filter-select:focus{border-color:var(--accent)}
+.filter-search{width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;transition:border-color .2s}
+.filter-search:focus{border-color:var(--accent)}
+.filter-reset{width:100%;margin-top:8px;background:none;border:1.5px solid var(--border);color:var(--ink-mid);font-size:13px;font-weight:500;padding:9px;border-radius:8px;cursor:pointer;transition:all .15s;font-family:'Inter',sans-serif}
+.filter-reset:hover{border-color:var(--ink-mid);color:var(--ink)}
+.submit-btn-sidebar{width:100%;background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s;margin-top:16px;display:flex;align-items:center;justify-content:center;gap:8px}
+.submit-btn-sidebar:hover{opacity:.88}
+
+/* QUESTION FEED */
+.feed-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.feed-title{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.3px}
+.feed-count{font-size:13px;color:var(--ink-light)}
+.sort-select{padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;color:var(--ink-mid);background:var(--white);outline:none;cursor:pointer}
+
+/* QUESTION CARD */
+.question-card{background:var(--white);border-radius:14px;border:1px solid var(--border);padding:20px 24px;margin-bottom:12px;transition:border-color .15s}
+.question-card:hover{border-color:#BFCFFF}
+.question-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.q-tag{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:3px 10px;border-radius:6px;letter-spacing:0.04em}
+.q-tag-firm{background:#EFF4FF;color:var(--accent)}
+.q-tag-sector{background:#F0FDF4;color:var(--good)}
+.q-tag-stage{background:#FFFBEB;color:var(--gold)}
+.q-tag-role{background:var(--surface);color:var(--ink-mid)}
+.question-text{font-size:15px;font-weight:500;color:var(--ink);line-height:1.5;margin-bottom:12px}
+.question-meta{display:flex;align-items:center;justify-content:space-between;font-size:12px;color:var(--ink-light)}
+.upvote-btn{display:flex;align-items:center;gap:5px;background:none;border:1.5px solid var(--border);padding:5px 12px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:600;color:var(--ink-mid);transition:all .15s;font-family:'Inter',sans-serif}
+.upvote-btn:hover{border-color:var(--accent);color:var(--accent)}
+.upvote-btn.voted{border-color:var(--accent);color:var(--accent);background:var(--accent-light)}
+
+/* PAYWALL OVERLAY on feed */
+.feed-paywall{background:var(--white);border-radius:16px;border:2px solid var(--border);padding:40px 32px;text-align:center;margin-top:12px}
+.feed-paywall h3{font-family:'Instrument Serif',serif;font-size:24px;margin-bottom:10px;letter-spacing:-0.3px}
+.feed-paywall p{font-size:14px;color:var(--ink-mid);max-width:400px;margin:0 auto 24px;line-height:1.6}
+.feed-paywall-options{display:flex;flex-direction:column;gap:10px;max-width:380px;margin:0 auto}
+.option-primary{background:var(--accent);color:white;font-size:15px;font-weight:600;padding:14px;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s}
+.option-primary:hover{opacity:.88}
+.option-secondary{background:var(--surface);color:var(--ink-mid);font-size:14px;font-weight:500;padding:13px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s}
+.option-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.option-divider{font-size:12px;color:var(--ink-light);text-align:center}
+
+/* BLUR PREVIEW CARDS */
+.question-card.blurred{filter:blur(4px);user-select:none;pointer-events:none}
+
+/* EMPTY STATE */
+.empty-state{text-align:center;padding:60px 24px;color:var(--ink-light)}
+.empty-state h3{font-size:18px;font-weight:600;color:var(--ink-mid);margin-bottom:8px}
+
+/* LOADING */
+.loading-feed{text-align:center;padding:40px;color:var(--ink-light)}
+.feed-spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* MODAL BASE */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)}
+.modal-overlay.open{display:flex}
+.modal{background:var(--white);border-radius:20px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(24px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-header{padding:24px 28px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;background:var(--white);z-index:1}
+.modal-header h3{font-family:'Instrument Serif',serif;font-size:22px;letter-spacing:-0.3px}
+.modal-close{width:32px;height:32px;background:var(--surface);border:none;border-radius:50%;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;color:var(--ink-mid)}
+.modal-close:hover{background:var(--border)}
+.modal-body{padding:24px 28px}
+.modal-input-group{margin-bottom:16px}
+.modal-input-group label{display:block;font-size:12px;font-weight:600;color:var(--ink-mid);margin-bottom:6px;letter-spacing:0.04em;text-transform:uppercase}
+.modal-input-group input,.modal-input-group select,.modal-input-group textarea{width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s;background:var(--white)}
+.modal-input-group input:focus,.modal-input-group select:focus,.modal-input-group textarea:focus{border-color:var(--accent)}
+.modal-input-group textarea{resize:vertical;min-height:100px;line-height:1.6}
+.char-count{font-size:11px;color:var(--ink-light);text-align:right;margin-top:4px}
+.char-count.warn{color:var(--warn)}
+.submit-question-btn{width:100%;background:var(--ink);color:white;font-size:16px;font-weight:600;padding:15px;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s;margin-top:4px}
+.submit-question-btn:hover{opacity:.85}
+.submit-question-btn:disabled{opacity:.4;cursor:not-allowed}
+.trial-note{background:var(--accent-light);border:1px solid #BFCFFF;border-radius:10px;padding:14px 16px;font-size:13px;color:var(--accent);margin-bottom:20px;line-height:1.5}
+.trial-note strong{font-weight:600}
+
+/* AUTH MODAL */
+.auth-tabs{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
+.auth-tab{flex:1;padding:12px;text-align:center;font-size:14px;font-weight:500;color:var(--ink-light);cursor:pointer;border-bottom:2px solid transparent;transition:all .15s;background:none;border-top:none;border-left:none;border-right:none;font-family:'Inter',sans-serif}
+.auth-tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+.auth-error{background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;padding:10px 14px;font-size:13px;color:var(--danger);margin-bottom:16px;display:none}
+.auth-btn{width:100%;background:var(--accent);color:white;font-size:15px;font-weight:600;padding:14px;border-radius:10px;border:none;cursor:pointer;transition:opacity .15s;font-family:'Inter',sans-serif}
+.auth-btn:hover{opacity:.88}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed}
+.auth-divider{text-align:center;font-size:13px;color:var(--ink-light);margin:16px 0}
+
+/* TRIAL BANNER */
+.trial-banner{background:linear-gradient(135deg,var(--navy),var(--navy-mid));color:white;padding:14px 24px;text-align:center;font-size:14px;display:none}
+.trial-banner.visible{display:block}
+.trial-banner strong{font-weight:600;color:#93C5FD}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:white;font-size:14px;font-weight:500;padding:12px 20px;border-radius:10px;z-index:2000;transition:transform .3s ease;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+/* FIRM PILLS */
+.firm-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;max-width:900px;margin-left:auto;margin-right:auto;padding:0 24px}
+.firm-pill{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--ink-mid);cursor:pointer;transition:all .15s;white-space:nowrap}
+.firm-pill:hover,.firm-pill.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+
+/* DISCLAIMER */
+.vault-disclaimer{font-size:12px;color:var(--ink-light);text-align:center;max-width:680px;margin:32px auto 0;padding:0 24px;line-height:1.6}
+
+@media(max-width:600px){
+  nav{padding:14px 20px}
+  .vault-hero{padding:40px 20px 36px}
+  .how-it-works{padding:14px 20px;gap:16px}
+  .vault-layout{padding:20px 16px}
+  .filter-panel{position:static}
+  .modal-body,.modal-header{padding-left:20px;padding-right:20px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="logo" href="/">Finance<span>CVScore</span></a>
+  <div class="nav-links">
+    <a class="nav-link" href="/">CV Scorer</a>
+    <a class="nav-link active" href="/vault.html">Interview Vault</a>
+    <button class="nav-link" id="navAuthBtn" onclick="openAuthModal()" style="background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif">Sign in</button>
+    <a class="nav-cta" href="#" onclick="openSubmitModal();return false">+ Submit a question</a>
+  </div>
+</nav>
+
+<!-- TRIAL BANNER -->
+<div class="trial-banner" id="trialBanner">
+  ⏰ Your free trial ends in <strong id="trialDaysLeft"></strong> — <a href="#" onclick="openSubscribeModal();return false" style="color:#93C5FD;font-weight:600">subscribe to keep access</a>
+</div>
+
+<!-- HERO -->
+<section class="vault-hero">
+  <span class="vault-eyebrow">Crowdsourced · Finance Only</span>
+  <h1>Real questions.<br><em>Real firms. Real stages.</em></h1>
+  <p>Every question in this vault was submitted by a candidate who sat in that interview. No AI-generated filler. No generic guides.</p>
+  <div class="vault-stats">
+    <div class="vault-stat"><span class="vault-stat-num" id="statQuestions">—</span><span class="vault-stat-label">questions</span></div>
+    <div class="vault-stat"><span class="vault-stat-num" id="statFirms">—</span><span class="vault-stat-label">firms covered</span></div>
+    <div class="vault-stat"><span class="vault-stat-num" id="statSectors">12</span><span class="vault-stat-label">sub-sectors</span></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<div class="how-it-works">
+  <div class="how-step"><span class="how-step-num">1</span>Submit a question you've been asked</div>
+  <span class="how-arrow">→</span>
+  <div class="how-step"><span class="how-step-num">2</span>Get 7 days free access</div>
+  <span class="how-arrow">→</span>
+  <div class="how-step"><span class="how-step-num">3</span>Subscribe for £12/month to keep browsing</div>
+</div>
+
+<!-- FIRM QUICK-FILTER PILLS -->
+<div style="padding:24px 24px 0;max-width:1100px;margin:0 auto">
+  <div class="firm-pills" id="firmPills">
+    <button class="firm-pill active" data-firm="" onclick="filterByFirm(this)">All firms</button>
+    <button class="firm-pill" data-firm="Goldman Sachs" onclick="filterByFirm(this)">Goldman Sachs</button>
+    <button class="firm-pill" data-firm="JPMorgan" onclick="filterByFirm(this)">JPMorgan</button>
+    <button class="firm-pill" data-firm="BlackRock" onclick="filterByFirm(this)">BlackRock</button>
+    <button class="firm-pill" data-firm="Morgan Stanley" onclick="filterByFirm(this)">Morgan Stanley</button>
+    <button class="firm-pill" data-firm="Fidelity" onclick="filterByFirm(this)">Fidelity</button>
+    <button class="firm-pill" data-firm="Schroders" onclick="filterByFirm(this)">Schroders</button>
+    <button class="firm-pill" data-firm="Jupiter" onclick="filterByFirm(this)">Jupiter</button>
+    <button class="firm-pill" data-firm="KKR" onclick="filterByFirm(this)">KKR</button>
+    <button class="firm-pill" data-firm="Bridgewater" onclick="filterByFirm(this)">Bridgewater</button>
+    <button class="firm-pill" data-firm="Citadel" onclick="filterByFirm(this)">Citadel</button>
+    <button class="firm-pill" data-firm="Citi" onclick="filterByFirm(this)">Citi</button>
+    <button class="firm-pill" data-firm="Barclays" onclick="filterByFirm(this)">Barclays</button>
+  </div>
+</div>
+
+<!-- MAIN LAYOUT -->
+<div class="vault-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="filter-panel">
+    <h3>Filter questions</h3>
+    <div class="filter-section">
+      <label>Search</label>
+      <input class="filter-search" id="searchInput" placeholder="e.g. DCF, walk me through…" oninput="applyFilters()">
+    </div>
+    <div class="filter-section">
+      <label>Sub-sector</label>
+      <select class="filter-select" id="sectorFilter" onchange="applyFilters()">
+        <option value="">All sub-sectors</option>
+        <option value="Investment Banking">Investment Banking</option>
+        <option value="Asset Management">Asset Management</option>
+        <option value="Private Equity">Private Equity</option>
+        <option value="Hedge Funds">Hedge Funds</option>
+        <option value="Equity Research">Equity Research</option>
+        <option value="Sales & Trading">Sales & Trading</option>
+        <option value="Wealth Management">Wealth Management</option>
+        <option value="Corporate Finance / FP&A">Corporate Finance / FP&A</option>
+        <option value="Risk & Compliance">Risk & Compliance</option>
+        <option value="Insurance / Actuarial">Insurance / Actuarial</option>
+        <option value="Fintech">Fintech</option>
+      </select>
+    </div>
+    <div class="filter-section">
+      <label>Interview stage</label>
+      <select class="filter-select" id="stageFilter" onchange="applyFilters()">
+        <option value="">All stages</option>
+        <option value="First round">First round</option>
+        <option value="Superday">Superday / Final round</option>
+        <option value="HireVue">HireVue / Video</option>
+        <option value="Assessment Centre">Assessment Centre</option>
+        <option value="Phone screen">Phone screen</option>
+      </select>
+    </div>
+    <div class="filter-section">
+      <label>Role</label>
+      <select class="filter-select" id="roleFilter" onchange="applyFilters()">
+        <option value="">All roles</option>
+        <option value="Analyst">Analyst</option>
+        <option value="Associate">Associate</option>
+        <option value="Internship">Internship / Summer</option>
+        <option value="Graduate scheme">Graduate scheme</option>
+        <option value="VP">VP</option>
+      </select>
+    </div>
+    <button class="filter-reset" onclick="resetFilters()">Reset filters</button>
+    <button class="submit-btn-sidebar" onclick="openSubmitModal()">
+      + Submit a question
+    </button>
+  </aside>
+
+  <!-- QUESTION FEED -->
+  <main>
+    <div class="feed-header">
+      <div>
+        <h2 class="feed-title">Interview Questions</h2>
+        <p class="feed-count" id="feedCount">Loading…</p>
+      </div>
+      <select class="sort-select" id="sortSelect" onchange="applyFilters()">
+        <option value="recent">Most recent</option>
+        <option value="upvotes">Most upvoted</option>
+        <option value="firm">By firm</option>
+      </select>
+    </div>
+    <div id="questionFeed">
+      <div class="loading-feed"><div class="feed-spinner"></div><p>Loading questions…</p></div>
+    </div>
+    <div id="paywallBlock" style="display:none"></div>
+  </main>
+</div>
+
+<p class="vault-disclaimer">
+  FinanceCV Score is not affiliated with, endorsed by, or connected to any firm named in this vault.
+  Questions are submitted by users based on their own recollections and are not verified or approved by any employer.
+  Do not submit any information you are contractually prohibited from sharing.
+</p>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- SUBMIT QUESTION MODAL -->
+<div class="modal-overlay" id="submitModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Submit a question</h3>
+      <button class="modal-close" onclick="closeModal('submitModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="trial-note">
+        🎁 <strong>Submit one real question you've been asked</strong> and unlock 7 days of free access to the full vault.
+        After 7 days, subscribe for £12/month to keep browsing.
+      </div>
+      <div class="modal-input-group">
+        <label>Firm *</label>
+        <select id="submitFirm">
+          <option value="">Select firm…</option>
+          <option>Goldman Sachs</option><option>JPMorgan</option><option>Morgan Stanley</option>
+          <option>BlackRock</option><option>Fidelity</option><option>Vanguard</option>
+          <option>Schroders</option><option>Jupiter</option><option>Abrdn</option><option>M&G</option>
+          <option>Baillie Gifford</option><option>KKR</option><option>Carlyle</option>
+          <option>Apollo</option><option>Bridgewater</option><option>Citadel</option>
+          <option>Man Group</option><option>Barclays</option><option>HSBC</option>
+          <option>Deutsche Bank</option><option>Credit Suisse</option><option>UBS</option>
+          <option>Lazard</option><option>Rothschild</option><option>Evercore</option>
+          <option>Citi</option><option>Bank of America</option><option>Wells Fargo</option>
+          <option>Macquarie</option><option>Other</option>
+        </select>
+      </div>
+      <div id="submitFirmOtherWrap" style="display:none" class="modal-input-group">
+        <label>Firm name *</label>
+        <input type="text" id="submitFirmOther" placeholder="Enter firm name">
+      </div>
+      <div class="modal-input-group">
+        <label>Sub-sector *</label>
+        <select id="submitSector">
+          <option value="">Select sub-sector…</option>
+          <option>Investment Banking</option><option>Asset Management</option>
+          <option>Private Equity</option><option>Hedge Funds</option>
+          <option>Equity Research</option><option>Sales & Trading</option>
+          <option>Wealth Management</option><option>Corporate Finance / FP&A</option>
+          <option>Risk & Compliance</option><option>Insurance / Actuarial</option><option>Fintech</option>
+        </select>
+      </div>
+      <div class="modal-input-group">
+        <label>Role</label>
+        <select id="submitRole">
+          <option value="">Select role (optional)…</option>
+          <option>Analyst</option><option>Associate</option>
+          <option>Internship / Summer</option><option>Graduate scheme</option><option>VP</option>
+        </select>
+      </div>
+      <div class="modal-input-group">
+        <label>Interview stage *</label>
+        <select id="submitStage">
+          <option value="">Select stage…</option>
+          <option>First round</option><option>Superday</option>
+          <option>HireVue</option><option>Assessment Centre</option><option>Phone screen</option>
+        </select>
+      </div>
+      <div class="modal-input-group">
+        <label>Year asked</label>
+        <select id="submitYear">
+          <option value="">Year (optional)…</option>
+          <option>2026</option><option>2025</option><option>2024</option>
+          <option>2023</option><option>2022</option><option>2021</option>
+        </select>
+      </div>
+      <div class="modal-input-group">
+        <label>The question *</label>
+        <textarea id="submitQuestion" placeholder="Type the interview question exactly as it was asked…" oninput="updateCharCount()" maxlength="500"></textarea>
+        <div class="char-count" id="charCount">0 / 500 (minimum 30)</div>
+      </div>
+      <button class="submit-question-btn" id="submitQuestionBtn" onclick="handleSubmit()">
+        Submit &amp; unlock 7-day access
+      </button>
+      <p style="font-size:12px;color:var(--ink-light);margin-top:12px;text-align:center;line-height:1.5">
+        By submitting you confirm this question is from your own experience and you are not sharing confidential information.
+        Questions are reviewed before going live.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 id="authModalTitle">Sign in to FinanceCV Score</h3>
+      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="signinTab" onclick="switchAuthTab('signin')">Sign in</button>
+        <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Create account</button>
+      </div>
+      <div class="auth-error" id="authError"></div>
+      <div class="modal-input-group">
+        <label>Email</label>
+        <input type="email" id="authEmail" placeholder="you@email.com">
+      </div>
+      <div class="modal-input-group">
+        <label>Password</label>
+        <input type="password" id="authPassword" placeholder="Password">
+      </div>
+      <div class="modal-input-group" id="confirmPasswordWrap" style="display:none">
+        <label>Confirm password</label>
+        <input type="password" id="authConfirmPassword" placeholder="Confirm password">
+      </div>
+      <button class="auth-btn" id="authSubmitBtn" onclick="handleAuth()">Sign in</button>
+      <p class="auth-divider" id="authSwitchText">
+        Don't have an account? <a href="#" onclick="switchAuthTab('signup');return false" style="color:var(--accent)">Create one free</a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- SUBSCRIBE MODAL -->
+<div class="modal-overlay" id="subscribeModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3>Interview Vault — Full Access</h3>
+      <button class="modal-close" onclick="closeModal('subscribeModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:20px">
+        <span style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;color:var(--ink)">£12</span>
+        <span style="font-size:14px;color:var(--ink-light)">/month · cancel anytime</span>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
+          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
+          Unlimited access to all interview questions
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
+          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
+          Search by firm, role, stage, and sub-sector
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
+          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
+          New questions added continuously
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
+          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
+          Cancel anytime — no commitment
+        </div>
+      </div>
+      <button class="option-primary" onclick="redirectToSubscribe()" style="width:100%;padding:15px;font-size:16px;font-family:'Inter',sans-serif">
+        🔒 Subscribe — £12/month
+      </button>
+      <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:12px">Secure checkout via Stripe</p>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://yweyfioiwwrvbawwuttk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZXlmaW9pd3dydmJhd3d1dHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg0OTksImV4cCI6MjA5NzgwNDQ5OX0.aBfrXzVPpjju0UKpLo02dw-hy7xdiPr0l4If5CsZfbk';
+// Stripe subscription link — update when created
+const STRIPE_SUB_LINK = 'https://buy.stripe.com/test_placeholder';
+
+let currentUser = null;
+let userProfile = null;
+let allQuestions = [];
+let filteredQuestions = [];
+let activeFirmFilter = '';
+let authMode = 'signin';
+let supabaseClient = null;
+
+// ── SUPABASE CLIENT ──────────────────────────────────────────────────
+async function initSupabase() {
+  // Load Supabase client from CDN
+  if (window.supabase) { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); return; }
+  await new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js';
+    s.onload = () => { supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY); resolve(); };
+    s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ── INIT ─────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    await initSupabase();
+    // Check session
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (session) await setUser(session.user);
+    // Load questions
+    await loadQuestions();
+    await loadStats();
+    // Auth state listener
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
+      if (session) await setUser(session.user);
+      else { currentUser = null; userProfile = null; updateNavAuth(); }
+    });
+  } catch(err) {
+    console.error('Init error:', err);
+    renderFeed(getSeedQuestions());
+  }
+}
+
+async function setUser(user) {
+  currentUser = user;
+  // Fetch profile
+  const { data } = await supabaseClient
+    .from('profiles').select('*').eq('id', user.id).single();
+  userProfile = data;
+  updateNavAuth();
+  checkTrialStatus();
+}
+
+function updateNavAuth() {
+  const btn = document.getElementById('navAuthBtn');
+  if (currentUser) {
+    btn.textContent = 'Account';
+    btn.onclick = () => showToast('Signed in as ' + currentUser.email);
+  } else {
+    btn.textContent = 'Sign in';
+    btn.onclick = () => openAuthModal();
+  }
+}
+
+// ── LOAD QUESTIONS ───────────────────────────────────────────────────
+async function loadQuestions() {
+  try {
+    const { data, error } = await supabaseClient
+      .from('questions')
+      .select('*')
+      .eq('status', 'approved')
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Supabase error:', JSON.stringify(error));
+      // Table might not exist yet — use seed questions only
+      allQuestions = getSeedQuestions();
+    } else {
+      // Combine DB questions with seed questions
+      const seed = getSeedQuestions();
+      allQuestions = [...(data || []), ...seed];
+    }
+  } catch(err) {
+    console.error('Load questions error:', err.message || err);
+    allQuestions = getSeedQuestions();
+  }
+  renderFeed(allQuestions);
+}
+
+async function loadStats() {
+  try {
+    const { count: qCount } = await supabaseClient
+      .from('questions').select('*', {count:'exact',head:true}).eq('status','approved');
+    const total = (qCount || 0) + getSeedQuestions().length;
+    document.getElementById('statQuestions').textContent = total + '+';
+    // Count unique firms
+    const firms = [...new Set(allQuestions.map(q => q.firm))].length;
+    document.getElementById('statFirms').textContent = firms + '+';
+  } catch(err) {
+    const seed = getSeedQuestions();
+    document.getElementById('statQuestions').textContent = seed.length + '+';
+    document.getElementById('statFirms').textContent = [...new Set(seed.map(q=>q.firm))].length + '+';
+  }
+}
+
+// ── SEED QUESTIONS (pre-loaded from founder's experience) ────────────
+function getSeedQuestions() {
+  return [
+    { id:'seed1', firm:'JPMorgan', sub_sector:'Investment Banking', role:'Analyst', stage:'First round', question_text:'Walk me through a DCF analysis step by step.', upvotes:24, created_at:'2026-01-15', year_asked:'2022' },
+    { id:'seed2', firm:'JPMorgan', sub_sector:'Investment Banking', role:'Internship / Summer', stage:'Superday', question_text:'How would you value a company with negative earnings?', upvotes:31, created_at:'2026-01-14', year_asked:'2022' },
+    { id:'seed3', firm:'Citi', sub_sector:'Investment Banking', role:'Internship / Summer', stage:'First round', question_text:'Tell me about a recent M&A deal and why you think it was done.', upvotes:18, created_at:'2026-01-13', year_asked:'2022' },
+    { id:'seed4', firm:'Citi', sub_sector:'Investment Banking', role:'Analyst', stage:'HireVue', question_text:'What is the difference between enterprise value and equity value?', upvotes:22, created_at:'2026-01-12', year_asked:'2022' },
+    { id:'seed5', firm:'Jupiter', sub_sector:'Asset Management', role:'Analyst', stage:'First round', question_text:'Walk me through your investment process for selecting a stock.', upvotes:15, created_at:'2026-01-11', year_asked:'2024' },
+    { id:'seed6', firm:'Jupiter', sub_sector:'Asset Management', role:'Graduate scheme', stage:'Superday', question_text:'What is upside/downside capture ratio and how do you interpret it?', upvotes:19, created_at:'2026-01-10', year_asked:'2024' },
+    { id:'seed7', firm:'Jupiter', sub_sector:'Asset Management', role:'Analyst', stage:'First round', question_text:'Pitch me a stock you would buy today and explain your thesis.', upvotes:27, created_at:'2026-01-09', year_asked:'2024' },
+    { id:'seed8', firm:'Goldman Sachs', sub_sector:'Investment Banking', role:'Analyst', stage:'Superday', question_text:'If a company has £10m in net income, what is its enterprise value?', upvotes:35, created_at:'2026-01-08', year_asked:'2025' },
+    { id:'seed9', firm:'Goldman Sachs', sub_sector:'Investment Banking', role:'Internship / Summer', stage:'First round', question_text:'Why investment banking over other areas of finance?', upvotes:41, created_at:'2026-01-07', year_asked:'2025' },
+    { id:'seed10', firm:'BlackRock', sub_sector:'Asset Management', role:'Analyst', stage:'Assessment Centre', question_text:'How does quantitative easing affect equity valuations?', upvotes:20, created_at:'2026-01-06', year_asked:'2025' },
+    { id:'seed11', firm:'BlackRock', sub_sector:'Asset Management', role:'Graduate scheme', stage:'First round', question_text:'Explain the relationship between bond prices and interest rates.', upvotes:28, created_at:'2026-01-05', year_asked:'2025' },
+    { id:'seed12', firm:'KKR', sub_sector:'Private Equity', role:'Analyst', stage:'Superday', question_text:'Walk me through an LBO model from start to finish.', upvotes:33, created_at:'2026-01-04', year_asked:'2025' },
+    { id:'seed13', firm:'KKR', sub_sector:'Private Equity', role:'Associate', stage:'First round', question_text:'What makes a good LBO candidate? What characteristics do you look for?', upvotes:29, created_at:'2026-01-03', year_asked:'2025' },
+    { id:'seed14', firm:'Citadel', sub_sector:'Hedge Funds', role:'Analyst', stage:'First round', question_text:'How would you trade around an earnings announcement?', upvotes:22, created_at:'2026-01-02', year_asked:'2025' },
+    { id:'seed15', firm:'Schroders', sub_sector:'Asset Management', role:'Graduate scheme', stage:'Assessment Centre', question_text:'What is your view on the current macroeconomic environment and how would you position a portfolio?', upvotes:16, created_at:'2026-01-01', year_asked:'2025' },
+  ];
+}
+
+// ── RENDER FEED ──────────────────────────────────────────────────────
+function renderFeed(questions) {
+  filteredQuestions = questions;
+  const feed = document.getElementById('questionFeed');
+  const paywallBlock = document.getElementById('paywallBlock');
+  const hasAccess = userHasAccess();
+
+  // Free users see 3 questions, rest blurred or hidden
+  const FREE_LIMIT = 3;
+  const visibleQuestions = questions.slice(0, FREE_LIMIT);
+  const lockedQuestions = questions.slice(FREE_LIMIT, FREE_LIMIT + 3);
+
+  document.getElementById('feedCount').textContent =
+    questions.length + ' question' + (questions.length !== 1 ? 's' : '') +
+    (hasAccess ? '' : ' · showing 3 free');
+
+  if (questions.length === 0) {
+    feed.innerHTML = `<div class="empty-state"><h3>No questions yet for this filter</h3><p>Be the first to submit one.</p></div>`;
+    paywallBlock.style.display = 'none';
+    return;
+  }
+
+  // Render visible questions
+  feed.innerHTML = visibleQuestions.map(q => renderQuestionCard(q, false)).join('');
+
+  if (!hasAccess) {
+    // Show 3 blurred preview cards
+    if (lockedQuestions.length > 0) {
+      feed.innerHTML += lockedQuestions.map(q => renderQuestionCard(q, true)).join('');
+    }
+    // Show paywall
+    paywallBlock.style.display = 'block';
+    paywallBlock.innerHTML = `
+      <div class="feed-paywall">
+        <h3>Access all ${questions.length} questions</h3>
+        <p>Submit a question you've been asked to unlock 7 days free — or subscribe for £12/month for unlimited access.</p>
+        <div class="feed-paywall-options">
+          <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — get 7 days free</button>
+          <p class="option-divider">or</p>
+          <button class="option-secondary" onclick="openSubscribeModal()">Subscribe for £12/month</button>
+        </div>
+      </div>`;
+  } else {
+    // Show all questions
+    if (questions.length > FREE_LIMIT) {
+      feed.innerHTML += questions.slice(FREE_LIMIT).map(q => renderQuestionCard(q, false)).join('');
+    }
+    paywallBlock.style.display = 'none';
+  }
+}
+
+function renderQuestionCard(q, blurred) {
+  const yearTag = q.year_asked ? `<span class="q-tag q-tag-role">${q.year_asked}</span>` : '';
+  const roleTag = q.role ? `<span class="q-tag q-tag-role">${q.role}</span>` : '';
+  return `
+    <div class="question-card${blurred ? ' blurred' : ''}">
+      <div class="question-tags">
+        <span class="q-tag q-tag-firm">${q.firm}</span>
+        <span class="q-tag q-tag-sector">${q.sub_sector}</span>
+        ${q.stage ? `<span class="q-tag q-tag-stage">${q.stage}</span>` : ''}
+        ${roleTag}${yearTag}
+      </div>
+      <p class="question-text">${q.question_text}</p>
+      <div class="question-meta">
+        <span>${timeAgo(q.created_at)}</span>
+        <button class="upvote-btn" onclick="upvote('${q.id}', this)">
+          ▲ <span class="upvote-count">${q.upvotes || 0}</span>
+        </button>
+      </div>
+    </div>`;
+}
+
+function userHasAccess() {
+  if (!userProfile) return false;
+  if (userProfile.subscription_status === 'active') return true;
+  if (userProfile.trial_expires_at && new Date(userProfile.trial_expires_at) > new Date()) return true;
+  return false;
+}
+
+// ── FILTERS ──────────────────────────────────────────────────────────
+function filterByFirm(btn) {
+  document.querySelectorAll('.firm-pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  activeFirmFilter = btn.dataset.firm;
+  applyFilters();
+}
+
+function applyFilters() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const sector = document.getElementById('sectorFilter').value;
+  const stage = document.getElementById('stageFilter').value;
+  const role = document.getElementById('roleFilter').value;
+  const sort = document.getElementById('sortSelect').value;
+
+  let filtered = allQuestions.filter(q => {
+    if (activeFirmFilter && q.firm !== activeFirmFilter) return false;
+    if (sector && q.sub_sector !== sector) return false;
+    if (stage && q.stage !== stage) return false;
+    if (role && q.role !== role) return false;
+    if (search && !q.question_text.toLowerCase().includes(search) &&
+        !q.firm.toLowerCase().includes(search)) return false;
+    return true;
+  });
+
+  if (sort === 'upvotes') filtered.sort((a,b) => (b.upvotes||0) - (a.upvotes||0));
+  else if (sort === 'firm') filtered.sort((a,b) => a.firm.localeCompare(b.firm));
+
+  renderFeed(filtered);
+}
+
+function resetFilters() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('sectorFilter').value = '';
+  document.getElementById('stageFilter').value = '';
+  document.getElementById('roleFilter').value = '';
+  document.getElementById('sortSelect').value = 'recent';
+  activeFirmFilter = '';
+  document.querySelectorAll('.firm-pill').forEach(p => p.classList.remove('active'));
+  document.querySelector('.firm-pill[data-firm=""]').classList.add('active');
+  applyFilters();
+}
+
+// ── SUBMIT QUESTION ──────────────────────────────────────────────────
+document.getElementById('submitFirm').addEventListener('change', function() {
+  document.getElementById('submitFirmOtherWrap').style.display =
+    this.value === 'Other' ? 'block' : 'none';
+});
+
+function updateCharCount() {
+  const len = document.getElementById('submitQuestion').value.length;
+  const el = document.getElementById('charCount');
+  el.textContent = len + ' / 500 (minimum 30)';
+  el.classList.toggle('warn', len > 450);
+}
+
+async function handleSubmit() {
+  if (!currentUser) { closeModal('submitModal'); openAuthModal('submit'); return; }
+
+  const firmSelect = document.getElementById('submitFirm').value;
+  const firm = firmSelect === 'Other'
+    ? document.getElementById('submitFirmOther').value.trim()
+    : firmSelect;
+  const sector = document.getElementById('submitSector').value;
+  const role = document.getElementById('submitRole').value;
+  const stage = document.getElementById('submitStage').value;
+  const year = document.getElementById('submitYear').value;
+  const question = document.getElementById('submitQuestion').value.trim();
+
+  if (!firm) { showToast('Please select or enter a firm.'); return; }
+  if (!sector) { showToast('Please select a sub-sector.'); return; }
+  if (!stage) { showToast('Please select an interview stage.'); return; }
+  if (question.length < 30) { showToast('Question must be at least 30 characters.'); return; }
+
+  // Basic English check — must have at least 3 real words
+  const words = question.split(/\s+/).filter(w => /^[a-zA-Z]{2,}$/.test(w));
+  if (words.length < 4) { showToast('Please enter a real interview question in English.'); return; }
+
+  const btn = document.getElementById('submitQuestionBtn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    // Insert question (status = pending, goes to moderation)
+    const { data: qData, error: qError } = await supabaseClient
+      .from('questions')
+      .insert({
+        firm, sub_sector: sector, role: role || null,
+        stage, question_text: question,
+        year_asked: year || null,
+        submitted_by: currentUser.id,
+        status: 'pending', upvotes: 0
+      })
+      .select().single();
+
+    if (qError) throw qError;
+
+    // Log submission
+    await supabaseClient.from('submissions').insert({
+      user_id: currentUser.id,
+      question_id: qData.id,
+      trial_granted: true
+    });
+
+    // Grant 7-day trial
+    const trialExpiry = new Date();
+    trialExpiry.setDate(trialExpiry.getDate() + 7);
+    await supabaseClient.from('profiles').update({
+      trial_expires_at: trialExpiry.toISOString(),
+      subscription_status: 'trial'
+    }).eq('id', currentUser.id);
+
+    userProfile = { ...userProfile, trial_expires_at: trialExpiry.toISOString(), subscription_status: 'trial' };
+
+    closeModal('submitModal');
+    showToast('✓ Question submitted! Your 7-day access is now active.');
+    checkTrialStatus();
+    renderFeed(allQuestions);
+
+  } catch(err) {
+    console.error('Submit error:', err);
+    showToast('Something went wrong. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit & unlock 7-day access';
+  }
+}
+
+// ── AUTH ─────────────────────────────────────────────────────────────
+let pendingAction = null;
+
+function openAuthModal(action) {
+  pendingAction = action || null;
+  document.getElementById('authModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function switchAuthTab(mode) {
+  authMode = mode;
+  document.getElementById('signinTab').classList.toggle('active', mode === 'signin');
+  document.getElementById('signupTab').classList.toggle('active', mode === 'signup');
+  document.getElementById('confirmPasswordWrap').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('authSubmitBtn').textContent = mode === 'signin' ? 'Sign in' : 'Create account';
+  document.getElementById('authModalTitle').textContent = mode === 'signin' ? 'Sign in' : 'Create your account';
+  document.getElementById('authSwitchText').innerHTML = mode === 'signin'
+    ? 'Don\'t have an account? <a href="#" onclick="switchAuthTab(\'signup\');return false" style="color:var(--accent)">Create one free</a>'
+    : 'Already have an account? <a href="#" onclick="switchAuthTab(\'signin\');return false" style="color:var(--accent)">Sign in</a>';
+  document.getElementById('authError').style.display = 'none';
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const errEl = document.getElementById('authError');
+  const btn = document.getElementById('authSubmitBtn');
+
+  if (!email || !password) { errEl.textContent = 'Please fill in all fields.'; errEl.style.display='block'; return; }
+  if (authMode === 'signup' && password !== document.getElementById('authConfirmPassword').value) {
+    errEl.textContent = 'Passwords do not match.'; errEl.style.display='block'; return;
+  }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; errEl.style.display='block'; return; }
+
+  btn.disabled = true;
+  btn.textContent = authMode === 'signin' ? 'Signing in…' : 'Creating account…';
+  errEl.style.display = 'none';
+
+  try {
+    let result;
+    if (authMode === 'signin') {
+      result = await supabaseClient.auth.signInWithPassword({ email, password });
+    } else {
+      result = await supabaseClient.auth.signUp({ email, password });
+    }
+
+    if (result.error) throw result.error;
+
+    closeModal('authModal');
+    showToast(authMode === 'signin' ? '✓ Signed in' : '✓ Account created — check your email to verify');
+
+    if (pendingAction === 'submit') openSubmitModal();
+
+  } catch(err) {
+    errEl.textContent = err.message || 'Authentication failed.';
+    errEl.style.display = 'block';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = authMode === 'signin' ? 'Sign in' : 'Create account';
+  }
+}
+
+// ── TRIAL STATUS ─────────────────────────────────────────────────────
+function checkTrialStatus() {
+  if (!userProfile) return;
+  if (userProfile.subscription_status === 'trial' && userProfile.trial_expires_at) {
+    const expiry = new Date(userProfile.trial_expires_at);
+    const now = new Date();
+    if (expiry > now) {
+      const days = Math.ceil((expiry - now) / (1000 * 60 * 60 * 24));
+      document.getElementById('trialDaysLeft').textContent = days + ' day' + (days !== 1 ? 's' : '');
+      document.getElementById('trialBanner').classList.add('visible');
+    }
+  }
+}
+
+// ── UPVOTE ───────────────────────────────────────────────────────────
+async function upvote(id, btn) {
+  if (!currentUser) { showToast('Sign in to upvote questions.'); return; }
+  if (btn.classList.contains('voted')) return;
+  btn.classList.add('voted');
+  const countEl = btn.querySelector('.upvote-count');
+  countEl.textContent = parseInt(countEl.textContent) + 1;
+  // Update in DB (fire and forget)
+  if (!id.startsWith('seed')) {
+    await supabaseClient.from('questions').update({ upvotes: parseInt(countEl.textContent) }).eq('id', id);
+  }
+}
+
+// ── SUBSCRIBE ────────────────────────────────────────────────────────
+function redirectToSubscribe() {
+  if (!currentUser) { closeModal('subscribeModal'); openAuthModal('subscribe'); return; }
+  window.location.href = STRIPE_SUB_LINK + '?prefilled_email=' + encodeURIComponent(currentUser.email);
+}
+
+// ── MODALS ───────────────────────────────────────────────────────────
+function openSubmitModal() {
+  document.getElementById('submitModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function openSubscribeModal() {
+  document.getElementById('subscribeModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// Close modals on overlay click
+['submitModal','authModal','subscribeModal'].forEach(id => {
+  document.getElementById(id).addEventListener('click', function(e) {
+    if (e.target === this) closeModal(id);
+  });
+});
+
+// ── UTILITIES ────────────────────────────────────────────────────────
+function timeAgo(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const days = Math.floor(diff / 86400000);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  if (days < 30) return days + ' days ago';
+  if (days < 365) return Math.floor(days/30) + ' months ago';
+  return Math.floor(days/365) + ' year' + (Math.floor(days/365)>1?'s':'') + ' ago';
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── START ────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
