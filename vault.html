@@ -146,6 +146,13 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 .trial-banner.visible{display:block}
 .trial-banner strong{font-weight:600;color:#93C5FD}
 
+/* ALERTS FIRM GRID */
+.alert-firm-btn { background:var(--white); border:1.5px solid var(--border); border-radius:10px; padding:10px 12px; font-size:13px; font-weight:500; color:var(--ink-mid); cursor:pointer; transition:all .15s; text-align:left; display:flex; align-items:center; gap:8px; font-family:'Inter',sans-serif; }
+.alert-firm-btn:hover { border-color:var(--accent); color:var(--accent); }
+.alert-firm-btn.selected { border-color:var(--accent); background:var(--accent-light); color:var(--accent); font-weight:600; }
+.alert-firm-btn .alert-check { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; transition:all .15s; }
+.alert-firm-btn.selected .alert-check { background:var(--accent); border-color:var(--accent); }
+
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:white;font-size:14px;font-weight:500;padding:12px 20px;border-radius:10px;z-index:2000;transition:transform .3s ease;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -201,7 +208,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 <div class="how-it-works">
   <div class="how-step"><span class="how-step-num">1</span>Submit a question you've been asked</div>
   <span class="how-arrow">→</span>
-  <div class="how-step"><span class="how-step-num">2</span>Get 7 days free access</div>
+  <div class="how-step"><span class="how-step-num">2</span>Get 3 days free access</div>
   <span class="how-arrow">→</span>
   <div class="how-step"><span class="how-step-num">3</span>Subscribe for £12/month to keep browsing</div>
 </div>
@@ -278,6 +285,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <button class="submit-btn-sidebar" onclick="openSubmitModal()">
       + Submit a question
     </button>
+    <button class="submit-btn-sidebar" onclick="openAlertsModal()" style="background:var(--surface);color:var(--ink-mid);border:1.5px solid var(--border);margin-top:8px">
+      🔔 Manage firm alerts
+    </button>
   </aside>
 
   <!-- QUESTION FEED -->
@@ -318,8 +328,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     </div>
     <div class="modal-body">
       <div class="trial-note">
-        🎁 <strong>Submit one real question you've been asked</strong> and unlock 7 days of free access to the full vault.
-        After 7 days, subscribe for £12/month to keep browsing.
+        🎁 <strong>Submit one real question you've been asked</strong> and unlock 3 days of free access to the full vault.
+        After 3 days, subscribe for £12/month to keep browsing.
       </div>
       <div class="modal-input-group">
         <label>Firm *</label>
@@ -382,7 +392,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <div class="char-count" id="charCount">0 / 500 (minimum 30)</div>
       </div>
       <button class="submit-question-btn" id="submitQuestionBtn" onclick="handleSubmit()">
-        Submit &amp; unlock 7-day access
+        Submit &amp; unlock 3-day access
       </button>
       <p style="font-size:12px;color:var(--ink-light);margin-top:12px;text-align:center;line-height:1.5">
         By submitting you confirm this question is from your own experience and you are not sharing confidential information.
@@ -421,6 +431,27 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <p class="auth-divider" id="authSwitchText">
         Don't have an account? <a href="#" onclick="switchAuthTab('signup');return false" style="color:var(--accent)">Create one free</a>
       </p>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTS MODAL -->
+<div class="modal-overlay" id="alertsModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3>🔔 Interview Alerts</h3>
+      <button class="modal-close" onclick="closeModal('alertsModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:14px;color:var(--ink-mid);margin-bottom:20px;line-height:1.5">
+        Select firms to watch. We'll email you when new interview questions are submitted for those firms — so you're always prepped for your next application.
+      </p>
+      <div id="alertsFirmGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px"></div>
+      <div id="alertsAuthNote" style="display:none;background:var(--accent-light);border:1px solid #BFCFFF;border-radius:10px;padding:14px;font-size:13px;color:var(--accent);margin-bottom:16px">
+        <strong>Sign in</strong> to save your alerts — we'll email you at your account address.
+      </div>
+      <button class="submit-question-btn" id="saveAlertsBtn" onclick="saveAlerts()">Save alerts</button>
+      <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:10px">You can update or remove alerts anytime.</p>
     </div>
   </div>
 </div>
@@ -629,9 +660,9 @@ function renderFeed(questions) {
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
         <h3>Access all ${questions.length} questions</h3>
-        <p>Submit a question you've been asked to unlock 7 days free — or subscribe for £12/month for unlimited access.</p>
+        <p>Submit a question you've been asked to unlock 3 days free — or subscribe for £12/month for unlimited access.</p>
         <div class="feed-paywall-options">
-          <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — get 7 days free</button>
+          <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — get 3 days free</button>
           <p class="option-divider">or</p>
           <button class="option-secondary" onclick="openSubscribeModal()">Subscribe for £12/month</button>
         </div>
@@ -777,9 +808,9 @@ async function handleSubmit() {
       trial_granted: true
     });
 
-    // Grant 7-day trial
+    // Grant 3-day trial
     const trialExpiry = new Date();
-    trialExpiry.setDate(trialExpiry.getDate() + 7);
+    trialExpiry.setDate(trialExpiry.getDate() + 3);
     await supabaseClient.from('profiles').update({
       trial_expires_at: trialExpiry.toISOString(),
       subscription_status: 'trial'
@@ -788,7 +819,7 @@ async function handleSubmit() {
     userProfile = { ...userProfile, trial_expires_at: trialExpiry.toISOString(), subscription_status: 'trial' };
 
     closeModal('submitModal');
-    showToast('✓ Question submitted! Your 7-day access is now active.');
+    showToast('✓ Question submitted! Your 3-day access is now active.');
     checkTrialStatus();
     renderFeed(allQuestions);
 
@@ -797,7 +828,7 @@ async function handleSubmit() {
     showToast('Something went wrong. Please try again.');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Submit & unlock 7-day access';
+    btn.textContent = 'Submit & unlock 3-day access';
   }
 }
 
@@ -911,7 +942,7 @@ function closeModal(id) {
 }
 
 // Close modals on overlay click
-['submitModal','authModal','subscribeModal'].forEach(id => {
+['submitModal','authModal','subscribeModal','alertsModal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target === this) closeModal(id);
   });
@@ -932,6 +963,120 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── INTERVIEW ALERTS ─────────────────────────────────────────────────
+const ALERT_FIRMS = [
+  'Goldman Sachs','JPMorgan','BlackRock','Morgan Stanley','Fidelity',
+  'Schroders','Jupiter','KKR','Bridgewater','Citadel','Barclays',
+  'HSBC','Citi','Deutsche Bank','Lazard','Rothschild','Evercore',
+  'Man Group','Abrdn','M&G','Baillie Gifford','Apollo','Carlyle','Macquarie'
+];
+
+let selectedAlertFirms = new Set();
+
+function openAlertsModal() {
+  if (!currentUser) {
+    document.getElementById('alertsAuthNote').style.display = 'block';
+  } else {
+    document.getElementById('alertsAuthNote').style.display = 'none';
+    loadUserAlerts();
+  }
+  renderAlertFirms();
+  document.getElementById('alertsModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function renderAlertFirms() {
+  const grid = document.getElementById('alertsFirmGrid');
+  grid.innerHTML = ALERT_FIRMS.map(firm => `
+    <button class="alert-firm-btn ${selectedAlertFirms.has(firm) ? 'selected' : ''}"
+      onclick="toggleAlertFirm('${firm}', this)">
+      <span class="alert-check"></span>
+      ${firm}
+    </button>
+  `).join('');
+}
+
+function toggleAlertFirm(firm, btn) {
+  if (selectedAlertFirms.has(firm)) {
+    selectedAlertFirms.delete(firm);
+    btn.classList.remove('selected');
+  } else {
+    selectedAlertFirms.add(firm);
+    btn.classList.add('selected');
+  }
+}
+
+async function loadUserAlerts() {
+  if (!currentUser) return;
+  try {
+    const { data } = await supabaseClient
+      .from('interview_alerts')
+      .select('firm')
+      .eq('user_id', currentUser.id);
+    selectedAlertFirms = new Set((data || []).map(r => r.firm));
+  } catch(err) {
+    console.error('Load alerts error:', err);
+  }
+}
+
+async function saveAlerts() {
+  if (!currentUser) {
+    closeModal('alertsModal');
+    openAuthModal('alerts');
+    return;
+  }
+
+  const btn = document.getElementById('saveAlertsBtn');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+
+  try {
+    // Delete all existing alerts for this user
+    await supabaseClient
+      .from('interview_alerts')
+      .delete()
+      .eq('user_id', currentUser.id);
+
+    // Insert new selections
+    if (selectedAlertFirms.size > 0) {
+      const inserts = [...selectedAlertFirms].map(firm => ({
+        user_id: currentUser.id,
+        firm
+      }));
+      const { error } = await supabaseClient
+        .from('interview_alerts')
+        .insert(inserts);
+      if (error) throw error;
+    }
+
+    closeModal('alertsModal');
+    const count = selectedAlertFirms.size;
+    showToast(count > 0
+      ? `🔔 Alerts saved for ${count} firm${count !== 1 ? 's' : ''}`
+      : '🔕 All alerts removed');
+
+  } catch(err) {
+    console.error('Save alerts error:', err);
+    showToast('Something went wrong. Please try again.');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Save alerts';
+  }
+}
+
+// Notify alerts when a new question is approved (called from admin flow)
+async function notifyAlertSubscribers(firm, questionText) {
+  try {
+    await fetch('/api/notify-alerts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ firm, questionText })
+    });
+  } catch(err) {
+    console.error('Notify alerts error:', err);
+  }
 }
 
 // ── START ────────────────────────────────────────────────────────────
