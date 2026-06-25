@@ -513,39 +513,17 @@
     </div>
   </div>
 
-  <!-- AI CV REWRITE (Pro add-on) -->
-  <div class="rewrite-card" id="rewriteCard">
-    <div class="rewrite-header">
-      <h3 id="rewriteCardTitle">✨ Your Finance CV Rewrite</h3>
-      <div class="rewrite-actions">
-        <button class="copy-btn" onclick="copyRewrite()">📋 Copy text</button>
-        <button class="download-btn" onclick="downloadRewrite()">⬇ Download Word</button>
-      </div>
-    </div>
-    <!-- Applied rules transparency panel -->
-    <div id="appliedRulesPanel" style="display:none;background:var(--accent-light);border:1px solid #BFCFFF;border-radius:10px;padding:14px 16px;margin-bottom:16px;font-size:13px;color:var(--accent)">
-      <strong style="display:block;margin-bottom:6px;font-size:11px;text-transform:uppercase;letter-spacing:0.06em">Formatting rules applied for <span id="appliedSectorLabel"></span></strong>
-      <ul id="appliedRulesList" style="padding-left:16px;line-height:1.8;color:var(--ink-mid)"></ul>
-    </div>
-    <div class="rewrite-loading" id="rewriteLoading">
-      <div class="rewrite-spinner"></div>
-      <p style="font-size:14px;color:var(--ink-light)">Rewriting your CV using <span id="rewriteSectorLabel"></span> formatting rules…</p>
-    </div>
-    <div class="rewrite-body" id="rewriteBody" style="display:none"></div>
-    <p style="font-size:12px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
-      ⚠️ <strong>Review before use:</strong> AI-generated content. Verify all dates, figures, and claims for accuracy before submitting to an employer.
-    </p>
-  </div>
+
 
   <!-- PAYWALL (hidden after unlock) -->
   <div class="paywall-card" id="paywallCard">
-    <h3>Find out what's stopping you — and fix it</h3>
+    <h3>Find out what's stopping you from getting interviews</h3>
     <p>Your free score shows where you stand. Pro unlocks your full keyword gap analysis and exact percentile ranking — so you know precisely what to fix to reach interview stage at your target firms.</p>
     <div class="paywall-features">
-      <div class="paywall-feature"><div class="paywall-feature-icon">✍️</div><div class="paywall-feature-label">AI CV rewrite in<br>IB / AM / PE format</div></div>
       <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real finance CVs</div></div>
       <div class="paywall-feature"><div class="paywall-feature-icon">🔑</div><div class="paywall-feature-label">Full keyword<br>gap analysis</div></div>
       <div class="paywall-feature"><div class="paywall-feature-icon">🎯</div><div class="paywall-feature-label">Full JD match<br>score + missing terms</div></div>
+      <div class="paywall-feature"><div class="paywall-feature-icon">🏦</div><div class="paywall-feature-label">Firm-specific<br>keyword tips</div></div>
     </div>
     <button class="paywall-cta" onclick="openPaymentModal()">
       Unlock Pro
@@ -578,7 +556,6 @@
         <div class="feature-row"><span class="feature-check">✓</span>Percentile ranking vs real finance CVs</div>
         <div class="feature-row"><span class="feature-check">✓</span>Full keyword gap analysis for your sub-sector</div>
         <div class="feature-row"><span class="feature-check">✓</span>Full JD match score and all missing terms</div>
-        <div class="feature-row"><span class="feature-check">✓</span>AI CV rewrite applying IB / AM / PE formatting rules</div>
         <div class="feature-row"><span class="feature-check">✓</span>Firm-specific keyword recommendations</div>
         <div class="feature-row"><span class="feature-check">✓</span>30-day money-back guarantee</div>
       </div>
@@ -1578,21 +1555,8 @@
     renderPercentile(analysisData, true);
     const lb = document.getElementById('jdLockBanner'); if (lb) lb.style.display='none';
 
-    // Show rewrite card and trigger rewrite
-    const rewriteCard = document.getElementById('rewriteCard');
-    if (rewriteCard) {
-      rewriteCard.classList.add('visible');
-      const indLabel = industryLabels[selectedIndustry] || selectedIndustry || 'Finance';
-      document.getElementById('rewriteSectorLabel').textContent = indLabel;
-      const hasJD = jdText && jdText.length > 50;
-      document.getElementById('rewriteCardTitle').textContent = hasJD
-        ? `🎯 Your CV — Rewritten for This ${indLabel} Role`
-        : `✨ Your ${indLabel} CV Rewrite`;
-      generateRewrite();
-    }
-
     setTimeout(() => document.getElementById('keywordCard').scrollIntoView({behavior:'smooth', block:'start'}), 300);
-    showToast('🎉 Pro unlocked! Generating your finance CV rewrite…');
+    showToast('🎉 Pro unlocked! Your full keyword analysis and percentile ranking are ready.');
   }
 
     async function generateRewrite() {
@@ -2049,10 +2013,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
     document.getElementById('fileName').textContent='file selected';
     document.getElementById('proBanner').classList.remove('visible');
     document.getElementById('paywallCard').style.display='';
-    const rc = document.getElementById('rewriteCard'); if(rc) rc.classList.remove('visible');
-    const rp = document.getElementById('appliedRulesPanel'); if(rp) rp.style.display='none';
-    document.getElementById('rewriteLoading').style.display='block';
-    document.getElementById('rewriteBody').style.display='none';
+
     document.getElementById('navTag').style.display='';
     document.getElementById('navProBadge').style.display='none';
     document.getElementById('rewriteLoading').style.display='block';
