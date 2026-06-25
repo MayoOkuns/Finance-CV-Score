@@ -162,6 +162,23 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 .firm-pill{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--ink-mid);cursor:pointer;transition:all .15s;white-space:nowrap}
 .firm-pill:hover,.firm-pill.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
 
+/* CYCLE BADGE */
+.cycle-badge { display:inline-flex; align-items:center; gap:4px; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:#FEF3C7; color:#B45309; letter-spacing:0.04em; }
+.cycle-badge::before { content:'●'; font-size:8px; }
+
+/* FRAMEWORK PANEL */
+.framework-panel { display:none; background:var(--accent-light); border:1.5px solid #BFCFFF; border-radius:10px; padding:16px; margin-top:12px; }
+.framework-panel.open { display:block; }
+.framework-title { font-size:12px; font-weight:600; color:var(--accent); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:10px; }
+.framework-body { font-size:13px; color:var(--ink-mid); line-height:1.7; }
+.framework-body ol { padding-left:18px; }
+.framework-body ol li { margin-bottom:6px; }
+.framework-body strong { color:var(--ink); font-weight:600; }
+.framework-toggle { display:flex; align-items:center; gap:6px; background:none; border:1.5px solid #BFCFFF; color:var(--accent); font-size:12px; font-weight:600; padding:5px 12px; border-radius:20px; cursor:pointer; transition:all .15s; font-family:'Inter',sans-serif; }
+.framework-toggle:hover { background:var(--accent-light); }
+.framework-lock { display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-light); }
+.framework-lock a { color:var(--accent); font-weight:600; cursor:pointer; }
+
 /* DISCLAIMER */
 .vault-disclaimer{font-size:12px;color:var(--ink-light);text-align:center;max-width:680px;margin:32px auto 0;padding:0 24px;line-height:1.6}
 
@@ -194,15 +211,42 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 
 <!-- HERO -->
 <section class="vault-hero">
-  <span class="vault-eyebrow">Crowdsourced · Finance Only</span>
-  <h1>Real questions.<br><em>Real firms. Real stages.</em></h1>
-  <p>Every question in this vault was submitted by a candidate who sat in that interview. No AI-generated filler. No generic guides.</p>
+  <span class="vault-eyebrow">Finance-Only · Not Glassdoor</span>
+  <h1>Interview prep built for<br><em>finance, not everyone.</em></h1>
+  <p>Glassdoor covers every industry and every role. This vault covers finance only — tagged by sub-sector, interview stage, and role, with answer frameworks written by someone who's actually worked in the industry.</p>
   <div class="vault-stats">
     <div class="vault-stat"><span class="vault-stat-num" id="statQuestions">—</span><span class="vault-stat-label">questions</span></div>
     <div class="vault-stat"><span class="vault-stat-num" id="statFirms">—</span><span class="vault-stat-label">firms covered</span></div>
     <div class="vault-stat"><span class="vault-stat-num" id="statSectors">12</span><span class="vault-stat-label">sub-sectors</span></div>
   </div>
 </section>
+
+<!-- WHY NOT GLASSDOOR -->
+<div style="background:var(--white);border-bottom:1px solid var(--border);padding:20px 40px">
+  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <span style="font-size:20px;flex-shrink:0">🎯</span>
+      <div>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Finance-specific, not generic</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Questions tagged by IB / AM / PE / HF sub-sector. No noise from ops, tech, or unrelated roles.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <span style="font-size:20px;flex-shrink:0">💡</span>
+      <div>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Answer frameworks included</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Not just the question — structured how-to-answer guides for DCF, LBO, stock pitches, and more. Glassdoor doesn't have this.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:flex-start">
+      <span style="font-size:20px;flex-shrink:0">📅</span>
+      <div>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">This recruiting cycle</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Questions submitted in the last 90 days are badged — so you know what's being asked right now, not 3 years ago.</p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- HOW IT WORKS -->
 <div class="how-it-works">
@@ -471,15 +515,19 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
         <div style="display:flex;align-items:center;gap:10px;font-size:14px">
           <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          Unlimited access to all interview questions
+          Full question database — filtered by firm, role & stage
         </div>
         <div style="display:flex;align-items:center;gap:10px;font-size:14px">
           <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          Search by firm, role, stage, and sub-sector
+          <strong>Answer frameworks</strong> for DCF, LBO, stock pitches & more — Glassdoor doesn't have these
         </div>
         <div style="display:flex;align-items:center;gap:10px;font-size:14px">
           <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          New questions added continuously
+          "This cycle" badge — see what's being asked right now
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
+          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
+          Firm alerts — get emailed when new questions are added
         </div>
         <div style="display:flex;align-items:center;gap:10px;font-size:14px">
           <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
@@ -676,18 +724,128 @@ function renderFeed(questions) {
   }
 }
 
+function isRecentQuestion(dateStr) {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  return diff < 90 * 24 * 60 * 60 * 1000; // 90 days
+}
+
+function getFramework(question, subSector) {
+  const q = question.toLowerCase();
+  const frameworks = {
+    dcf: {
+      match: q.includes('dcf') || q.includes('discounted cash flow'),
+      title: 'IB/PE: How to answer a DCF question',
+      body: `<ol>
+        <li><strong>Acknowledge the three components:</strong> free cash flow projections, discount rate (WACC), and terminal value.</li>
+        <li><strong>Walk through FCF build:</strong> EBIT → tax → D&A add-back → capex → working capital changes.</li>
+        <li><strong>WACC:</strong> weighted average of cost of equity (CAPM) and after-tax cost of debt. State the formula.</li>
+        <li><strong>Terminal value:</strong> offer both methods — Gordon Growth Model and exit multiple — and note you'd cross-check them.</li>
+        <li><strong>Sensitivity:</strong> always mention you'd run a sensitivity table on WACC and terminal growth rate.</li>
+        <li><strong>Common follow-up:</strong> "What are the main limitations of a DCF?" → Answer: highly sensitive to assumptions, especially terminal value which often drives 60-80% of value.</li>
+      </ol>`
+    },
+    lbo: {
+      match: q.includes('lbo') || q.includes('leveraged buyout'),
+      title: 'PE: How to answer an LBO question',
+      body: `<ol>
+        <li><strong>Define the goal:</strong> LBO is buying a company using significant debt to amplify equity returns (target IRR 20-30%+ for PE).</li>
+        <li><strong>Structure:</strong> entry price → financing split (60-70% debt / 30-40% equity) → operating improvements → exit after 3-7 years.</li>
+        <li><strong>Returns drivers:</strong> (1) EBITDA growth, (2) multiple expansion, (3) debt paydown — be able to quantify each.</li>
+        <li><strong>Good LBO candidate:</strong> stable cash flows, strong market position, low capex, clear exit path, management team in place.</li>
+        <li><strong>Key metrics:</strong> entry/exit multiple, MOIC (money-on-invested-capital), IRR. Know how to back-solve for these.</li>
+      </ol>`
+    },
+    stockpitch: {
+      match: q.includes('pitch') || q.includes('stock') || q.includes('investment thesis') || q.includes('buy today'),
+      title: 'AM/ER: How to structure a stock pitch',
+      body: `<ol>
+        <li><strong>One sentence thesis:</strong> lead with your conclusion — "I recommend buying X because..."</li>
+        <li><strong>Business overview:</strong> 2-3 sentences max. What does the company do, what's the moat?</li>
+        <li><strong>Investment thesis:</strong> 2-3 specific catalysts — near-term and structural. Be specific, not generic.</li>
+        <li><strong>Valuation:</strong> show it's cheap on at least 2 metrics (P/E, EV/EBITDA, DCF). Know your target price.</li>
+        <li><strong>Risks and mitigants:</strong> name the 2 biggest risks and explain why they're manageable. Shows intellectual honesty.</li>
+        <li><strong>Prepare for:</strong> "What's your variant view vs consensus?" — this is the key AM question. You need to have a differentiated view.</li>
+      </ol>`
+    },
+    whyfinance: {
+      match: q.includes('why') && (q.includes('finance') || q.includes('banking') || q.includes('investment') || q.includes('asset management')),
+      title: 'All roles: How to answer "Why finance/IB/AM"',
+      body: `<ol>
+        <li><strong>Avoid clichés:</strong> "I love markets", "I want to work hard" — every candidate says this. Recruiters switch off.</li>
+        <li><strong>Structure — three pillars:</strong> (1) a specific experience that sparked the interest, (2) skills you've developed that make you suited, (3) why this firm specifically.</li>
+        <li><strong>Be specific about the firm:</strong> research their strategy, recent deals/funds, culture. Reference something specific — not their website homepage.</li>
+        <li><strong>For IB:</strong> emphasise deal execution interest, learning environment, and a specific sector or product area you want to develop in.</li>
+        <li><strong>For AM:</strong> emphasise investment process curiosity, long-term thinking, and ideally link to a specific strategy or sector at that firm.</li>
+      </ol>`
+    },
+    valuation: {
+      match: q.includes('valuation') || q.includes('value a company') || q.includes('how would you value'),
+      title: 'IB/PE: Valuation methodology question',
+      body: `<ol>
+        <li><strong>Three main methods:</strong> (1) DCF — intrinsic value based on future cash flows, (2) Comparable company analysis — relative value vs peers on EV/EBITDA, P/E, (3) Precedent transactions — M&A multiples paid for similar companies historically.</li>
+        <li><strong>Football field chart:</strong> mention you'd show a range from each method and look for where they overlap — that's your fair value range.</li>
+        <li><strong>Which to weight most:</strong> depends on the situation. DCF for stable, predictable businesses. Comps when good peers exist. Precedents for M&A contexts.</li>
+        <li><strong>Follow-up prep:</strong> "What if the company has negative earnings?" → Use EV/Revenue, EV/EBITDA if positive, or sum-of-parts.</li>
+      </ol>`
+    },
+    macro: {
+      match: q.includes('macro') || q.includes('interest rate') || q.includes('inflation') || q.includes('economy') || q.includes('qe') || q.includes('quantitative easing'),
+      title: 'AM/S&T: Macro/market question framework',
+      body: `<ol>
+        <li><strong>Show you have a view:</strong> don't hedge everything. State your position, then caveat. Interviewers want to see conviction.</li>
+        <li><strong>Link macro to markets:</strong> don't just describe the economic trend — say what it means for equities, rates, credit, FX.</li>
+        <li><strong>Structure:</strong> current situation → your view on direction → market implication → how you'd position.</li>
+        <li><strong>For AM specifically:</strong> link to portfolio positioning — "in this environment I'd favour X sector/duration/geography because..."</li>
+        <li><strong>Common trap:</strong> giving a consensus view with no variant angle. The best answers acknowledge consensus then explain why you differ slightly.</li>
+      </ol>`
+    }
+  };
+
+  for (const [, fw] of Object.entries(frameworks)) {
+    if (fw.match) return fw;
+  }
+  return null;
+}
+
 function renderQuestionCard(q, blurred) {
   const yearTag = q.year_asked ? `<span class="q-tag q-tag-role">${q.year_asked}</span>` : '';
   const roleTag = q.role ? `<span class="q-tag q-tag-role">${q.role}</span>` : '';
+  const recent = isRecentQuestion(q.created_at);
+  const cycleBadge = recent ? `<span class="cycle-badge">This cycle</span>` : '';
+  const framework = getFramework(q.question_text, q.sub_sector);
+  const hasAccess = userHasAccess();
+
+  let frameworkHtml = '';
+  if (framework && !blurred) {
+    if (hasAccess) {
+      frameworkHtml = `
+        <div style="margin-top:10px">
+          <button class="framework-toggle" onclick="toggleFramework('fw-${q.id}', this)">
+            💡 Answer framework
+          </button>
+          <div class="framework-panel" id="fw-${q.id}">
+            <div class="framework-title">${framework.title}</div>
+            <div class="framework-body">${framework.body}</div>
+          </div>
+        </div>`;
+    } else {
+      frameworkHtml = `
+        <div style="margin-top:10px">
+          <span class="framework-lock">💡 Answer framework — <a onclick="openSubscribeModal()">subscribe to unlock</a></span>
+        </div>`;
+    }
+  }
+
   return `
     <div class="question-card${blurred ? ' blurred' : ''}">
       <div class="question-tags">
         <span class="q-tag q-tag-firm">${q.firm}</span>
         <span class="q-tag q-tag-sector">${q.sub_sector}</span>
         ${q.stage ? `<span class="q-tag q-tag-stage">${q.stage}</span>` : ''}
-        ${roleTag}${yearTag}
+        ${roleTag}${yearTag}${cycleBadge}
       </div>
       <p class="question-text">${q.question_text}</p>
+      ${frameworkHtml}
       <div class="question-meta">
         <span>${timeAgo(q.created_at)}</span>
         <button class="upvote-btn" onclick="upvote('${q.id}', this)">
@@ -695,6 +853,13 @@ function renderQuestionCard(q, blurred) {
         </button>
       </div>
     </div>`;
+}
+
+function toggleFramework(id, btn) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.contains('open');
+  panel.classList.toggle('open');
+  btn.textContent = isOpen ? '💡 Answer framework' : '💡 Hide framework';
 }
 
 function userHasAccess() {
