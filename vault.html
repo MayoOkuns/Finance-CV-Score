@@ -376,8 +376,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     </div>
     <div class="modal-body">
       <div class="trial-note">
-        🎁 <strong>Submit one real question you've been asked</strong> and unlock 3 days of free access to the full vault.
-        After 3 days, subscribe for £12/month to keep browsing.
+        🎁 <strong>Submit a real question you've been asked</strong> to unlock a 3-day free trial.
+        You'll be asked to enter your card details — you won't be charged until the trial ends.
+        After 3 days, £12/month applies automatically. Cancel anytime before the trial ends and pay nothing.
       </div>
       <div class="modal-input-group">
         <label>Firm *</label>
@@ -440,7 +441,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <div class="char-count" id="charCount">0 / 500 (minimum 30)</div>
       </div>
       <button class="submit-question-btn" id="submitQuestionBtn" onclick="handleSubmit()">
-        Submit &amp; unlock 3-day access
+        Submit &amp; start free trial
       </button>
       <p style="font-size:12px;color:var(--ink-light);margin-top:12px;text-align:center;line-height:1.5">
         By submitting you confirm this question is from your own experience and you are not sharing confidential information.
@@ -541,7 +542,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <button class="option-primary" onclick="redirectToSubscribe()" style="width:100%;padding:15px;font-size:16px;font-family:'Inter',sans-serif">
         🔒 Subscribe — £12/month
       </button>
-      <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:12px">Secure checkout via Stripe</p>
+      <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:12px;line-height:1.6">
+        Secure checkout via Stripe.<br>
+        3-day free trial, then £12/month. First payment non-refundable once trial ends.<br>
+        Cancel anytime before trial ends and pay nothing.
+      </p>
     </div>
   </div>
 </div>
@@ -815,7 +820,7 @@ function renderFeed(questions) {
         <h3>Access all ${questions.length > 100 ? "100+" : questions.length} questions</h3>
         <p>Submit a question you've been asked to unlock 3 days free — or subscribe for £12/month for unlimited access.</p>
         <div class="feed-paywall-options">
-          <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — get 3 days free</button>
+          <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — start free trial</button>
           <p class="option-divider">or</p>
           <button class="option-secondary" onclick="openSubscribeModal()">Subscribe for £12/month</button>
         </div>
@@ -1087,35 +1092,22 @@ async function handleSubmit() {
       console.warn('Submission log (non-fatal):', subErr);
     }
 
-    // Grant 3-day trial — upsert handles both new and existing profiles
-    const trialExpiry = new Date();
-    trialExpiry.setDate(trialExpiry.getDate() + 3);
-    const { error: profileError } = await supabaseClient
-      .from('profiles')
-      .upsert({
-        id: currentUser.id,
-        trial_expires_at: trialExpiry.toISOString(),
-        subscription_status: 'trial'
-      }, { onConflict: 'id' });
-
-    if (profileError) {
-      console.error('Profile upsert error:', JSON.stringify(profileError));
-      // Non-fatal — question was submitted successfully, trial grant logged
-    }
-
-    userProfile = { ...userProfile, trial_expires_at: trialExpiry.toISOString(), subscription_status: 'trial' };
-
     closeModal('submitModal');
-    showToast('✓ Question submitted for review! Your 3-day access is now active.');
-    checkTrialStatus();
-    renderFeed(allQuestions);
+    showToast('✓ Question submitted! Redirecting to start your free trial…');
+
+    // Redirect to Stripe with trial — card required, charged after 3 days
+    // Small delay so user sees the toast
+    setTimeout(() => {
+      const stripeUrl = STRIPE_SUB_LINK + '?prefilled_email=' + encodeURIComponent(currentUser.email);
+      window.location.href = stripeUrl;
+    }, 1200);
 
   } catch(err) {
     console.error('Submit error:', JSON.stringify(err), err.message);
     showToast('Something went wrong — ' + (err.message || 'please try again.'));
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Submit & unlock 3-day access';
+    btn.textContent = 'Submit & start free trial';
   }
 }
 
