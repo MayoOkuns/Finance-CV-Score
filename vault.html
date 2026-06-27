@@ -288,7 +288,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <h3>Filter questions</h3>
     <div class="filter-section">
       <label>Search</label>
-      <input class="filter-search" id="searchInput" placeholder="e.g. DCF, walk me through…" oninput="applyFilters()" autocomplete="off" type="search" name="vault-search">
+      <input class="filter-search" id="searchInput" placeholder="e.g. DCF, walk me through…" oninput="applyFilters()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" type="search" name="vault-search-x" readonly onfocus="this.removeAttribute('readonly')"">
     </div>
     <div class="filter-section">
       <label>Sub-sector</label>
@@ -1056,15 +1056,22 @@ async function handleSubmit() {
 
   try {
     // Insert question (status = pending, goes to moderation)
+    const insertData = {
+        firm,
+        sub_sector: sector,
+        role: role || null,
+        stage,
+        question_text: question,
+        submitted_by: currentUser.id,
+        status: 'pending',
+        upvotes: 0
+      };
+      // Only include year_asked if provided — column may not exist in older DB schemas
+      if (year) insertData.year_asked = year;
+
     const { data: qData, error: qError } = await supabaseClient
       .from('questions')
-      .insert({
-        firm, sub_sector: sector, role: role || null,
-        stage, question_text: question,
-        year_asked: year || null,
-        submitted_by: currentUser.id,
-        status: 'pending', upvotes: 0
-      })
+      .insert(insertData)
       .select().single();
 
     if (qError) throw qError;
