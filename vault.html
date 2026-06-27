@@ -276,7 +276,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <button class="firm-pill" data-firm="Blackstone" onclick="filterByFirm(this)">Blackstone</button>
     <button class="firm-pill" data-firm="Apollo" onclick="filterByFirm(this)">Apollo</button>
     <button class="firm-pill" data-firm="Morgan Stanley" onclick="filterByFirm(this)">Morgan Stanley</button>
-    <button class="firm-pill" data-firm="Fidelity International" onclick="filterByFirm(this)">Fidelity</button>
+    <button class="firm-pill" data-firm="Fidelity" onclick="filterByFirm(this)">Fidelity</button>
   </div>
 </div>
 
@@ -384,16 +384,38 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <label>Firm *</label>
         <select id="submitFirm">
           <option value="">Select firm…</option>
-          <option>Goldman Sachs</option><option>JPMorgan</option><option>Morgan Stanley</option>
-          <option>BlackRock</option><option>Fidelity</option><option>Vanguard</option>
-          <option>Schroders</option><option>Jupiter</option><option>Abrdn</option><option>M&G</option>
-          <option>Baillie Gifford</option><option>KKR</option><option>Carlyle</option>
-          <option>Apollo</option><option>Bridgewater</option><option>Citadel</option>
-          <option>Man Group</option><option>Barclays</option><option>HSBC</option>
-          <option>Deutsche Bank</option><option>Credit Suisse</option><option>UBS</option>
-          <option>Lazard</option><option>Rothschild</option><option>Evercore</option>
-          <option>Citi</option><option>Bank of America</option><option>Wells Fargo</option>
-          <option>Macquarie</option><option>Other</option>
+          <option>Abrdn</option>
+          <option>Apollo</option>
+          <option>Baillie Gifford</option>
+          <option>Bank of America</option>
+          <option>Barclays</option>
+          <option>BlackRock</option>
+          <option>Blackstone</option>
+          <option>Carlyle</option>
+          <option>Citadel</option>
+          <option>Citi</option>
+          <option>Credit Suisse</option>
+          <option>Deutsche Bank</option>
+          <option>Evercore</option>
+          <option>Fidelity</option>
+          <option>Goldman Sachs</option>
+          <option>HSBC</option>
+          <option>JPMorgan</option>
+          <option>Jupiter</option>
+          <option>KKR</option>
+          <option>Lazard</option>
+          <option>M&G</option>
+          <option>Macquarie</option>
+          <option>Man Group</option>
+          <option>Mondrian Investment Partners</option>
+          <option>Morgan Stanley</option>
+          <option>Rothschild</option>
+          <option>Schroders</option>
+          <option>TD Securities</option>
+          <option>UBS</option>
+          <option>Vanguard</option>
+          <option>Wells Fargo</option>
+          <option>Other</option>
         </select>
       </div>
       <div id="submitFirmOtherWrap" style="display:none" class="modal-input-group">
@@ -711,7 +733,7 @@ function getSeedQuestions() {
     { id:"seed38", firm:"Morgan Stanley", sub_sector:"Asset Management", role:"Analyst", stage:"First round", question_text:`How would you value a company?`, upvotes:0, created_at:"2026-02-10", year_asked:"2025" },
     { id:"seed39", firm:"Morgan Stanley", sub_sector:"Asset Management", role:"Analyst", stage:"First round", question_text:`What is the difference between technical and fundamental analysis`, upvotes:0, created_at:"2026-03-11", year_asked:"2026" },
     { id:"seed40", firm:"Morgan Stanley", sub_sector:"Asset Management", role:"Analyst", stage:"First round", question_text:`What are your thoughts on cryptocurrency?`, upvotes:0, created_at:"2026-04-12", year_asked:"2025" },
-    { id:"seed41", firm:"Fidelity International", sub_sector:"Asset Management", role:"Analyst", stage:"First round", question_text:`If a colleague was struggling to make a complex decision, what would you do to help?`, upvotes:0, created_at:"2026-05-13", year_asked:"2026" },
+    { id:"seed41", firm:"Fidelity", sub_sector:"Asset Management", role:"Analyst", stage:"First round", question_text:`If a colleague was struggling to make a complex decision, what would you do to help?`, upvotes:0, created_at:"2026-05-13", year_asked:"2026" },
     { id:"seed42", firm:"Citi", sub_sector:"Investment Banking", role:"Analyst", stage:"First round", question_text:`Walk me through a basic merger model?`, upvotes:0, created_at:"2026-06-14", year_asked:"2026" },
     { id:"seed43", firm:"Citi", sub_sector:"Investment Banking", role:"Analyst", stage:"First round", question_text:`What is the difference between common equity and preferred equity`, upvotes:0, created_at:"2026-07-15", year_asked:"2025" },
     { id:"seed44", firm:"Citi", sub_sector:"Investment Banking", role:"Analyst", stage:"First round", question_text:`What is goodwill, and where do you find it within financial statements`, upvotes:0, created_at:"2026-08-16", year_asked:"2026" },
