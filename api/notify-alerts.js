@@ -61,14 +61,14 @@ export default async function handler(req, res) {
 
     // Send email via Brevo
     const emailBody = {
-      sender: { name: 'FinanceCV Score', email: 'hello@financecvscore.com' },
+      sender: { name: 'Finance Career Vault', email: 'hello@financecareervault.com' },
       to: recipients,
       subject: `🔔 New ${firm} interview question added`,
       htmlContent: `
         <div style="font-family:Arial,sans-serif;max-width:560px;margin:0 auto;padding:32px 24px">
           <div style="background:#0F172A;border-radius:12px;padding:24px;text-align:center;margin-bottom:24px">
             <h1 style="font-family:Georgia,serif;color:white;font-size:22px;margin:0 0 6px">
-              Finance<span style="color:#93C5FD">CVScore</span>
+              Finance<span style="color:#93C5FD">CareerVault</span>
             </h1>
             <p style="color:rgba(255,255,255,.6);font-size:13px;margin:0">Interview Vault Alert</p>
           </div>
@@ -88,14 +88,14 @@ export default async function handler(req, res) {
           </div>
           ` : ''}
 
-          <a href="https://www.financecvscore.com/vault.html?firm=${encodeURIComponent(firm)}"
+          <a href="https://www.financecareervault.com/vault.html?firm=${encodeURIComponent(firm)}"
             style="display:block;background:#2563EB;color:white;text-align:center;padding:14px;border-radius:10px;text-decoration:none;font-weight:600;font-size:15px;margin-bottom:20px">
             View question in the vault →
           </a>
 
           <p style="font-size:12px;color:#7A7A80;text-align:center;line-height:1.6">
-            You're receiving this because you set up a firm alert for ${firm} on FinanceCV Score.<br>
-            <a href="https://www.financecvscore.com/vault.html" style="color:#2563EB">Manage your alerts</a>
+            You're receiving this because you set up a firm alert for ${firm} on Finance Career Vault.<br>
+            <a href="https://www.financecareervault.com/vault.html" style="color:#2563EB">Manage your alerts</a>
           </p>
         </div>
       `
