@@ -33,7 +33,7 @@ export default async function handler(req, res) {
       },
       body: new URLSearchParams({
         customer: customer.id,
-        return_url: 'https://www.financecvscore.com/vault.html'
+        return_url: 'https://www.financecareervault.com/vault.html'
       })
     });
 
