@@ -153,6 +153,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 .alert-firm-btn .alert-check { width:16px; height:16px; border-radius:50%; border:2px solid var(--border); flex-shrink:0; transition:all .15s; }
 .alert-firm-btn.selected .alert-check { background:var(--accent); border-color:var(--accent); }
 
+/* ACCOUNT STATUS */
+.status-pill { display:inline-flex; align-items:center; gap:6px; font-size:13px; font-weight:600; padding:6px 14px; border-radius:20px; }
+.status-active { background:#F0FDF4; color:var(--good); }
+.status-trial { background:#FFFBEB; color:var(--gold); }
+.status-free { background:var(--surface); color:var(--ink-light); border:1px solid var(--border); }
+
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:white;font-size:14px;font-weight:500;padding:12px 20px;border-radius:10px;z-index:2000;transition:transform .3s ease;white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
@@ -363,6 +369,39 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   Questions are submitted by users based on their own recollections and are not verified or approved by any employer.
   Do not submit any information you are contractually prohibited from sharing.
 </p>
+
+<!-- ACCOUNT MODAL -->
+<div class="modal-overlay" id="accountModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>Your Account</h3>
+      <button class="modal-close" onclick="closeModal('accountModal')">✕</button>
+    </div>
+    <div class="modal-body">
+      <!-- Email -->
+      <div style="background:var(--surface);border-radius:10px;padding:16px;margin-bottom:16px">
+        <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-light);margin-bottom:4px">Signed in as</p>
+        <p style="font-size:14px;font-weight:500;color:var(--ink)" id="accountEmail">—</p>
+      </div>
+
+      <!-- Subscription status -->
+      <div style="background:var(--surface);border-radius:10px;padding:16px;margin-bottom:20px">
+        <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-light);margin-bottom:10px">Vault Access</p>
+        <div id="accountStatusBlock"></div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <button id="accountUpgradeBtn" onclick="closeModal('accountModal');openSubscribeModal()" style="display:none;background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif">
+          Subscribe for £12/month
+        </button>
+        <button onclick="handleSignOut()" style="background:var(--surface);color:var(--danger);font-size:14px;font-weight:500;padding:12px;border-radius:10px;border:1.5px solid #FECACA;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s" onmouseover="this.style.background='#FEF2F2'" onmouseout="this.style.background='var(--surface)'">
+          Sign out
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
@@ -639,7 +678,7 @@ function updateNavAuth() {
   const btn = document.getElementById('navAuthBtn');
   if (currentUser) {
     btn.textContent = 'Account';
-    btn.onclick = () => showToast('Signed in as ' + currentUser.email);
+    btn.onclick = () => openAccountModal();
   } else {
     btn.textContent = 'Sign in';
     btn.onclick = () => openAuthModal();
@@ -1222,6 +1261,101 @@ async function upvote(id, btn) {
   }
 }
 
+// ── ACCOUNT MODAL ───────────────────────────────────────────────────
+function openAccountModal() {
+  if (!currentUser) { openAuthModal(); return; }
+
+  // Populate email
+  document.getElementById('accountEmail').textContent = currentUser.email;
+
+  // Populate status
+  const statusBlock = document.getElementById('accountStatusBlock');
+  const upgradeBtn = document.getElementById('accountUpgradeBtn');
+  const profile = userProfile;
+
+  if (!profile || profile.subscription_status === 'free') {
+    statusBlock.innerHTML = `
+      <span class="status-pill status-free">Free tier</span>
+      <p style="font-size:13px;color:var(--ink-light);margin-top:8px;line-height:1.5">
+        You have access to 3 free questions. Submit a question or subscribe to unlock all 100+.
+      </p>`;
+    upgradeBtn.style.display = 'block';
+  } else if (profile.subscription_status === 'trial') {
+    const expiry = profile.trial_expires_at ? new Date(profile.trial_expires_at) : null;
+    const daysLeft = expiry ? Math.max(0, Math.ceil((expiry - Date.now()) / 86400000)) : 0;
+    const expiryStr = expiry ? expiry.toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'}) : '';
+    statusBlock.innerHTML = `
+      <span class="status-pill status-trial">⏰ Trial active</span>
+      <p style="font-size:13px;color:var(--ink-mid);margin-top:8px;line-height:1.5">
+        ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining — trial ends ${expiryStr}.
+        After that, £12/month applies automatically.
+      </p>`;
+    upgradeBtn.style.display = 'none';
+  } else if (profile.subscription_status === 'active') {
+    statusBlock.innerHTML = `
+      <span class="status-pill status-active">✓ Subscribed</span>
+      <p style="font-size:13px;color:var(--ink-mid);margin-top:8px;line-height:1.5">
+        Full access to all interview questions. £12/month.
+      </p>`;
+    upgradeBtn.style.display = 'none';
+    // Show manage subscription button
+    const existingManage = document.getElementById('manageSubBtn');
+    if (!existingManage) {
+      const manageBtn = document.createElement('button');
+      manageBtn.id = 'manageSubBtn';
+      manageBtn.textContent = 'Manage or cancel subscription';
+      manageBtn.style.cssText = 'width:100%;background:var(--surface);color:var(--ink-mid);font-size:14px;font-weight:500;padding:12px;border-radius:10px;border:1.5px solid var(--border);cursor:pointer;font-family:Inter,sans-serif;margin-top:10px;transition:all .15s';
+      manageBtn.onmouseover = () => manageBtn.style.borderColor = 'var(--ink-mid)';
+      manageBtn.onmouseout = () => manageBtn.style.borderColor = 'var(--border)';
+      manageBtn.onclick = () => openCustomerPortal();
+      document.querySelector('#accountModal .modal-body > div:last-child').appendChild(manageBtn);
+    } else {
+      existingManage.style.display = 'block';
+    }
+  } else {
+    statusBlock.innerHTML = `<span class="status-pill status-free">${profile.subscription_status || 'Free'}</span>`;
+    upgradeBtn.style.display = 'block';
+  }
+
+  document.getElementById('accountModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+async function handleSignOut() {
+  await supabaseClient.auth.signOut();
+  currentUser = null;
+  userProfile = null;
+  closeModal('accountModal');
+  updateNavAuth();
+  renderFeed(allQuestions);
+  showToast('Signed out successfully');
+}
+
+async function openCustomerPortal() {
+  if (!currentUser) return;
+  const btn = document.getElementById('manageSubBtn');
+  if (btn) { btn.textContent = 'Loading…'; btn.disabled = true; }
+
+  try {
+    const res = await fetch('/api/customer-portal', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: currentUser.email })
+    });
+    const data = await res.json();
+
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      showToast('Could not open billing portal — ' + (data.error || 'please try again'));
+      if (btn) { btn.textContent = 'Manage or cancel subscription'; btn.disabled = false; }
+    }
+  } catch(err) {
+    showToast('Something went wrong. Please try again.');
+    if (btn) { btn.textContent = 'Manage or cancel subscription'; btn.disabled = false; }
+  }
+}
+
 // ── SUBSCRIBE ────────────────────────────────────────────────────────
 function redirectToSubscribe() {
   if (!currentUser) { closeModal('subscribeModal'); openAuthModal('subscribe'); return; }
@@ -1243,7 +1377,7 @@ function closeModal(id) {
 }
 
 // Close modals on overlay click
-['submitModal','authModal','subscribeModal','alertsModal'].forEach(id => {
+['submitModal','authModal','subscribeModal','alertsModal','accountModal'].forEach(id => {
   document.getElementById(id).addEventListener('click', function(e) {
     if (e.target === this) closeModal(id);
   });
