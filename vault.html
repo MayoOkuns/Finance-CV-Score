@@ -269,8 +269,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <button class="firm-pill" data-firm="Schroders" onclick="filterByFirm(this)">Schroders</button>
     <button class="firm-pill" data-firm="Jupiter" onclick="filterByFirm(this)">Jupiter</button>
     <button class="firm-pill" data-firm="KKR" onclick="filterByFirm(this)">KKR</button>
-    <button class="firm-pill" data-firm="Bridgewater" onclick="filterByFirm(this)">Bridgewater</button>
     <button class="firm-pill" data-firm="Citadel" onclick="filterByFirm(this)">Citadel</button>
+    <button class="firm-pill" data-firm="Blackstone" onclick="filterByFirm(this)">Blackstone</button>
     <button class="firm-pill" data-firm="Citi" onclick="filterByFirm(this)">Citi</button>
     <button class="firm-pill" data-firm="Barclays" onclick="filterByFirm(this)">Barclays</button>
     <button class="firm-pill" data-firm="Blackstone" onclick="filterByFirm(this)">Blackstone</button>
@@ -288,7 +288,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <h3>Filter questions</h3>
     <div class="filter-section">
       <label>Search</label>
-      <input class="filter-search" id="searchInput" placeholder="e.g. DCF, walk me through…" oninput="applyFilters()">
+      <input class="filter-search" id="searchInput" placeholder="e.g. DCF, walk me through…" oninput="applyFilters()" autocomplete="off" type="search" name="vault-search">
     </div>
     <div class="filter-section">
       <label>Sub-sector</label>
@@ -577,6 +577,10 @@ async function initSupabase() {
 async function init() {
   try {
     await initSupabase();
+    // Clear any browser-autofilled search inputs on load
+    const si = document.getElementById('searchInput');
+    if (si) si.value = '';
+
     // Check session
     const { data: { session } } = await supabaseClient.auth.getSession();
     if (session) await setUser(session.user);
@@ -637,6 +641,9 @@ async function loadQuestions() {
     console.error('Load questions error:', err.message || err);
     allQuestions = getSeedQuestions();
   }
+  // Clear any browser-autofilled email from search before rendering
+  const searchEl = document.getElementById('searchInput');
+  if (searchEl && searchEl.value && searchEl.value.includes('@')) searchEl.value = '';
   renderFeed(allQuestions);
 }
 
@@ -805,7 +812,7 @@ function renderFeed(questions) {
     paywallBlock.style.display = 'block';
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
-        <h3>Access all ${questions.length} questions</h3>
+        <h3>Access all ${questions.length > 100 ? "100+" : questions.length} questions</h3>
         <p>Submit a question you've been asked to unlock 3 days free — or subscribe for £12/month for unlimited access.</p>
         <div class="feed-paywall-options">
           <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — get 3 days free</button>
@@ -1062,31 +1069,43 @@ async function handleSubmit() {
 
     if (qError) throw qError;
 
-    // Log submission
-    await supabaseClient.from('submissions').insert({
-      user_id: currentUser.id,
-      question_id: qData.id,
-      trial_granted: true
-    });
+    // Log submission (non-blocking)
+    try {
+      await supabaseClient.from('submissions').insert({
+        user_id: currentUser.id,
+        question_id: qData.id,
+        trial_granted: true
+      });
+    } catch(subErr) {
+      console.warn('Submission log (non-fatal):', subErr);
+    }
 
-    // Grant 3-day trial
+    // Grant 3-day trial — upsert handles both new and existing profiles
     const trialExpiry = new Date();
     trialExpiry.setDate(trialExpiry.getDate() + 3);
-    await supabaseClient.from('profiles').update({
-      trial_expires_at: trialExpiry.toISOString(),
-      subscription_status: 'trial'
-    }).eq('id', currentUser.id);
+    const { error: profileError } = await supabaseClient
+      .from('profiles')
+      .upsert({
+        id: currentUser.id,
+        trial_expires_at: trialExpiry.toISOString(),
+        subscription_status: 'trial'
+      }, { onConflict: 'id' });
+
+    if (profileError) {
+      console.error('Profile upsert error:', JSON.stringify(profileError));
+      // Non-fatal — question was submitted successfully, trial grant logged
+    }
 
     userProfile = { ...userProfile, trial_expires_at: trialExpiry.toISOString(), subscription_status: 'trial' };
 
     closeModal('submitModal');
-    showToast('✓ Question submitted! Your 3-day access is now active.');
+    showToast('✓ Question submitted for review! Your 3-day access is now active.');
     checkTrialStatus();
     renderFeed(allQuestions);
 
   } catch(err) {
-    console.error('Submit error:', err);
-    showToast('Something went wrong. Please try again.');
+    console.error('Submit error:', JSON.stringify(err), err.message);
+    showToast('Something went wrong — ' + (err.message || 'please try again.'));
   } finally {
     btn.disabled = false;
     btn.textContent = 'Submit & unlock 3-day access';
