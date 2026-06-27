@@ -764,16 +764,18 @@ function getSeedQuestions() {
 }
 
 // ── RENDER FEED ──────────────────────────────────────────────────────
+// These three questions always show as the free preview
+const PREVIEW_IDS = [
+  'seed5',  // Goldman Sachs IB Analyst — When would you use a P/E multiple vs an EV/EBITDA multiple?
+  'seed12', // JPMorgan IB Analyst — What would you use as the discount rate in a DCF
+  'seed93'  // Citadel HF Analyst — What is the difference between supervised and unsupervised machine learning
+];
+
 function renderFeed(questions) {
   filteredQuestions = questions;
   const feed = document.getElementById('questionFeed');
   const paywallBlock = document.getElementById('paywallBlock');
   const hasAccess = userHasAccess();
-
-  // Free users see 3 questions, rest blurred or hidden
-  const FREE_LIMIT = 3;
-  const visibleQuestions = questions.slice(0, FREE_LIMIT);
-  const lockedQuestions = questions.slice(FREE_LIMIT, FREE_LIMIT + 3);
 
   document.getElementById('feedCount').textContent =
     questions.length + ' question' + (questions.length !== 1 ? 's' : '') +
@@ -785,15 +787,21 @@ function renderFeed(questions) {
     return;
   }
 
-  // Render visible questions
-  feed.innerHTML = visibleQuestions.map(q => renderQuestionCard(q, false)).join('');
-
   if (!hasAccess) {
-    // Show 3 blurred preview cards
-    if (lockedQuestions.length > 0) {
-      feed.innerHTML += lockedQuestions.map(q => renderQuestionCard(q, true)).join('');
-    }
-    // Show paywall
+    // Pin the three designated preview questions first (from full seed list)
+    const allSeeds = getSeedQuestions();
+    const previewQuestions = PREVIEW_IDS
+      .map(id => allSeeds.find(q => q.id === id))
+      .filter(Boolean);
+
+    // Then 3 blurred cards from filtered results (excluding preview questions)
+    const blurCandidates = questions
+      .filter(q => !PREVIEW_IDS.includes(q.id))
+      .slice(0, 3);
+
+    feed.innerHTML = previewQuestions.map(q => renderQuestionCard(q, false)).join('');
+    feed.innerHTML += blurCandidates.map(q => renderQuestionCard(q, true)).join('');
+
     paywallBlock.style.display = 'block';
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
@@ -806,10 +814,8 @@ function renderFeed(questions) {
         </div>
       </div>`;
   } else {
-    // Show all questions
-    if (questions.length > FREE_LIMIT) {
-      feed.innerHTML += questions.slice(FREE_LIMIT).map(q => renderQuestionCard(q, false)).join('');
-    }
+    // Subscribed — show all questions
+    feed.innerHTML = questions.map(q => renderQuestionCard(q, false)).join('');
     paywallBlock.style.display = 'none';
   }
 }
