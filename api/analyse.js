@@ -1,7 +1,7 @@
 export default async function handler(req, res) {
   // CORS
   const origin = req.headers.origin || '';
-  const allowed = ['https://financecvscore.com','https://www.financecvscore.com'];
+  const allowed = ['https://financecareervault.com','https://www.financecareervault.com'];
   res.setHeader('Access-Control-Allow-Origin', allowed.includes(origin) ? origin : '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
