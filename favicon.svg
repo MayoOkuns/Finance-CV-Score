@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Dark navy background with rounded corners -->
+  <rect width="100" height="100" rx="18" fill="#0F172A"/>
+  <!-- Vault door outer ring -->
+  <circle cx="50" cy="50" r="38" fill="none" stroke="#1E3A5F" stroke-width="3"/>
+  <!-- Vault door face -->
+  <circle cx="50" cy="50" r="34" fill="#1E3A5F"/>
+  <!-- Vault spokes (like a real vault wheel) -->
+  <line x1="50" y1="18" x2="50" y2="28" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="50" y1="72" x2="50" y2="82" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="18" y1="50" x2="28" y2="50" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <line x1="72" y1="50" x2="82" y2="50" stroke="#2563EB" stroke-width="3" stroke-linecap="round"/>
+  <!-- Diagonal spokes -->
+  <line x1="26" y1="26" x2="33" y2="33" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="67" y1="67" x2="74" y2="74" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="74" y1="26" x2="67" y2="33" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="26" y1="74" x2="33" y2="67" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Inner vault circle -->
+  <circle cx="50" cy="50" r="22" fill="#0F172A"/>
+  <!-- F lettermark -->
+  <text x="50" y="58" font-family="Georgia,serif" font-size="26" font-weight="700"
+    fill="white" text-anchor="middle">F</text>
+</svg>

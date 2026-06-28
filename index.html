@@ -314,7 +314,7 @@
   <span class="waitlist-eyebrow">Launching September 2026</span>
   <h2 style="font-size:clamp(20px,3vw,28px);margin-bottom:8px">Real interview questions from <em style="color:#93C5FD">Goldman, BlackRock, JPMorgan</em> and more — launching September.</h2>
   <p style="font-size:14px;color:rgba(255,255,255,0.65);max-width:560px;margin:0 auto 6px">Finance-only interview questions tagged by firm, sub-sector and stage — plus answer frameworks for DCF, LBO, stock pitches and more. The interview prep Glassdoor should have built but didn't.</p>
-  <p style="font-size:13px;color:rgba(255,255,255,0.45);max-width:480px;margin:0 auto 20px">Also includes: AI CV rewrite, employer insights, and percentile benchmarking.</p>
+  <p style="font-size:13px;color:rgba(255,255,255,0.45);max-width:480px;margin:0 auto 20px">Also includes: percentile benchmarking, employer insights, and keyword gap analysis.</p>
   <div class="waitlist-form">
     <input type="email" class="waitlist-input" id="waitlistEmail" placeholder="your@email.com">
     <button class="waitlist-btn" id="waitlistBtn" onclick="submitWaitlist()">Join waitlist</button>
@@ -380,9 +380,9 @@
     <label for="jdTextArea">
       Paste the job description
       <span style="display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#B45309,#D97706);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;letter-spacing:0.06em;text-transform:uppercase;margin-left:6px">Pro</span>
-      <span style="color:var(--ink-light);font-weight:400"> — unlocks JD match score & targeted rewrite</span>
+      <span style="color:var(--ink-light);font-weight:400"> — unlocks full JD match score & keyword gap</span>
     </label>
-    <textarea id="jdTextArea" rows="4" placeholder="Paste the full job description here to get a match score and a CV rewritten specifically for this role…" style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;resize:vertical;line-height:1.6;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+    <textarea id="jdTextArea" rows="4" placeholder="Paste the full job description here to get a JD match score and missing keyword analysis…" style="width:100%;padding:12px 16px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);background:var(--white);outline:none;resize:vertical;line-height:1.6;transition:border-color .2s;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
   </div>
 
   <button class="analyse-btn" onclick="startAnalysis()">
@@ -415,6 +415,7 @@
 <section class="results-section" id="resultsSection">
   <div class="results-header">
     <h2 id="resultsTitle">Your CV Report</h2>
+
     <button class="restart-btn" onclick="restart()">↩ Analyse another CV</button>
   </div>
 
@@ -434,11 +435,26 @@
     </div>
   </div>
 
-  <!-- BREAKDOWN -->
-  <div class="breakdown-card"><h3>Score Breakdown</h3><div id="breakdownBars"></div></div>
+  <!-- BREAKDOWN + ISSUES — hidden behind email gate until unlocked -->
+  <div id="gatedContent" style="display:none">
+    <!-- BREAKDOWN -->
+    <div class="breakdown-card"><h3>Score Breakdown</h3><div id="breakdownBars"></div></div>
 
-  <!-- ISSUES -->
-  <div class="issues-card"><h3>Key Issues Found</h3><div id="issuesList"></div></div>
+    <!-- ISSUES -->
+    <div class="issues-card"><h3>Key Issues Found</h3><div id="issuesList"></div></div>
+  </div>
+
+  <!-- EMAIL GATE — shown after score/issues, before detailed breakdown -->
+  <div id="emailGate" style="display:none;background:var(--white);border:2px solid var(--accent);border-radius:16px;padding:28px 32px;margin-bottom:24px;text-align:center">
+    <div style="width:48px;height:48px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px">📊</div>
+    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px;margin-bottom:8px">See your full breakdown</h3>
+    <p style="font-size:14px;color:var(--ink-mid);max-width:380px;margin:0 auto 20px;line-height:1.5">Enter your email to unlock your score breakdown, keyword gaps, and percentile ranking — free.</p>
+    <div style="display:flex;gap:8px;max-width:400px;margin:0 auto 8px;flex-wrap:wrap;justify-content:center">
+      <input type="email" id="gateEmailInput" placeholder="your@email.com" autocomplete="off" style="flex:1;min-width:200px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+      <button onclick="submitEmailGate()" id="gateBtn" style="background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">See my results</button>
+    </div>
+    <p style="font-size:11px;color:var(--ink-light);margin-top:8px">No spam. We'll notify you when the Interview Vault launches.</p>
+  </div>
 
   <!-- INTERVIEW VAULT TEASER — shown after issues, before percentile -->
   <div id="vaultTeaser" style="background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:16px;padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
@@ -498,7 +514,7 @@
     <div id="jdGapList"></div>
     <div class="jd-lock-banner" id="jdLockBanner">
       <span>🔒</span>
-      <span><strong>Pro:</strong> Get your CV rewritten to match this exact job description — keywords injected, bullets reframed, summary tailored.</span>
+      <span><strong>Pro:</strong> See your full JD match score and every missing keyword for this specific role.</span>
       <button class="unlock-mini-btn" onclick="openPaymentModal()" style="white-space:nowrap">Unlock Pro — £5</button>
     </div>
   </div>
@@ -550,7 +566,6 @@
     <div class="modal-body">
       <div class="price-display">
         <span class="price-main">£5</span>
-        <span class="price-original">£9</span>
         <span class="price-sub">one-time · no subscription</span>
       </div>
 
@@ -567,15 +582,19 @@
         <input type="email" id="emailInput" placeholder="you@email.com">
       </div>
 
-      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:16px;font-size:12px;color:var(--ink-light)">
+      <div style="display:flex;align-items:flex-start;gap:8px;margin-bottom:12px;font-size:12px;color:var(--ink-light)">
         <input type="checkbox" id="marketingOptIn" style="margin-top:2px;flex-shrink:0">
         <label for="marketingOptIn" style="cursor:pointer;line-height:1.4">Send me occasional updates about new features and offers (you can unsubscribe anytime)</label>
+      </div>
+
+      <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#92400E;line-height:1.5">
+        ⚠️ This is a one-time payment of £5. Non-refundable after purchase, except under our 30-day money-back guarantee. By proceeding you confirm you have read and agree to our <a href="#" onclick="showModal('termsModal');return false" style="color:#92400E;text-decoration:underline">Terms of Service</a>.
       </div>
 
       <button class="pay-btn" id="payBtn" onclick="simulatePayment()">
         🔒 Pay £5 — Secure Checkout
       </button>
-      <p class="modal-secure"><span>✓</span> Powered by Stripe · SSL encrypted · 30-day guarantee</p>
+      <p class="modal-secure"><span>✓</span> Powered by Stripe · SSL encrypted</p>
     </div>
   </div>
 </div>
@@ -585,7 +604,7 @@
   <div class="footer-disclaimer">
     <strong>Important:</strong> Finance Career Vault provides AI-generated and automated CV analysis for general
     informational purposes only. It does not constitute professional careers advice, and scores, percentile
-    estimates, and rewritten content are indicative only — they do not guarantee interview success, job
+    estimates and keyword analysis are indicative only — they do not guarantee interview success, job
     offers, or that any specific employer's ATS or recruiters will assess your CV in the same way.
     Always review AI-generated content for accuracy before use.
   </div>
@@ -1451,15 +1470,21 @@
     document.getElementById('resultsSection').classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
 
-    // Score
+    // Store score anonymously in Supabase for real percentile data
+    storeCVScore(data.overallScore, data.industry || selectedIndustry);
+
+    // Score ring and title — always visible
     document.getElementById('scoreNumber').textContent = data.overallScore;
     document.getElementById('scoreTitle').textContent = data.scoreTitle;
     document.getElementById('scoreVerdict').textContent = data.scoreVerdict;
     drawRing(data.overallScore);
 
-    // Pills
+    // Pills — always visible
     const pillsEl = document.getElementById('scorePills'); pillsEl.innerHTML = '';
     data.pills.forEach((p,i) => { const s = document.createElement('span'); s.className=`pill pill-${data.pillColors[i]}`; s.textContent=p; pillsEl.appendChild(s); });
+
+    // Show email gate — hides breakdown and issues until email submitted
+    showEmailGate();
 
     // Breakdown bars
     const barsEl = document.getElementById('breakdownBars'); barsEl.innerHTML = '';
@@ -1900,10 +1925,10 @@ BSc Business Management | University of Manchester | 2015–2018`;
     },
     terms: {
       title: 'Terms of Service',
-      html: `<p class="legal-updated">Last updated: 16 June 2026</p>
+      html: `<p class="legal-updated">Last updated: 28 June 2026</p>
         <div class="legal-section">
           <h4>1. The service</h4>
-          <p>Finance Career Vault provides automated, AI-assisted analysis of CVs, including an ATS compatibility score, keyword analysis, job description matching, and CV rewriting ("the Service"). A free tier and a paid "Pro" tier are available.</p>
+          <p>Finance Career Vault provides automated, AI-assisted analysis of CVs, including an ATS compatibility score, keyword analysis, and job description matching ("the Service"). A free tier, a paid "Pro" tier (one-time), and a subscription tier (Interview Vault) are available.</p>
         </div>
         <div class="legal-section">
           <h4>2. No professional advice</h4>
@@ -1911,29 +1936,34 @@ BSc Business Management | University of Manchester | 2015–2018`;
         </div>
         <div class="legal-section">
           <h4>3. Payments &amp; refunds</h4>
-          <p>Pro features are available for a one-time fee as displayed at checkout. Payments are processed securely by our third-party payment provider. If you are not satisfied with the Pro output, you may request a refund within 30 days of purchase by contacting us, subject to review.</p>
+          <p><strong>CV Pro (£5 one-time):</strong> We offer a 30-day money-back guarantee. To request a refund, email hello@financecareervault.com within 30 days of purchase with your order reference. Refunds are processed within 5-10 business days to your original payment method. This does not affect your statutory rights under the Consumer Rights Act 2015.</p>
+          <p style="margin-top:8px"><strong>Interview Vault Subscription (£12/month):</strong> A 3-day free trial is available. Your payment method is required upfront but you will not be charged until the trial ends. If you cancel before the trial ends, no charge is made. The first monthly payment of £12 is non-refundable once the trial period has elapsed. Subsequent monthly payments may be refunded within 7 days of charge if the service has not been accessed during that billing period. Cancel anytime via your account page. Cancellation takes effect at the end of your current billing period.</p>
 
-          <h4>3a. Marketing communications</h4>
+          <h4 style="margin-top:12px">3a. Marketing communications</h4>
           <p>If you opt in to marketing emails, you may unsubscribe at any time by clicking the unsubscribe link in any email we send, or by contacting us directly. We will never send marketing communications without your prior consent and will never sell your email address to third parties.</p>
         </div>
         <div class="legal-section">
-          <h4>4. Your content</h4>
+          <h4>4. Interview vault submissions</h4>
+          <p>By submitting an interview question, you confirm that: (a) the question is based on your own personal recollection; (b) you are not sharing information you are contractually prohibited from disclosing; and (c) you grant Finance Career Vault a non-exclusive licence to display and moderate the submission on the platform. Submissions are reviewed before going live. We reserve the right to reject or remove any submission without explanation.</p>
+        </div>
+        <div class="legal-section">
+          <h4>5. Your content</h4>
           <p>You retain ownership of any CV or job description text you submit. By using the Service, you grant us a limited licence to process that content (including via third-party AI providers) solely to provide the Service to you. We do not claim ownership of your CV content.</p>
         </div>
         <div class="legal-section">
-          <h4>5. Acceptable use</h4>
+          <h4>6. Acceptable use</h4>
           <p>You agree not to use the Service to submit unlawful content, attempt to reverse-engineer the Service, or use it in any way that could damage or impair its operation.</p>
         </div>
         <div class="legal-section">
-          <h4>6. Limitation of liability</h4>
+          <h4>7. Limitation of liability</h4>
           <p>To the maximum extent permitted by law, we exclude liability for any indirect or consequential loss, including loss of employment opportunity, arising from use of the Service. Nothing in these terms excludes liability that cannot be excluded under UK law.</p>
         </div>
         <div class="legal-section">
-          <h4>7. Changes</h4>
+          <h4>8. Changes</h4>
           <p>We may update these terms or the Service from time to time. Continued use after changes constitutes acceptance of the updated terms.</p>
         </div>
         <div class="legal-section">
-          <h4>8. Governing law</h4>
+          <h4>9. Governing law</h4>
           <p>These terms are governed by the laws of England and Wales.</p>
         </div>`
     },
@@ -2028,6 +2058,114 @@ BSc Business Management | University of Manchester | 2015–2018`;
 
   // Run after all functions defined
   checkPaidReturn();
+
+  // ── EMAIL GATE & CV SCORE STORAGE ───────────────────────────────────
+  let emailGatePassed = false;
+
+  function showEmailGate() {
+    // Check if already passed this session
+    try {
+      if (localStorage.getItem('fcv_gate_passed') === '1') {
+        unlockGatedContent();
+        return;
+      }
+    } catch(e) {}
+    document.getElementById('emailGate').style.display = 'block';
+    document.getElementById('gatedContent').style.display = 'none';
+  }
+
+  function unlockGatedContent() {
+    emailGatePassed = true;
+    document.getElementById('emailGate').style.display = 'none';
+    document.getElementById('gatedContent').style.display = 'block';
+    try { localStorage.setItem('fcv_gate_passed', '1'); } catch(e) {}
+  }
+
+  async function submitEmailGate() {
+    const email = document.getElementById('gateEmailInput').value.trim();
+    const btn = document.getElementById('gateBtn');
+    if (!email || !email.includes('@') || !email.includes('.')) {
+      showToast('Please enter a valid email address.');
+      return;
+    }
+    btn.textContent = 'Unlocking…';
+    btn.disabled = true;
+    // Submit to waitlist
+    try {
+      await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+    } catch(e) { console.warn('Gate email error:', e); }
+    trackEvent('email_gate_passed');
+    unlockGatedContent();
+  }
+
+  // ── CV SCORE STORAGE IN SUPABASE ─────────────────────────────────────
+  // Stores anonymised CV scores to build real percentile data
+  // Called after every analysis completes
+  async function storeCVScore(score, industry) {
+    try {
+      await fetch(`${window.SUPABASE_URL || 'https://yweyfioiwwrvbawwuttk.supabase.co'}/rest/v1/cv_scores`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZXlmaW9pd3dydmJhd3d1dHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg0OTksImV4cCI6MjA5NzgwNDQ5OX0.aBfrXzVPpjju0UKpLo02dw-hy7xdiPr0l4If5CsZfbk',
+          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZXlmaW9pd3dydmJhd3d1dHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg0OTksImV4cCI6MjA5NzgwNDQ5OX0.aBfrXzVPpjju0UKpLo02dw-hy7xdiPr0l4If5CsZfbk',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify({
+          industry: industry,
+          score: score,
+          submitted_at: new Date().toISOString()
+        })
+      });
+    } catch(e) {
+      // Non-fatal — score storage is background analytics only
+      console.warn('Score storage error (non-fatal):', e);
+    }
+  }
+
+  // ── REAL PERCENTILE FROM STORED SCORES ──────────────────────────────
+  // Fetches real scores for this industry — uses real data once 50+ exist,
+  // falls back to heuristic model below that threshold
+  async function getRealPercentile(score, industry) {
+    const MIN_SCORES = 50; // switch threshold
+    try {
+      const res = await fetch(
+        `https://yweyfioiwwrvbawwuttk.supabase.co/rest/v1/cv_scores?industry=eq.${industry}&select=score`,
+        {
+          headers: {
+            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZXlmaW9pd3dydmJhd3d1dHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg0OTksImV4cCI6MjA5NzgwNDQ5OX0.aBfrXzVPpjju0UKpLo02dw-hy7xdiPr0l4If5CsZfbk'
+          }
+        }
+      );
+      const data = await res.json();
+      if (Array.isArray(data) && data.length >= MIN_SCORES) {
+        const scores = data.map(r => r.score).sort((a,b) => a - b);
+        const below = scores.filter(s => s < score).length;
+        const percentile = Math.round((below / scores.length) * 100);
+        return { percentile, isReal: true, sampleSize: scores.length };
+      }
+    } catch(e) {
+      console.warn('Real percentile fetch failed:', e);
+    }
+    return { percentile: null, isReal: false, sampleSize: 0 };
+  }
+
+  // ── RESULTS EMAIL CAPTURE (kept as function for gate) ──────────────
+  async function saveResultsEmail() {
+    const email = document.getElementById('gateEmailInput')?.value?.trim();
+    if (!email) return;
+    try {
+      await fetch('/api/waitlist', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+    } catch(e) {}
+  }
 
   // ── WAITLIST SUBMISSION ──────────────────────────────────────────────
   // Calls /api/waitlist serverless function which reads Brevo keys from

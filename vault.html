@@ -198,6 +198,33 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   .filter-panel{position:static}
   .modal-body,.modal-header{padding-left:20px;padding-right:20px}
 }
+
+/* ── VAULT DOOR ANIMATION ── */
+.vault-anim-wrap { display:flex; flex-direction:column; align-items:center; padding:28px 28px 0; }
+.vault-mini { position:relative; width:72px; height:72px; margin-bottom:14px; }
+.vault-mini-body { position:absolute; inset:0; background:linear-gradient(145deg,#1E293B,#0F172A); border-radius:10px; border:2px solid #334155; overflow:hidden; }
+.vault-mini-interior { position:absolute; inset:0; border-radius:8px; background:linear-gradient(135deg,#1E3A5F,#0F172A); display:flex; align-items:center; justify-content:center; opacity:0; transition:opacity .3s ease .5s; }
+.vault-mini-interior.open { opacity:1; }
+.vault-mini-f { font-family:Georgia,serif; font-size:32px; font-weight:700; color:white; text-shadow:0 0 20px rgba(147,197,253,.8); transform:scale(.6); opacity:0; transition:transform .4s ease .6s,opacity .4s ease .6s; }
+.vault-mini-f.open { transform:scale(1); opacity:1; }
+.vault-mini-door { position:absolute; inset:0; background:linear-gradient(145deg,#334155,#1E293B); border-radius:10px; border:2px solid #475569; transform-origin:left center; transform:perspective(280px) rotateY(0deg); transition:transform .8s cubic-bezier(.4,0,.2,1); }
+.vault-mini-door.open { transform:perspective(280px) rotateY(-68deg); }
+.vault-mini-wheel { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:28px; height:28px; }
+.vmw-outer { position:absolute; inset:0; border-radius:50%; background:radial-gradient(circle at 35% 35%,#475569,#1E293B); border:1.5px solid #64748B; }
+.vmw-inner { position:absolute; top:5px; left:5px; right:5px; bottom:5px; border-radius:50%; background:#0F172A; }
+.vmw-spoke { position:absolute; top:50%; left:50%; width:1.5px; height:11px; background:#64748B; transform-origin:top center; margin-left:-.75px; border-radius:1px; }
+.vmw-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:5px; height:5px; border-radius:50%; background:#94A3B8; }
+.vmw-bolt { position:absolute; width:7px; height:7px; background:radial-gradient(circle at 35% 35%,#64748B,#1E293B); border-radius:50%; border:1px solid #475569; }
+.vmw-bolt-tl { top:6px; left:6px; }
+.vmw-bolt-tr { top:6px; right:6px; }
+.vmw-bolt-bl { bottom:6px; left:6px; }
+.vmw-bolt-br { bottom:6px; right:6px; }
+.vault-mini-sidebolt { position:absolute; right:-4px; top:50%; transform:translateY(-50%); display:flex; flex-direction:column; gap:14px; }
+.vmb { width:5px; height:14px; background:linear-gradient(to right,#475569,#334155); border-radius:1px; transition:transform .4s ease .1s; }
+.vault-mini-door.open ~ * .vmb, .vault-mini-door.open .vault-mini-sidebolt .vmb { transform:translateX(-8px); }
+.vault-brand-name { font-family:'Instrument Serif',serif; font-size:20px; letter-spacing:-.3px; color:var(--ink); margin-bottom:4px; }
+.vault-brand-name span { color:var(--accent); }
+.vault-auth-sub { font-size:13px; color:var(--ink-light); margin-bottom:24px; }
 </style>
 </head>
 <body>
@@ -273,18 +300,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     <button class="firm-pill" data-firm="JPMorgan" onclick="filterByFirm(this)">JPMorgan</button>
     <button class="firm-pill" data-firm="BlackRock" onclick="filterByFirm(this)">BlackRock</button>
     <button class="firm-pill" data-firm="Morgan Stanley" onclick="filterByFirm(this)">Morgan Stanley</button>
-    <button class="firm-pill" data-firm="Fidelity" onclick="filterByFirm(this)">Fidelity</button>
-    <button class="firm-pill" data-firm="Schroders" onclick="filterByFirm(this)">Schroders</button>
-    <button class="firm-pill" data-firm="Jupiter" onclick="filterByFirm(this)">Jupiter</button>
-    <button class="firm-pill" data-firm="KKR" onclick="filterByFirm(this)">KKR</button>
-    <button class="firm-pill" data-firm="Citadel" onclick="filterByFirm(this)">Citadel</button>
     <button class="firm-pill" data-firm="Blackstone" onclick="filterByFirm(this)">Blackstone</button>
+    <button class="firm-pill" data-firm="Citadel" onclick="filterByFirm(this)">Citadel</button>
+    <button class="firm-pill" data-firm="KKR" onclick="filterByFirm(this)">KKR</button>
+    <button class="firm-pill" data-firm="Apollo" onclick="filterByFirm(this)">Apollo</button>
     <button class="firm-pill" data-firm="Citi" onclick="filterByFirm(this)">Citi</button>
     <button class="firm-pill" data-firm="Barclays" onclick="filterByFirm(this)">Barclays</button>
-    <button class="firm-pill" data-firm="Blackstone" onclick="filterByFirm(this)">Blackstone</button>
-    <button class="firm-pill" data-firm="Apollo" onclick="filterByFirm(this)">Apollo</button>
-    <button class="firm-pill" data-firm="Morgan Stanley" onclick="filterByFirm(this)">Morgan Stanley</button>
     <button class="firm-pill" data-firm="Fidelity" onclick="filterByFirm(this)">Fidelity</button>
+    <button class="firm-pill" data-firm="Schroders" onclick="filterByFirm(this)">Schroders</button>
   </div>
 </div>
 
@@ -517,11 +540,44 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 <!-- AUTH MODAL -->
 <div class="modal-overlay" id="authModal">
   <div class="modal" style="max-width:440px">
-    <div class="modal-header">
-      <h3 id="authModalTitle">Sign in to Finance Career Vault</h3>
-      <button class="modal-close" onclick="closeModal('authModal')">✕</button>
+    <button class="modal-close" onclick="closeModal('authModal')" style="position:absolute;top:16px;right:16px;z-index:1">✕</button>
+    <div class="vault-anim-wrap">
+      <!-- Mini vault door animation -->
+      <div class="vault-mini" id="authVault">
+        <div class="vault-mini-body">
+          <div class="vault-mini-interior" id="authVaultInterior">
+            <div class="vault-mini-f" id="authVaultF">F</div>
+          </div>
+        </div>
+        <div class="vault-mini-door" id="authVaultDoor">
+          <div class="vmw-bolt vmw-bolt-tl"></div>
+          <div class="vmw-bolt vmw-bolt-tr"></div>
+          <div class="vmw-bolt vmw-bolt-bl"></div>
+          <div class="vmw-bolt vmw-bolt-br"></div>
+          <div class="vault-mini-wheel">
+            <div class="vmw-outer"></div>
+            <div class="vmw-inner"></div>
+            <div class="vmw-spoke" style="transform:rotate(0deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(45deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(90deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(135deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(180deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(225deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(270deg)"></div>
+            <div class="vmw-spoke" style="transform:rotate(315deg)"></div>
+            <div class="vmw-center"></div>
+            <div class="vault-mini-sidebolt">
+              <div class="vmb"></div>
+              <div class="vmb"></div>
+              <div class="vmb"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <h3 class="vault-brand-name">Finance<span>CareerVault</span></h3>
+      <p class="vault-auth-sub" id="authModalTitle">Sign in to continue</p>
     </div>
-    <div class="modal-body">
+    <div class="modal-body" style="padding-top:0">
       <div class="auth-tabs">
         <button class="auth-tab active" id="signinTab" onclick="switchAuthTab('signin')">Sign in</button>
         <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Create account</button>
@@ -576,9 +632,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <button class="modal-close" onclick="closeModal('subscribeModal')">✕</button>
     </div>
     <div class="modal-body">
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:20px">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;color:var(--ink)">£12</span>
-        <span style="font-size:14px;color:var(--ink-light)">/month · cancel anytime</span>
+      <!-- Plan toggle -->
+      <div style="display:flex;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:20px;gap:4px">
+        <button id="planMonthly" onclick="selectPlan('monthly')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;background:white;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)">Monthly £12</button>
+        <button id="planAnnual" onclick="selectPlan('annual')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;background:none;color:var(--ink-mid)">Annual £89 <span style="font-size:11px;background:#F0FDF4;color:var(--good);padding:2px 6px;border-radius:4px;font-weight:600">Save 38%</span></button>
+      </div>
+      <div id="planPriceDisplay" style="display:flex;align-items:baseline;gap:8px;margin-bottom:20px">
+        <span id="planPrice" style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;color:var(--ink)">£12</span>
+        <span id="planPeriod" style="font-size:14px;color:var(--ink-light)">/month · cancel anytime</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
         <div style="display:flex;align-items:center;gap:10px;font-size:14px">
@@ -1181,6 +1242,8 @@ function openAuthModal(action) {
   pendingAction = action || null;
   document.getElementById('authModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  // Play vault opening animation
+  setTimeout(playVaultAnimation, 100);
 }
 
 function switchAuthTab(mode) {
@@ -1359,12 +1422,48 @@ async function openCustomerPortal() {
 }
 
 // ── SUBSCRIBE ────────────────────────────────────────────────────────
+const STRIPE_ANNUAL_LINK = 'https://buy.stripe.com/test_placeholder_annual'; // TODO: create annual link in Stripe
+let selectedPlan = 'monthly';
+
+function selectPlan(plan) {
+  selectedPlan = plan;
+  const monthBtn = document.getElementById('planMonthly');
+  const annualBtn = document.getElementById('planAnnual');
+  const price = document.getElementById('planPrice');
+  const period = document.getElementById('planPeriod');
+  if (plan === 'monthly') {
+    monthBtn.style.background = 'white'; monthBtn.style.color = 'var(--ink)'; monthBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,.1)';
+    annualBtn.style.background = 'none'; annualBtn.style.color = 'var(--ink-mid)'; annualBtn.style.boxShadow = 'none';
+    price.textContent = '£12'; period.textContent = '/month · cancel anytime';
+  } else {
+    annualBtn.style.background = 'white'; annualBtn.style.color = 'var(--ink)'; annualBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,.1)';
+    monthBtn.style.background = 'none'; monthBtn.style.color = 'var(--ink-mid)'; monthBtn.style.boxShadow = 'none';
+    price.textContent = '£89'; period.textContent = '/year (£7.42/month) · save 38%';
+  }
+}
+
 function redirectToSubscribe() {
   if (!currentUser) { closeModal('subscribeModal'); openAuthModal('subscribe'); return; }
-  window.location.href = STRIPE_SUB_LINK + '?prefilled_email=' + encodeURIComponent(currentUser.email);
+  const link = selectedPlan === 'annual' ? STRIPE_ANNUAL_LINK : STRIPE_SUB_LINK;
+  window.location.href = link + '?prefilled_email=' + encodeURIComponent(currentUser.email);
 }
 
 // ── MODALS ───────────────────────────────────────────────────────────
+// ── VAULT DOOR AUTH ANIMATION ────────────────────────────────────────
+function playVaultAnimation() {
+  const door = document.getElementById('authVaultDoor');
+  const interior = document.getElementById('authVaultInterior');
+  const f = document.getElementById('authVaultF');
+  if (!door) return;
+  // Reset first
+  door.classList.remove('open');
+  interior.classList.remove('open');
+  f.classList.remove('open');
+  // Play after short delay
+  setTimeout(() => { door.classList.add('open'); }, 400);
+  setTimeout(() => { interior.classList.add('open'); f.classList.add('open'); }, 900);
+}
+
 function openSubmitModal() {
   document.getElementById('submitModal').classList.add('open');
   document.body.style.overflow = 'hidden';
