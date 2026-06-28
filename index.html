@@ -293,7 +293,26 @@
 <body>
 
 <nav>
-  <div class="logo">Finance<span>CareerVault</span></div>
+  <a class="logo" href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--ink)">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="32" height="32" style="flex-shrink:0">
+      <rect width="100" height="100" rx="16" fill="#0F172A"/>
+      <rect x="8" y="8" width="84" height="84" rx="10" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+      <circle cx="24" cy="24" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="76" cy="24" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="24" cy="76" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="76" cy="76" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <rect x="4" y="38" width="6" height="10" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+      <rect x="4" y="52" width="6" height="10" rx="2" fill="#334155" stroke="#475569" stroke-width="1"/>
+      <circle cx="50" cy="50" r="24" fill="#0F172A" stroke="#2563EB" stroke-width="2"/>
+      <line x1="50" y1="27" x2="50" y2="36" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="50" y1="64" x2="50" y2="73" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="27" y1="50" x2="36" y2="50" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="64" y1="50" x2="73" y2="50" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="15" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+      <text x="50" y="56" font-family="Georgia,serif" font-size="18" font-weight="700" fill="white" text-anchor="middle">F</text>
+    </svg>
+    Finance<span style="color:var(--accent)">CareerVault</span>
+  </a>
   <div style="display:flex;align-items:center;gap:16px">
     <a href="/vault.html" style="font-size:14px;font-weight:500;color:var(--ink-mid);text-decoration:none;transition:color .15s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--ink-mid)'">Interview Vault</a>
     <span class="nav-tag" id="navTag">Free Interview Probability Score</span>
@@ -446,14 +465,14 @@
 
   <!-- EMAIL GATE — shown after score/issues, before detailed breakdown -->
   <div id="emailGate" style="display:none;background:var(--white);border:2px solid var(--accent);border-radius:16px;padding:28px 32px;margin-bottom:24px;text-align:center">
-    <div style="width:48px;height:48px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px">📊</div>
-    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px;margin-bottom:8px">See your full breakdown</h3>
-    <p style="font-size:14px;color:var(--ink-mid);max-width:380px;margin:0 auto 20px;line-height:1.5">Enter your email to unlock your score breakdown, keyword gaps, and percentile ranking — free.</p>
+    <div style="width:48px;height:48px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px">🔍</div>
+    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px;margin-bottom:8px">See your score breakdown &amp; key issues</h3>
+    <p style="font-size:14px;color:var(--ink-mid);max-width:380px;margin:0 auto 20px;line-height:1.5">Enter your email to see your full score breakdown and the key issues found in your CV — free.</p>
     <div style="display:flex;gap:8px;max-width:400px;margin:0 auto 8px;flex-wrap:wrap;justify-content:center">
       <input type="email" id="gateEmailInput" placeholder="your@email.com" autocomplete="off" style="flex:1;min-width:200px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-      <button onclick="submitEmailGate()" id="gateBtn" style="background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">See my results</button>
+      <button onclick="submitEmailGate()" id="gateBtn" style="background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Show me</button>
     </div>
-    <p style="font-size:11px;color:var(--ink-light);margin-top:8px">No spam. We'll notify you when the Interview Vault launches.</p>
+    <p style="font-size:11px;color:var(--ink-light);margin-top:8px">No spam. One email when the Interview Vault launches.</p>
   </div>
 
   <!-- INTERVIEW VAULT TEASER — shown after issues, before percentile -->
