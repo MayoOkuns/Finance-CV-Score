@@ -253,6 +253,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   <div class="nav-links">
     <a class="nav-link" href="/">CV Scorer</a>
     <a class="nav-link active" href="/vault.html">Interview Vault</a>
+    <a class="nav-link" href="/quiz.html">Daily Quiz</a>
     <button class="nav-link" id="navAuthBtn" onclick="openAuthModal()" style="background:none;border:none;cursor:pointer;font-family:'Inter',sans-serif">Sign in</button>
     <a class="nav-cta" href="#" onclick="openSubmitModal();return false">+ Submit a question</a>
   </div>
@@ -265,11 +266,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 
 <!-- HERO -->
 <section class="vault-hero">
-  <span class="vault-eyebrow">Finance-Only · Not Glassdoor</span>
-  <h1>Interview prep built for<br><em>finance, not everyone.</em></h1>
-  <p>Glassdoor covers every industry and every role. This vault covers finance only — tagged by sub-sector, interview stage, and role, with answer frameworks written by someone who's actually worked in the industry.</p>
+  <span class="vault-eyebrow">Finance-Only · Real Candidates · Updated Weekly</span>
+  <h1>Real interview questions.<br><em>From real candidates.</em></h1>
+  <p>Every question in this vault was submitted by someone who sat in that interview — at Goldman Sachs, BlackRock, JPMorgan, KKR and more. Searchable by firm, sub-sector, role, and interview stage. Updated every week as new candidates submit their experiences.</p>
   <div class="vault-stats">
-    <div class="vault-stat"><span class="vault-stat-num" id="statQuestions">—</span><span class="vault-stat-label">questions</span></div>
+    <div class="vault-stat"><span class="vault-stat-num" id="statQuestions">—</span><span class="vault-stat-label">real questions</span></div>
     <div class="vault-stat"><span class="vault-stat-num" id="statFirms">—</span><span class="vault-stat-label">firms covered</span></div>
     <div class="vault-stat"><span class="vault-stat-num" id="statSectors">12</span><span class="vault-stat-label">sub-sectors</span></div>
   </div>
@@ -277,26 +278,33 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 
 <!-- WHY NOT GLASSDOOR -->
 <div style="background:var(--white);border-bottom:1px solid var(--border);padding:20px 40px">
-  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:24px">
-    <div style="display:flex;gap:12px;align-items:flex-start">
-      <span style="font-size:20px;flex-shrink:0">🎯</span>
+  <div style="max-width:1100px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px;flex-shrink:0">🏦</span>
       <div>
-        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Finance-specific, not generic</p>
-        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Questions tagged by IB / AM / PE / HF sub-sector. No noise from ops, tech, or unrelated roles.</p>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Real candidates, real firms</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Submitted by people who actually sat in those interviews — not scraped, not AI-generated.</p>
       </div>
     </div>
-    <div style="display:flex;gap:12px;align-items:flex-start">
-      <span style="font-size:20px;flex-shrink:0">💡</span>
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px;flex-shrink:0">🔄</span>
+      <div>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Updated every week</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">New questions added as candidates submit their experiences. Subscribers stay ahead of every cycle.</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px;flex-shrink:0">💡</span>
       <div>
         <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Answer frameworks included</p>
-        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Not just the question — structured how-to-answer guides for DCF, LBO, stock pitches, and more. Glassdoor doesn't have this.</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Structured how-to-answer guides for DCF, LBO, stock pitches and more. Glassdoor doesn't have these.</p>
       </div>
     </div>
-    <div style="display:flex;gap:12px;align-items:flex-start">
-      <span style="font-size:20px;flex-shrink:0">📅</span>
+    <div style="display:flex;gap:10px;align-items:flex-start">
+      <span style="font-size:18px;flex-shrink:0">🎯</span>
       <div>
-        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">This recruiting cycle</p>
-        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Questions submitted in the last 90 days are badged — so you know what's being asked right now, not 3 years ago.</p>
+        <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:3px">Daily finance quiz</p>
+        <p style="font-size:12px;color:var(--ink-light);line-height:1.5">Build interview-ready technical knowledge with a 60-second daily challenge. Included with every subscription.</p>
       </div>
     </div>
   </div>
@@ -308,7 +316,19 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   <span class="how-arrow">→</span>
   <div class="how-step"><span class="how-step-num">2</span>Get 3 days free access</div>
   <span class="how-arrow">→</span>
-  <div class="how-step"><span class="how-step-num">3</span>Subscribe for £12/month to keep browsing</div>
+  <div class="how-step"><span class="how-step-num">3</span>Subscribe for £12/month — new questions added weekly</div>
+</div>
+
+<!-- QUIZ TEASER -->
+<div style="background:linear-gradient(135deg,#1E3A5F,#0F172A);padding:14px 40px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;border-bottom:1px solid rgba(255,255,255,.08)">
+  <div style="display:flex;align-items:center;gap:12px">
+    <span style="font-size:22px">🎯</span>
+    <div>
+      <p style="font-size:13px;font-weight:600;color:white;margin-bottom:2px">Daily Finance Quiz — 223 questions across valuation, derivatives, risk, macro & more</p>
+      <p style="font-size:12px;color:rgba(255,255,255,.55)">60 seconds a day. Build the technical knowledge that gets you through interview rounds. Free to try, included with every subscription.</p>
+    </div>
+  </div>
+  <a href="/quiz.html" style="background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:white;font-size:13px;font-weight:600;padding:8px 18px;border-radius:8px;text-decoration:none;white-space:nowrap;flex-shrink:0;transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.18)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Try today's quiz →</a>
 </div>
 
 <!-- FIRM QUICK-FILTER PILLS -->
@@ -661,25 +681,46 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <span id="planPeriod" style="font-size:14px;color:var(--ink-light)">/month · cancel anytime</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
-        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          Full question database — filtered by firm, role & stage
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          <strong>Answer frameworks</strong> for DCF, LBO, stock pitches & more — Glassdoor doesn't have these
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          "This cycle" badge — see what's being asked right now
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          Firm alerts — get emailed when new questions are added
-        </div>
-        <div style="display:flex;align-items:center;gap:10px;font-size:14px">
-          <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0">✓</span>
-          Cancel anytime — no commitment
+        <!-- What you get -->
+        <div style="background:var(--surface);border-radius:12px;padding:16px;margin-bottom:20px">
+          <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--ink-light);margin-bottom:12px">What subscribers get</p>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px">✓</span>
+              <div>
+                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">100+ real interview questions — growing weekly</p>
+                <p style="font-size:12px;color:var(--ink-light)">Submitted by candidates who sat in those exact interviews at Goldman, BlackRock, JPMorgan, KKR and more. Not scraped. Not AI-generated.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px">✓</span>
+              <div>
+                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">Firm alerts — stay ahead of every cycle</p>
+                <p style="font-size:12px;color:var(--ink-light)">Get emailed the moment new questions are added for your target firms. Know what Goldman asked this week, not last year.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px">✓</span>
+              <div>
+                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">Answer frameworks for DCF, LBO, stock pitches & more</p>
+                <p style="font-size:12px;color:var(--ink-light)">Not just the question — structured how-to-answer guides written by someone in the industry. Glassdoor doesn't have these.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px">✓</span>
+              <div>
+                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">Daily finance quiz — 223 questions across 17 topics</p>
+                <p style="font-size:12px;color:var(--ink-light)">60-second daily challenge covering valuation, derivatives, risk, macro, PE and more. Build the knowledge that gets you through technical rounds.</p>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:flex-start">
+              <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px">✓</span>
+              <div>
+                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">Cancel anytime — no questions asked</p>
+                <p style="font-size:12px;color:var(--ink-light)">Cancel in one click from your account page. No phone call required. No retention team.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       <button class="option-primary" onclick="redirectToSubscribe()" style="width:100%;padding:15px;font-size:16px;font-family:'Inter',sans-serif">
@@ -960,8 +1001,8 @@ function renderFeed(questions) {
     paywallBlock.style.display = 'block';
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
-        <h3>Access all ${questions.length > 100 ? "100+" : questions.length} questions</h3>
-        <p>Submit a question you've been asked to unlock 3 days free — or subscribe for £12/month for unlimited access.</p>
+        <h3>Stay ahead of every recruiting cycle</h3>
+        <p>New questions added weekly from real interviews at Goldman, BlackRock, JPMorgan and more. Subscribe for £12/month — vault access, answer frameworks, daily quiz, and firm alerts included.</p>
         <div class="feed-paywall-options">
           <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — start free trial</button>
           <p class="option-divider">or</p>

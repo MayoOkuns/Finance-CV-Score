@@ -1,0 +1,1891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Finance Quiz — Finance Career Vault</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0E0E0F;--ink-mid:#3A3A3C;--ink-light:#7A7A80;
+  --surface:#F7F6F3;--white:#FFFFFF;
+  --accent:#2563EB;--accent-light:#EFF4FF;
+  --good:#16A34A;--good-light:#F0FDF4;
+  --danger:#DC2626;--danger-light:#FEF2F2;
+  --warn:#D97706;--warn-light:#FFFBEB;
+  --border:#E4E3DF;--navy:#0F172A;--navy-mid:#1E3A5F;
+  --gold:#F59E0B;
+}
+body{font-family:'Inter',sans-serif;background:var(--surface);color:var(--ink);min-height:100vh;font-size:15px}
+
+/* NAV */
+nav{display:flex;align-items:center;justify-content:space-between;padding:16px 40px;background:var(--white);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
+.logo{font-family:'Instrument Serif',serif;font-size:20px;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;align-items:center;gap:20px}
+.nav-link{font-size:14px;font-weight:500;color:var(--ink-mid);text-decoration:none}
+.nav-link:hover,.nav-link.active{color:var(--accent)}
+
+/* PAGE */
+.page{max-width:640px;margin:0 auto;padding:40px 24px 80px}
+
+/* HEADER */
+.quiz-header{text-align:center;margin-bottom:32px}
+.quiz-eyebrow{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--accent);background:var(--accent-light);padding:5px 14px;border-radius:20px;margin-bottom:14px}
+.quiz-header h1{font-family:'Instrument Serif',serif;font-size:clamp(28px,4vw,38px);letter-spacing:-0.5px;margin-bottom:10px}
+.quiz-header p{font-size:15px;color:var(--ink-mid);line-height:1.6}
+
+/* STREAK BAR */
+.streak-bar{display:flex;align-items:center;justify-content:center;gap:20px;background:var(--white);border:1px solid var(--border);border-radius:14px;padding:16px 24px;margin-bottom:28px;flex-wrap:wrap}
+.streak-item{text-align:center}
+.streak-num{font-family:'JetBrains Mono',monospace;font-size:24px;font-weight:600;color:var(--ink);display:block}
+.streak-label{font-size:11px;color:var(--ink-light);text-transform:uppercase;letter-spacing:0.06em}
+.streak-fire{font-size:28px}
+.streak-divider{width:1px;height:40px;background:var(--border)}
+
+/* QUIZ CARD */
+.quiz-card{background:var(--white);border-radius:20px;border:1px solid var(--border);overflow:hidden;margin-bottom:20px}
+.quiz-card-header{background:linear-gradient(135deg,var(--navy),var(--navy-mid));padding:20px 28px}
+.quiz-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.quiz-category{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#93C5FD;background:rgba(147,197,253,0.1);padding:4px 10px;border-radius:20px}
+.quiz-number{font-family:'JetBrains Mono',monospace;font-size:12px;color:rgba(255,255,255,.4)}
+.quiz-definition{font-family:'Instrument Serif',serif;font-size:clamp(18px,3vw,22px);color:white;line-height:1.5;letter-spacing:-0.2px}
+.quiz-body{padding:24px 28px}
+
+/* INPUT */
+.answer-wrap{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
+.answer-input{flex:1;min-width:200px;padding:13px 16px;border:2px solid var(--border);border-radius:12px;font-family:'Inter',sans-serif;font-size:16px;color:var(--ink);outline:none;transition:border-color .2s;background:var(--white)}
+.answer-input:focus{border-color:var(--accent)}
+.answer-input.correct{border-color:var(--good);background:var(--good-light)}
+.answer-input.wrong{border-color:var(--danger);background:var(--danger-light)}
+.submit-btn{background:var(--accent);color:white;font-size:15px;font-weight:600;padding:13px 24px;border-radius:12px;border:none;cursor:pointer;transition:opacity .15s;font-family:'Inter',sans-serif;white-space:nowrap}
+.submit-btn:hover{opacity:.88}
+.submit-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* HINT */
+.hint-btn{background:none;border:none;font-size:13px;color:var(--ink-light);cursor:pointer;font-family:'Inter',sans-serif;padding:0;text-decoration:underline;text-underline-offset:2px}
+.hint-btn:hover{color:var(--accent)}
+.hint-text{display:none;font-size:13px;color:var(--warn);background:var(--warn-light);border-radius:8px;padding:10px 14px;margin-top:12px;line-height:1.5}
+.hint-text.visible{display:block}
+
+/* RESULT */
+.result-panel{display:none;padding:16px;border-radius:12px;margin-top:4px}
+.result-panel.correct{background:var(--good-light);border:1px solid #BBF7D0}
+.result-panel.wrong{background:var(--danger-light);border:1px solid #FECACA}
+.result-icon{font-size:20px;margin-bottom:6px;display:block}
+.result-title{font-size:15px;font-weight:600;margin-bottom:4px}
+.result-correct-answer{font-size:13px;color:var(--ink-mid);line-height:1.5}
+.result-explanation{font-size:13px;color:var(--ink-mid);margin-top:8px;line-height:1.5;padding-top:8px;border-top:1px solid rgba(0,0,0,.06)}
+
+/* NEXT BTN */
+.next-btn{width:100%;background:var(--ink);color:white;font-size:15px;font-weight:600;padding:14px;border-radius:12px;border:none;cursor:pointer;transition:opacity .15s;margin-top:12px;font-family:'Inter',sans-serif;display:none}
+.next-btn:hover{opacity:.85}
+
+/* DAILY COMPLETE */
+.daily-complete{text-align:center;padding:40px 28px;display:none}
+.complete-icon{font-size:56px;margin-bottom:16px}
+.complete-title{font-family:'Instrument Serif',serif;font-size:26px;letter-spacing:-0.3px;margin-bottom:8px}
+.complete-sub{font-size:14px;color:var(--ink-mid);margin-bottom:24px;line-height:1.6}
+.complete-score{font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;color:var(--accent);display:block;margin-bottom:4px}
+.complete-score-label{font-size:12px;color:var(--ink-light);text-transform:uppercase;letter-spacing:.06em}
+
+/* PROGRESS DOTS */
+.progress-dots{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--border);transition:background .2s}
+.dot.done-correct{background:var(--good)}
+.dot.done-wrong{background:var(--danger)}
+.dot.active{background:var(--accent);transform:scale(1.2)}
+
+/* CATEGORY TABS */
+.cat-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:24px;justify-content:center}
+.cat-tab{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-mid);background:var(--white);border:1.5px solid var(--border);cursor:pointer;transition:all .15s;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em}
+.cat-tab.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+
+/* LOCKED */
+.locked-overlay{background:var(--white);border:2px solid var(--border);border-radius:16px;padding:40px 28px;text-align:center;margin-bottom:20px}
+.locked-overlay h3{font-family:'Instrument Serif',serif;font-size:22px;margin-bottom:8px}
+.locked-overlay p{font-size:14px;color:var(--ink-mid);max-width:380px;margin:0 auto 20px;line-height:1.6}
+.locked-btn{background:var(--accent);color:white;font-size:15px;font-weight:600;padding:13px 28px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;text-decoration:none;display:inline-block}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:white;font-size:14px;font-weight:500;padding:12px 20px;border-radius:10px;z-index:2000;transition:transform .3s;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+
+@media(max-width:600px){nav{padding:14px 20px}.page{padding:24px 16px}.quiz-card-header,.quiz-body{padding-left:20px;padding-right:20px}}
+</style>
+</head>
+<body>
+<nav>
+  <a class="logo" href="/">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="28" height="28" style="flex-shrink:0">
+      <rect width="100" height="100" rx="16" fill="#0F172A"/>
+      <rect x="8" y="8" width="84" height="84" rx="10" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+      <circle cx="24" cy="24" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="76" cy="24" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="24" cy="76" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="76" cy="76" r="6" fill="#0F172A" stroke="#475569" stroke-width="1.5"/>
+      <circle cx="50" cy="50" r="24" fill="#0F172A" stroke="#2563EB" stroke-width="2"/>
+      <line x1="50" y1="27" x2="50" y2="36" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="50" y1="64" x2="50" y2="73" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="27" y1="50" x2="36" y2="50" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <line x1="64" y1="50" x2="73" y2="50" stroke="#2563EB" stroke-width="2.5" stroke-linecap="round"/>
+      <circle cx="50" cy="50" r="15" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+      <text x="50" y="56" font-family="Georgia,serif" font-size="18" font-weight="700" fill="white" text-anchor="middle">F</text>
+    </svg>
+    Finance<span>CareerVault</span>
+  </a>
+  <div class="nav-links">
+    <a class="nav-link" href="/">CV Scorer</a>
+    <a class="nav-link" href="/vault.html">Interview Vault</a>
+    <a class="nav-link active" href="/quiz.html">Daily Quiz</a>
+  </div>
+</nav>
+
+<div class="page">
+
+  <div class="quiz-header">
+    <span class="quiz-eyebrow">🎯 Included with every subscription</span>
+    <h1>Daily Finance Quiz</h1>
+    <p>5 questions a day. 223 questions across valuation, derivatives, risk, macro, PE and more — build the technical knowledge that gets you through interview rounds.</p>
+  </div>
+
+  <!-- Subscription upsell banner -->
+  <div style="background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:14px;padding:18px 24px;margin-bottom:28px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div>
+      <p style="font-size:13px;font-weight:600;color:white;margin-bottom:4px">This quiz is part of the Finance Career Vault subscription</p>
+      <p style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.5;max-width:460px">For £12/month you also get 100+ real interview questions from Goldman, BlackRock, JPMorgan and more — submitted by candidates who sat in those interviews, updated every week. Answer frameworks and firm alerts included.</p>
+    </div>
+    <a href="/vault.html" style="background:#2563EB;color:white;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0;display:block">See the Interview Vault →</a>
+  </div>
+
+  <!-- Streak bar -->
+  <div class="streak-bar">
+    <div class="streak-item">
+      <span class="streak-fire">🔥</span>
+    </div>
+    <div class="streak-item">
+      <span class="streak-num" id="streakCount">0</span>
+      <span class="streak-label">Day streak</span>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item">
+      <span class="streak-num" id="totalPoints">0</span>
+      <span class="streak-label">Total points</span>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item">
+      <span class="streak-num" id="bestStreak">0</span>
+      <span class="streak-label">Best streak</span>
+    </div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress-dots" id="progressDots"></div>
+
+  <!-- Category tabs -->
+  <div class="cat-tabs">
+    <button class="cat-tab active" onclick="setCategory('all', this)">All</button>
+    <button class="cat-tab" onclick="setCategory('valuation', this)">Valuation</button>
+    <button class="cat-tab" onclick="setCategory('markets', this)">Markets</button>
+    <button class="cat-tab" onclick="setCategory('fixed_income', this)">Fixed Income</button>
+    <button class="cat-tab" onclick="setCategory('derivatives', this)">Derivatives</button>
+    <button class="cat-tab" onclick="setCategory('risk', this)">Risk</button>
+    <button class="cat-tab" onclick="setCategory('portfolio', this)">Portfolio</button>
+    <button class="cat-tab" onclick="setCategory('pe_vc', this)">PE / VC</button>
+    <button class="cat-tab" onclick="setCategory('corp_finance', this)">Corp Finance</button>
+    <button class="cat-tab" onclick="setCategory('accounting', this)">Accounting</button>
+    <button class="cat-tab" onclick="setCategory('quant', this)">Quant</button>
+    <button class="cat-tab" onclick="setCategory('behavioural', this)">Behavioural</button>
+    <button class="cat-tab" onclick="setCategory('microstructure', this)">Microstructure</button>
+    <button class="cat-tab" onclick="setCategory('alternatives', this)">Alternatives</button>
+    <button class="cat-tab" onclick="setCategory('commodities', this)">Commodities</button>
+  </div>
+
+  <!-- Quiz card -->
+  <div class="quiz-card" id="quizCard">
+    <div class="quiz-card-header">
+      <div class="quiz-meta">
+        <span class="quiz-category" id="qCategory">Valuation</span>
+        <span class="quiz-number" id="qNumber">Question 1 of 5</span>
+      </div>
+      <p class="quiz-definition" id="qDefinition">Loading…</p>
+    </div>
+    <div class="quiz-body">
+      <div class="answer-wrap">
+        <input type="text" class="answer-input" id="answerInput"
+          placeholder="Type your answer…"
+          autocomplete="off"
+          onkeydown="if(event.key==='Enter')checkAnswer()">
+        <button class="submit-btn" id="submitBtn" onclick="checkAnswer()">Submit</button>
+      </div>
+      <button class="hint-btn" id="hintBtn" onclick="toggleHint()">Show hint</button>
+      <div class="hint-text" id="hintText"></div>
+      <div class="result-panel" id="resultPanel">
+        <span class="result-icon" id="resultIcon"></span>
+        <div class="result-title" id="resultTitle"></div>
+        <div class="result-correct-answer" id="resultAnswer"></div>
+        <div class="result-explanation" id="resultExplanation"></div>
+      </div>
+      <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next question →</button>
+    </div>
+  </div>
+
+  <!-- Daily complete -->
+  <div class="daily-complete" id="dailyComplete">
+    <div class="complete-icon" id="completeIcon">🏆</div>
+    <h2 class="complete-title" id="completeTitle">Daily challenge complete!</h2>
+    <p class="complete-sub" id="completeSub">Come back tomorrow to keep your streak going.</p>
+    <span class="complete-score" id="completeScore"></span>
+    <span class="complete-score-label">points earned today</span>
+    <br><br>
+    <a href="/vault.html" style="display:inline-block;background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px 24px;border-radius:10px;text-decoration:none;margin-top:8px">
+      Practice with interview questions →
+    </a>
+    <div style="margin-top:20px;padding:16px;background:var(--surface);border-radius:12px;border:1px solid var(--border);text-align:left;max-width:420px;margin-left:auto;margin-right:auto">
+      <p style="font-size:12px;font-weight:600;color:var(--ink);margin-bottom:4px">📬 Get notified when new vault questions drop</p>
+      <p style="font-size:12px;color:var(--ink-light);line-height:1.5;margin-bottom:10px">Subscribe for £12/month — 100+ real interview questions from Goldman, BlackRock, JPMorgan and more. Updated weekly.</p>
+      <a href="/vault.html#subscribe" style="font-size:13px;font-weight:600;color:var(--accent);text-decoration:none">Subscribe to the vault → </a>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── QUESTION BANK ────────────────────────────────────────────────────
+// 50 finance career questions across 5 categories
+const ALL_QUESTIONS = [
+// ═══════════════════════════════════════════════════════════════
+// VALUATION (v1–v20)
+// ═══════════════════════════════════════════════════════════════
+{id:'v1',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'The discount rate that makes the net present value of all cash flows from a project equal to zero.',
+answers:['irr','internal rate of return'],
+hint:'Abbreviated IRR — if this exceeds WACC, the project creates value.',
+explanation:'IRR is the breakeven discount rate. Projects with IRR > WACC create value. It can be misleading for mutually exclusive projects or when cash flows change sign multiple times.'},
+
+{id:'v2',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A valuation method that discounts projected future free cash flows back to present value using the weighted average cost of capital.',
+answers:['dcf','discounted cash flow'],
+hint:'Three letters — the most commonly tested methodology in IB interviews.',
+explanation:'A DCF values a company intrinsically based on its cash generation ability. Terminal value typically represents 60-80% of total value, making growth rate assumptions critically important.'},
+
+{id:'v3',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'Enterprise value divided by EBITDA — the most widely used valuation multiple in M&A because it is capital structure neutral.',
+answers:['ev/ebitda','ev ebitda','enterprise value to ebitda'],
+hint:'Starts with EV — removes the effect of capital structure and D&A.',
+explanation:'EV/EBITDA strips out financing effects and non-cash charges, making it useful for cross-border comparisons. Typical ranges: 6-8x for mature businesses, 15-20x+ for fast-growing companies.'},
+
+{id:'v4',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'The weighted average of the cost of equity and after-tax cost of debt, reflecting the overall required return of the business.',
+answers:['wacc','weighted average cost of capital'],
+hint:'The denominator in a DCF — four letters.',
+explanation:'WACC = (E/V x Re) + (D/V x Rd x (1-T)). A higher WACC lowers valuation by discounting cash flows more heavily.'},
+
+{id:'v5',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'The value of a business beyond the explicit forecast period, typically calculated using a perpetuity growth formula or exit multiple.',
+answers:['terminal value','tv','continuing value'],
+hint:'Often represents the majority of total DCF value.',
+explanation:'Gordon Growth Model: TV = FCF x (1+g) / (WACC-g). Exit multiple: TV = EBITDA x multiple. The two methods should cross-check each other.'},
+
+{id:'v6',cat:'valuation',catLabel:'Valuation',points:15,
+definition:'A valuation method that values each business division separately and adds them together — used for conglomerates with distinct risk profiles.',
+answers:['sum of the parts','sotp','sum-of-the-parts'],
+hint:'Abbreviated SOTP — used when divisions deserve different multiples.',
+explanation:'SOTP prevents the conglomerate discount from obscuring value in individual divisions. Each segment is valued using its most appropriate methodology.'},
+
+{id:'v7',cat:'valuation',catLabel:'Valuation',points:5,
+definition:'Earnings before interest, taxes, depreciation and amortisation — a proxy for operating cash flow.',
+answers:['ebitda'],
+hint:'Six letters — the most common LBO entry metric.',
+explanation:'EBITDA removes non-cash charges and financing costs to show operating performance. It overstates true cash flow since it ignores capex and working capital.'},
+
+{id:'v8',cat:'valuation',catLabel:'Valuation',points:5,
+definition:'Price paid per share divided by earnings per share — the most basic equity valuation multiple.',
+answers:['pe ratio','p/e','p/e ratio','price to earnings'],
+hint:'Two letters separated by a slash — the most quoted market metric.',
+explanation:'P/E reflects what investors pay per pound of earnings. High P/E may indicate growth expectations or overvaluation. Cannot be used when earnings are negative.'},
+
+{id:'v9',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A dividend discount model that values a stock as dividends per share divided by the difference between the required return and the constant growth rate.',
+answers:['gordon growth model','dividend discount model','ddm'],
+hint:'P = D1 / (r - g) — also used to calculate terminal value in a DCF.',
+explanation:'Assumes dividends grow at a constant rate forever. Most useful for stable, dividend-paying companies. Widely used in DCF terminal value calculations as an alternative to exit multiples.'},
+
+{id:'v10',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A valuation approach using financial metrics of similar publicly traded companies to derive implied multiples for the subject company.',
+answers:['comparable company analysis','comps','trading comps'],
+hint:'Also called trading comps — uses public market data.',
+explanation:'Applies peer multiples (EV/EBITDA, P/E) to the subject company. Key challenges: finding truly comparable peers and deciding whether to apply a premium or discount.'},
+
+{id:'v11',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A valuation method using multiples paid in historical M&A transactions involving similar companies.',
+answers:['precedent transaction analysis','precedent transactions','deal comps'],
+hint:'Also called deal comps — typically implies higher values than trading comps due to control premium.',
+explanation:'Precedent transactions include a control premium (typically 20-40%) paid to acquire a company. They represent the highest end of the valuation range alongside DCF.'},
+
+{id:'v12',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'The ratio of P/E divided by the expected earnings growth rate — adjusts P/E for growth to find relative value.',
+answers:['peg ratio','peg','price earnings to growth'],
+hint:'A PEG of 1.0x is often considered fairly valued — three letters.',
+explanation:'PEG = P/E / EPS growth rate. A PEG below 1 may indicate undervaluation relative to growth. Peter Lynch popularised its use.'},
+
+{id:'v13',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'Share price divided by book value per share — used to assess whether a stock trades at a premium or discount to accounting net worth.',
+answers:['price to book','p/b ratio','p/b','price-to-book'],
+hint:'Common in banking — a ratio below 1 can indicate capital destruction.',
+explanation:'Most meaningful for capital-intensive businesses and banks. A P/B above 1 implies the market expects returns above cost of equity.'},
+
+{id:'v14',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A valuation technique that calculates present value by adjusting for the value of financing side effects, particularly the interest tax shield.',
+answers:['adjusted present value','apv'],
+hint:'Abbreviated APV — separates operating value from financing benefits.',
+explanation:'APV = Unlevered firm value + PV of financing side effects. Useful when capital structure is changing (e.g. LBOs) because WACC assumes constant leverage.'},
+
+{id:'v15',cat:'valuation',catLabel:'Valuation',points:15,
+definition:'A beta that has been stripped of financial leverage, representing the systematic risk of a company\'s assets as if it had no debt.',
+answers:['unlevered beta','asset beta'],
+hint:'Used to compare companies with different capital structures.',
+explanation:'Unlevered beta = Levered beta / (1 + (1-T) x D/E). When performing a DCF for a company with a different structure, you unlever peer betas and relever at the target structure.'},
+
+{id:'v16',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A DCF convention assuming cash flows occur in the middle of each period rather than at year end — more accurate for businesses generating cash evenly throughout the year.',
+answers:['mid-year convention','midyear convention'],
+hint:'Increases DCF value vs year-end convention by roughly half a year of discount.',
+explanation:'Mid-year convention discounts cash flows at t=0.5, 1.5, 2.5 etc. This is more realistic for continuous businesses and increases present values of near-term cash flows.'},
+
+{id:'v17',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A measure of value creation calculated as net operating profit after tax minus a capital charge representing the opportunity cost of capital employed.',
+answers:['economic value added','eva','economic profit'],
+hint:'Abbreviated EVA — positive means the business earns above its cost of capital.',
+explanation:'EVA = NOPAT - (WACC x Invested Capital). A company can report positive net income while destroying economic value if returns are below WACC.'},
+
+{id:'v18',cat:'valuation',catLabel:'Valuation',points:15,
+definition:'The ratio of a company\'s market value of assets to their replacement cost — above 1 suggests the market believes assets earn above their replacement cost.',
+answers:["tobin's q","tobins q","q ratio"],
+hint:'Named after James Tobin — above 1 encourages new investment.',
+explanation:"Tobin's Q > 1 means new investment creates value. Q < 1 means it is cheaper to buy existing assets than create new ones, discouraging investment."},
+
+{id:'v19',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'The difference between a stock\'s intrinsic value and its current market price — Benjamin Graham\'s key concept representing the buffer against valuation errors.',
+answers:['margin of safety'],
+hint:'Benjamin Graham\'s central concept — the bigger the better.',
+explanation:'Margin of safety = (Intrinsic value - Market price) / Intrinsic value. A large margin protects against analytical errors. Graham typically required 33-50% discount before investing.'},
+
+{id:'v20',cat:'valuation',catLabel:'Valuation',points:10,
+definition:'A technique systematically varying two key assumptions simultaneously to show how valuation changes across a range of outcomes.',
+answers:['sensitivity analysis'],
+hint:'Displayed as a colour-coded grid — standard output in any financial model.',
+explanation:'In a DCF, the most common sensitivity table varies WACC vs terminal growth rate. A well-built model allows instant recalculation across any combination of inputs.'},
+
+// ═══════════════════════════════════════════════════════════════
+// CORPORATE FINANCE (cf1–cf20)
+// ═══════════════════════════════════════════════════════════════
+{id:'cf1',cat:'corp_finance',catLabel:'Corporate Finance',points:15,
+definition:'The theorem stating that in perfect capital markets, a firm\'s value is independent of its capital structure.',
+answers:['modigliani-miller theorem','modigliani miller','mm theorem'],
+hint:'Named after Modigliani and Miller — assumes no taxes or bankruptcy costs.',
+explanation:'MM Proposition I: firm value is independent of leverage. Proposition II: cost of equity rises with leverage to exactly offset cheaper debt. In reality, taxes and distress costs mean an optimal leverage exists.'},
+
+{id:'cf2',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The theory that companies prefer to finance investments first with retained earnings, then debt, then equity — due to asymmetric information costs.',
+answers:['pecking order theory'],
+hint:'Retained earnings first, equity last — Myers and Majluf (1984).',
+explanation:'Companies avoid equity issuance because markets interpret it as a signal management believes the stock is overvalued. Debt sits between internal finance and equity in the preference hierarchy.'},
+
+{id:'cf3',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The theory that firms balance the tax benefits of debt against the costs of financial distress to find an optimal capital structure.',
+answers:['trade-off theory','static trade-off theory'],
+hint:'The sweet spot between tax shield and distress costs.',
+explanation:'The trade-off theory predicts higher leverage for profitable stable companies (large tax shield, low distress risk) and lower leverage for growth companies with intangible assets.'},
+
+{id:'cf4',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The reduction in corporate tax liability from deducting interest payments, calculated as the tax rate multiplied by interest expense.',
+answers:['interest tax shield','tax shield'],
+hint:'A key benefit of debt financing — increases firm value.',
+explanation:'Interest tax shield = Tax rate x Interest expense. This is why firms prefer debt to equity in the presence of corporate taxes. The PV of the tax shield adds to firm value in the APV method.'},
+
+{id:'cf5',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'A corporate action distributing shares of a subsidiary to existing shareholders, creating two independent publicly traded entities.',
+answers:['spin-off','spinoff'],
+hint:'Creates two separate public companies — often to unlock hidden value.',
+explanation:'Spin-offs allow the market to separately value businesses previously obscured within a conglomerate. Research shows spin-offs and their parents both tend to outperform after separation.'},
+
+{id:'cf6',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'An analysis comparing earnings per share before and after a merger to determine whether the transaction increases or decreases the acquirer\'s EPS.',
+answers:['accretion dilution analysis','accretion/dilution analysis'],
+hint:'Accretive if EPS goes up, dilutive if EPS goes down post-merger.',
+explanation:'Accretion/dilution depends on relative P/E ratios and acquisition premium. If the acquirer has a higher P/E than the target, a stock deal is typically accretive.'},
+
+{id:'cf7',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The process of assigning fair values to all acquired assets and liabilities in an acquisition — the excess purchase price over fair net assets becomes goodwill.',
+answers:['purchase price allocation','ppa'],
+hint:'Required under IFRS 3 — abbreviated PPA.',
+explanation:'PPA assigns fair value to identifiable intangibles (IP, customer lists, brand) and liabilities. Under IFRS, goodwill is tested annually for impairment rather than amortised.'},
+
+{id:'cf8',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'A hostile takeover defence where existing shareholders can buy additional shares at a discount, diluting a potential acquirer\'s stake.',
+answers:['poison pill','shareholders rights plan'],
+hint:'Discourages hostile bids by making them prohibitively expensive.',
+explanation:'A poison pill allows all shareholders except the acquirer to buy shares at 50% discount when any party exceeds a trigger threshold. It forces the acquirer to negotiate with the board.'},
+
+{id:'cf9',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The benefits a combined company achieves that neither could achieve alone — the primary justification for paying acquisition premiums.',
+answers:['synergy','synergies'],
+hint:'2+2=5 — the key justification for M&A premiums.',
+explanation:'Cost synergies (headcount reduction, procurement savings) are more reliable than revenue synergies. Typically 25-50% of synergies is shared with target shareholders through the acquisition premium.'},
+
+{id:'cf10',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The period from purchasing inventory to collecting cash from customers — a measure of cash flow efficiency.',
+answers:['cash conversion cycle','ccc'],
+hint:'DIO + DSO - DPO — shorter is generally better.',
+explanation:'CCC = Days Inventory Outstanding + Days Sales Outstanding - Days Payables Outstanding. A short CCC means cash is tied up in operations for less time. Amazon famously operated with a negative CCC.'},
+
+{id:'cf11',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'Capital spending required to maintain existing assets and productive capacity at current levels.',
+answers:['maintenance capex','maintenance capital expenditure'],
+hint:'The unavoidable portion of capex — keeping the business running.',
+explanation:'Maintenance capex keeps the business running but does not generate incremental returns. Warren Buffett focuses on owner earnings (net income + D&A - maintenance capex) as true economic earnings.'},
+
+{id:'cf12',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The cash a company generates after funding operations and capital expenditures — available for distribution to debt and equity holders.',
+answers:['free cash flow','fcf','unlevered free cash flow'],
+hint:'EBIT(1-t) + D&A - CapEx - change in NWC.',
+explanation:'FCF = EBIT x (1-T) + D&A - CapEx - Change in NWC. Unlike net income, it is unaffected by capital structure. It is the correct input for an enterprise value DCF.'},
+
+{id:'cf13',cat:'corp_finance',catLabel:'Corporate Finance',points:15,
+definition:'A leveraged buyout where the existing management team participates as equity investors alongside the private equity sponsor.',
+answers:['management buyout','mbo'],
+hint:'Abbreviated MBO — aligns management incentives with PE sponsor.',
+explanation:'Management typically invests 1-5% of total equity in an MBO. This creates strong alignment. MBOs often come with less competition than open auctions as management has an informational advantage.'},
+
+{id:'cf14',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'A sale of a minority stake in a subsidiary through an initial public offering while the parent retains a controlling interest.',
+answers:['carve-out','equity carve-out'],
+hint:'Parent keeps control but raises cash and creates a public market for the subsidiary.',
+explanation:'Carve-outs allow parents to raise capital for a subsidiary while retaining control. Often a precursor to a full spin-off once the market values the subsidiary.'},
+
+{id:'cf15',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'An agreement between acquirer and target company where the target agrees not to solicit competing offers for a specified period.',
+answers:['no-shop provision','no-shop','exclusivity agreement'],
+hint:'Target agrees not to shop the deal — protects the acquirer\'s negotiating investment.',
+explanation:'No-shop provisions restrict targets from soliciting competing bids. Go-shop provisions (the opposite) allow the target to seek better offers for a limited period. Fiduciary exceptions allow boards to respond to unsolicited superior proposals.'},
+
+{id:'cf16',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'A fee paid by the target to the acquirer if the target breaks the merger agreement — typically 2-4% of deal value.',
+answers:['break-up fee','termination fee','reverse break fee'],
+hint:'Compensates acquirer if deal falls through — aligns incentives to close.',
+explanation:'Break-up fees incentivise targets to complete deals. Reverse break fees (paid by acquirer to target) compensate if the acquirer walks away. They became controversial in LBOs when PE firms paid reverse break fees to exit transactions during 2008.'},
+
+{id:'cf17',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'A type of corporate restructuring where a division or subsidiary is sold to an outside party for cash or other consideration.',
+answers:['divestiture','asset sale','divestitures'],
+hint:'Selling off part of the business — opposite of an acquisition.',
+explanation:'Divestitures can be strategic (refocusing on core business) or financial (raising cash, reducing leverage). Research shows that divesting non-core assets often increases the share price of the selling company by allowing focus and re-rating.'},
+
+{id:'cf18',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'A financial contract where the borrower receives funds upfront and repays the principal plus interest over a specified term — with the business assets as collateral.',
+answers:['term loan','leveraged loan','senior secured loan'],
+hint:'A key debt instrument in LBO financing — matures at a fixed date.',
+explanation:'Term loans are a primary LBO financing instrument. Term Loan A (amortises) and Term Loan B (bullet maturity, mostly held by institutional investors) are the two main types. TLBs typically have 5-7 year maturities and trade in the secondary market.'},
+
+{id:'cf19',cat:'corp_finance',catLabel:'Corporate Finance',points:15,
+definition:'Debt ranked below senior secured debt but above equity in the capital structure — offering higher yields to compensate for the additional risk.',
+answers:['mezzanine debt','mezzanine','junior debt','subordinated debt'],
+hint:'Between debt and equity in the capital structure — higher yield, more risk.',
+explanation:'Mezzanine debt includes PIK (payment-in-kind) notes, second lien loans, and subordinated bonds. It fills the gap between senior debt capacity and required equity. It often includes equity warrants to enhance returns for mezzanine lenders.'},
+
+{id:'cf20',cat:'corp_finance',catLabel:'Corporate Finance',points:10,
+definition:'The total rate of return on a company\'s invested capital — calculated as NOPAT divided by invested capital.',
+answers:['roic','return on invested capital'],
+hint:'Abbreviated ROIC — the primary measure of capital efficiency. Above WACC = value creation.',
+explanation:'ROIC = NOPAT / Invested Capital. When ROIC > WACC, the company creates shareholder value. The spread between ROIC and WACC determines how much value growth creates. Buffett focuses on companies with consistently high ROIC.'},
+
+// ═══════════════════════════════════════════════════════════════
+// FIXED INCOME (fi1–fi20)
+// ═══════════════════════════════════════════════════════════════
+{id:'fi1',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'The weighted average time to receive all cash flows from a bond — also a measure of its price sensitivity to interest rate changes.',
+answers:['duration','macaulay duration'],
+hint:'Longer duration = more interest rate risk. Measured in years.',
+explanation:'A bond with duration of 5 years falls approximately 5% in price if yields rise 1%. Modified duration = Macaulay duration / (1 + yield). Zero coupon bonds have the highest duration for a given maturity.'},
+
+{id:'fi2',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'The percentage change in a bond\'s price for a 1% change in yield.',
+answers:['modified duration'],
+hint:'The most commonly used interest rate risk measure for bonds.',
+explanation:'A bond with modified duration of 7 loses approximately 7% in value if rates rise 100bps. It works well for small yield changes but overestimates losses for large moves due to convexity.'},
+
+{id:'fi3',cat:'fixed_income',catLabel:'Fixed Income',points:15,
+definition:'A measure of the curvature in the price-yield relationship of a bond — explains why duration alone underestimates price increases when yields fall.',
+answers:['convexity'],
+hint:'Positive convexity is beneficial — bonds gain more than they lose for equal yield movements.',
+explanation:'Convexity is the second-order effect. Positive convexity: price rises more for yield decreases than it falls for equal yield increases. Callable bonds have negative convexity near the call price.'},
+
+{id:'fi4',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'The single discount rate equating the present value of all future cash flows to the bond\'s current market price.',
+answers:['yield to maturity','ytm'],
+hint:'Total expected return if held to maturity and coupons reinvested at the same rate.',
+explanation:'YTM assumes all coupons are reinvested at the same rate. It is the most comprehensive single yield measure and is used to compare bonds across different maturities and coupon structures.'},
+
+{id:'fi5',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'The additional yield an investor requires over a risk-free benchmark to compensate for credit risk.',
+answers:['credit spread','spread'],
+hint:'Widens during recessions — a gauge of credit health.',
+explanation:'Credit spreads reflect default risk and liquidity risk. Investment grade typically 50-200bps; high yield 300-1000bps+. A widening spread signals deteriorating credit conditions.'},
+
+{id:'fi6',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A bond with no periodic coupon payments — trading at a discount to face value, with the return coming entirely from price appreciation.',
+answers:['zero coupon bond','zero-coupon bond','zero coupon'],
+hint:'No periodic payments — bought at a deep discount, redeemed at par.',
+explanation:'Zero coupon bonds have duration equal to their maturity. They are highly sensitive to interest rates. STRIPS are US Treasury zero-coupon securities created by separating coupon and principal payments.'},
+
+{id:'fi7',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A bond giving the issuer the right to redeem it before maturity at a predetermined price.',
+answers:['callable bond','callable'],
+hint:'The call option benefits the issuer — investors require a higher yield to compensate.',
+explanation:'Callable bonds have negative convexity when rates fall because the call caps price appreciation. Investors demand a call premium (higher yield) to compensate for this disadvantage.'},
+
+{id:'fi8',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A fixed income security paying variable interest linked to a reference rate such as SONIA or SOFR, resetting periodically.',
+answers:['floating rate note','frn','floater'],
+hint:'Abbreviated FRN — low duration because coupons reset with market rates.',
+explanation:'FRNs have very low interest rate duration because the coupon adjusts when rates change. They carry credit risk but almost no interest rate risk, making them popular in rising rate environments.'},
+
+{id:'fi9',cat:'fixed_income',catLabel:'Fixed Income',points:15,
+definition:'A bond that can be converted into a predetermined number of equity shares at the holder\'s option.',
+answers:['convertible bond','convertible'],
+hint:'Equity upside with bond downside protection.',
+explanation:'Converts behave as bonds when stock is well below the conversion price and as equity when well above it. Typically issued at below-market yields in exchange for the conversion option.'},
+
+{id:'fi10',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'The spread over the theoretical spot rate curve that removes the effect of a bond\'s embedded options — allowing fair comparison.',
+answers:['option-adjusted spread','oas'],
+hint:'Abbreviated OAS — used to compare callable and non-callable bonds on equal footing.',
+explanation:'OAS strips out embedded options from the nominal spread to give a pure credit/liquidity spread. It is the key metric for comparing callable corporate bonds against plain vanilla bonds.'},
+
+{id:'fi11',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A portfolio strategy constructing bond holdings such that portfolio duration matches the investment horizon, protecting against interest rate risk.',
+answers:['immunisation','immunization'],
+hint:'Sets portfolio duration equal to the liability duration.',
+explanation:'Immunisation protects against interest rate changes by matching portfolio duration to liability duration. As rates change, price risk and reinvestment risk offset each other, locking in the required return.'},
+
+{id:'fi12',cat:'fixed_income',catLabel:'Fixed Income',points:15,
+definition:'A bond portfolio strategy concentrating holdings at short and long maturities while avoiding intermediate maturities.',
+answers:['barbell strategy','barbell'],
+hint:'Short + long maturities, nothing in the middle.',
+explanation:'A barbell holds short-term bonds for liquidity and long-term bonds for yield. It benefits if the yield curve steepens or inverts unexpectedly. Contrast with a bullet strategy (all bonds at the same maturity) or a ladder.'},
+
+{id:'fi13',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A bond rated below investment grade (below BBB-/Baa3) — offering higher yields to compensate for higher default risk.',
+answers:['high yield bond','junk bond','high yield'],
+hint:'Also called junk bonds — rated BB+ or lower.',
+explanation:'High yield bonds behave more like equities in downturns. Yields typically range from 5-15%+. The high yield market is a key indicator of credit conditions and risk appetite.'},
+
+{id:'fi14',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A previously investment grade bond that has been downgraded to high yield status — often causing forced selling from investment grade fund mandates.',
+answers:['fallen angel'],
+hint:'Was once investment grade — the downgrade creates buying opportunities.',
+explanation:'Fallen angels are forced sellers from investment grade indices. This can create price dislocations as technical selling pressure outweighs fundamental value. Historically, fallen angels have outperformed original issue high yield bonds.'},
+
+{id:'fi15',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'The sensitivity of a bond\'s price to a 1 basis point change in interest rates — essential for fixed income risk management.',
+answers:['dv01','dollar value of 01','pvbp'],
+hint:'Abbreviated DV01 — the P&L impact of a 1bp rate move.',
+explanation:'DV01 = Modified Duration x Dirty Price / 10,000. A position with DV01 of £10,000 loses £10,000 if rates rise 1bp. Portfolio managers use DV01 to size interest rate hedges precisely.'},
+
+{id:'fi16',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A graphical representation of the relationship between interest rates and bond maturities — typically sloping upward in normal conditions.',
+answers:['yield curve'],
+hint:'Short rates on the left, long rates on the right — slopes up in normal markets.',
+explanation:'The yield curve reflects market expectations of future rates, risk premium, and supply/demand. Normal (upward sloping), flat, inverted, and humped are the four main shapes. The 2s10s spread is the most-watched segment.'},
+
+{id:'fi17',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A yield curve where short-term bonds yield more than long-term bonds — historically a reliable recession predictor.',
+answers:['inverted yield curve','yield curve inversion'],
+hint:'The opposite of normal — has preceded every US recession since 1955.',
+explanation:'The 2s10s inversion signals that markets expect future rates to be lower than current rates (typically implying recession). The lag between inversion and recession is typically 12-18 months.'},
+
+{id:'fi18',cat:'fixed_income',catLabel:'Fixed Income',points:15,
+definition:'An agreement to sell securities with a commitment to repurchase them at a higher price — effectively a short-term collateralised loan.',
+answers:['repo','repurchase agreement'],
+hint:'The backbone of short-term wholesale funding — provides liquidity against collateral.',
+explanation:'In a repo, the seller provides collateral (typically government bonds) and receives cash. The repo rate is the implied interest rate. Repos are critical for bank funding. The 2008 repo market freeze was a key transmission mechanism of the crisis.'},
+
+{id:'fi19',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'US government securities whose principal is adjusted for inflation, providing investors with inflation-protected real returns.',
+answers:['tips','treasury inflation-protected securities','inflation-linked bonds'],
+hint:'Abbreviated TIPS — principal grows with CPI.',
+explanation:'TIPS principal increases with CPI inflation. The break-even inflation rate (nominal yield minus TIPS yield) represents the market\'s inflation expectation. Real yields on TIPS are the pure cost of money adjusted for inflation.'},
+
+{id:'fi20',cat:'fixed_income',catLabel:'Fixed Income',points:10,
+definition:'A portfolio of bonds with maturities spread evenly across time horizons — providing predictable reinvestment as each rung matures.',
+answers:['ladder strategy','bond ladder','ladder portfolio'],
+hint:'Bonds maturing every year — one rung at a time.',
+explanation:'A bond ladder reduces reinvestment risk by spreading maturities. As each bond matures, proceeds are reinvested at prevailing rates. It provides regular liquidity without needing to sell bonds before maturity.'},
+
+// ═══════════════════════════════════════════════════════════════
+// DERIVATIVES (d1–d20)
+// ═══════════════════════════════════════════════════════════════
+{id:'d1',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'The sensitivity of an option\'s price to a $1 change in the underlying asset price — ranges from 0 to 1 for calls and -1 to 0 for puts.',
+answers:['delta'],
+hint:'Greek letter — call deltas are positive, put deltas are negative.',
+explanation:'Delta is the hedge ratio. An ATM option has delta approximately 0.5. Deep ITM options approach delta of 1. Delta hedging involves continuously adjusting the hedge as delta changes.'},
+
+{id:'d2',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'The rate of change of delta with respect to the underlying asset price — measuring the curvature of the option\'s value.',
+answers:['gamma'],
+hint:'Greek letter — highest for at-the-money options near expiry.',
+explanation:'High gamma means delta changes rapidly, making hedging expensive. Long options have positive gamma; short options have negative gamma. Gamma scalping is the process of harvesting gains from frequent rebalancing.'},
+
+{id:'d3',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'The sensitivity of an option\'s price to a 1% change in implied volatility.',
+answers:['vega'],
+hint:'Greek letter — highest for long-dated ATM options.',
+explanation:'Long options have positive vega (benefit from rising volatility); short options have negative vega. Vega is critical for traders taking views on volatility levels rather than directional moves.'},
+
+{id:'d4',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'The daily decline in an option\'s value due to the passage of time — called time decay.',
+answers:['theta','time decay'],
+hint:'Greek letter — negative for long options, positive for short options.',
+explanation:'Theta accelerates as expiry approaches for ATM options. Selling options (earning theta) must be balanced against gamma risk. Theta and gamma are directly linked: high gamma = high theta cost.'},
+
+{id:'d5',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A relationship stating that call price minus put price equals spot price minus present value of strike — linking European calls and puts with same strike and expiry.',
+answers:['put-call parity','put call parity'],
+hint:'C - P = S - PV(K) — arbitrage-free relationship.',
+explanation:'If put-call parity is violated, a riskless arbitrage exists. It requires European options with the same strike and expiry. American options can violate put-call parity due to early exercise rights.'},
+
+{id:'d6',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A model pricing European options using the underlying price, strike, time to expiry, risk-free rate, and volatility.',
+answers:['black-scholes model','black-scholes','bsm'],
+hint:'Named after Fischer Black and Myron Scholes — the foundational options pricing framework.',
+explanation:'Black-Scholes assumes log-normal returns, constant volatility, no dividends, and continuous hedging. In practice, volatility is not constant (volatility smile). Despite limitations, it remains the industry standard.'},
+
+{id:'d7',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'The volatility implied by an option\'s current market price — representing the market\'s consensus view of future volatility.',
+answers:['implied volatility','iv','implied vol'],
+hint:'Derived by inverting Black-Scholes — the market\'s forecast of future volatility.',
+explanation:'When IV exceeds historical volatility, options appear expensive. The VIX Index represents implied volatility on the S&P 500 and is known as the fear gauge.'},
+
+{id:'d8',cat:'derivatives',catLabel:'Derivatives',points:15,
+definition:'The pattern where implied volatility is higher for in-the-money and out-of-the-money options than for at-the-money options.',
+answers:['volatility smile','vol smile','volatility skew'],
+hint:'Implied volatility plotted against strike forms a U-shape or skew.',
+explanation:'The volatility smile arises because markets price in extreme moves that Black-Scholes underestimates. In equity markets it is typically a skew (higher IV for downside puts) due to crash risk.'},
+
+{id:'d9',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'An obligation for two parties to exchange cash flows — typically fixed rate for floating rate — based on a notional principal amount.',
+answers:['interest rate swap','irs','vanilla swap'],
+hint:'The most common derivative by notional — fixed for floating.',
+explanation:'In a vanilla IRS, one party pays fixed and receives floating (SONIA/SOFR). The notional principal is never exchanged — only the interest differential. Companies use swaps to convert floating debt to fixed.'},
+
+{id:'d10',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A derivative contract giving the buyer the right but not the obligation to buy an asset at a specified price before or at expiry.',
+answers:['call option','call'],
+hint:'Profits when the underlying rises above the strike price.',
+explanation:'Call options have value when the underlying trades above the strike. Max loss = premium paid. Max gain = unlimited. Used for bullish speculation, covered calls (income), and corporate hedging.'},
+
+{id:'d11',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A derivative contract giving the buyer the right but not the obligation to sell an asset at a specified price before or at expiry.',
+answers:['put option','put'],
+hint:'Profits when the underlying falls below the strike price.',
+explanation:'Put options increase in value as the underlying falls. Used for downside protection (protective put), bearish speculation, or creating equity portfolio floors. Long puts are portfolio insurance.'},
+
+{id:'d12',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A credit derivative in which the protection seller receives periodic payments in exchange for compensating the buyer if a reference entity defaults.',
+answers:['credit default swap','cds'],
+hint:'Abbreviated CDS — insurance against a bond default.',
+explanation:'CDS spreads reflect the market\'s view of default probability and recovery rates. Buying CDS is equivalent to buying bond insurance. During 2008, AIG\'s massive CDS portfolio nearly collapsed the financial system.'},
+
+{id:'d13',cat:'derivatives',catLabel:'Derivatives',points:15,
+definition:'An option strategy combining a long call and long put at the same strike and expiry — profitable when the underlying makes a large move in either direction.',
+answers:['straddle','long straddle'],
+hint:'Long call + long put, same strike — you want volatility, not direction.',
+explanation:'A straddle profits if the underlying moves more than the combined option premium. It is a pure volatility bet. Implied volatility crush after earnings is a classic straddle risk.'},
+
+{id:'d14',cat:'derivatives',catLabel:'Derivatives',points:15,
+definition:'An option strategy selling a call above the current price and selling a put below it — collecting premium in exchange for capping upside and limiting downside protection.',
+answers:['collar','collar strategy'],
+hint:'Long stock + long put + short call — creates a band.',
+explanation:'A collar limits both upside and downside. Corporations use collars to protect concentrated equity positions without triggering a taxable event. The put cost is partially offset by call premium received.'},
+
+{id:'d15',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A derivative contract obligating two parties to exchange one currency for another at a specified rate on a future date.',
+answers:['currency swap','fx swap','cross currency swap'],
+hint:'Exchange currencies now and reverse the exchange later at a fixed rate.',
+explanation:'Currency swaps are used by multinationals to access cheaper financing in foreign markets. Unlike FX forwards, currency swaps involve principal exchange at start and end. Central banks use swap lines to provide dollar liquidity to foreign banks.'},
+
+{id:'d16',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A strategy buying volatility on individual stocks while selling index volatility — profiting if stock correlations fall.',
+answers:['dispersion trading','dispersion trade'],
+hint:'Long single-stock volatility, short index volatility — bets on correlation decreasing.',
+explanation:'Dispersion trading exploits the difference between implied index volatility and the implied volatility of the constituent stocks. Index vol > weighted component vol implies the market is pricing high correlation. If correlations fall, the trade profits.'},
+
+{id:'d17',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A derivative where the payoff depends on the path taken by the underlying asset, not just its final price.',
+answers:['path-dependent option','exotic option'],
+hint:'Asian options and barrier options are examples — the full price path matters.',
+explanation:'Path-dependent options include Asian (average price), barrier (knock-in/knock-out), and lookback options. They are typically cheaper than vanilla options but harder to price (requiring Monte Carlo simulation rather than Black-Scholes).'},
+
+{id:'d18',cat:'derivatives',catLabel:'Derivatives',points:15,
+definition:'An option strategy simultaneously buying and selling options at different strikes but same expiry — typically to create a defined risk/reward range.',
+answers:['vertical spread','bull spread','bear spread'],
+hint:'Buy one option, sell another at a different strike — defined risk and reward.',
+explanation:'A bull call spread: buy low-strike call, sell high-strike call. Limits both the cost and the maximum gain. Bull/bear spreads are popular ways to express a directional view while reducing premium outlay.'},
+
+{id:'d19',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'An option whose value depends on the exchange rate between two currencies — where the underlying is a foreign asset.',
+answers:['quanto option','quantity-adjusted option'],
+hint:'Eliminates exchange rate risk from a foreign equity exposure.',
+explanation:'Quanto options pay in the domestic currency regardless of exchange rate movements. They are used by investors wanting exposure to foreign equity returns without FX risk. The FX correlation must be modelled in pricing.'},
+
+{id:'d20',cat:'derivatives',catLabel:'Derivatives',points:10,
+definition:'A strategy exploiting differences between the implied volatility of a convertible bond and the implied volatility of the underlying equity options.',
+answers:['convertible arbitrage','convert arb'],
+hint:'Long convertible, short equity — exploiting embedded option mispricing.',
+explanation:'Convertible arb funds buy convertibles and delta-hedge by shorting the underlying stock. They profit from the convertible\'s implied volatility being cheaper than listed options. This strategy struggled when credit spreads and equity markets moved simultaneously in 2008.'},
+
+// ═══════════════════════════════════════════════════════════════
+// RISK (r1–r20)
+// ═══════════════════════════════════════════════════════════════
+{id:'r1',cat:'risk',catLabel:'Risk',points:10,
+definition:'A statistical measure of the maximum potential loss on a portfolio over a specific time horizon at a given confidence level.',
+answers:['value at risk','var'],
+hint:'Abbreviated VaR — maximum loss in X% of worst cases.',
+explanation:'A 1-day 99% VaR of £1m means there is a 1% chance of losing more than £1m in a day. VaR was criticised for underestimating tail risk and assuming normal distributions in the 2008 crisis.'},
+
+{id:'r2',cat:'risk',catLabel:'Risk',points:15,
+definition:'The expected loss in the worst scenarios beyond the VaR threshold — measuring the average of tail losses.',
+answers:['expected shortfall','conditional var','cvar','es'],
+hint:'The average of losses that exceed VaR — a more complete picture of tail risk.',
+explanation:'Expected Shortfall answers: given that I lose more than VaR, how much do I expect to lose on average? Basel III requires banks to use ES (97.5%) rather than VaR for market risk capital.'},
+
+{id:'r3',cat:'risk',catLabel:'Risk',points:10,
+definition:'Risk that cannot be eliminated through diversification — inherent in the entire market due to macroeconomic factors.',
+answers:['systematic risk','market risk','undiversifiable risk'],
+hint:'Cannot be diversified away — beta measures exposure to this.',
+explanation:'Systematic risk affects all assets simultaneously (recession, rates, geopolitics). Under CAPM, investors are only compensated for systematic risk because idiosyncratic risk can be diversified away.'},
+
+{id:'r4',cat:'risk',catLabel:'Risk',points:10,
+definition:'Company-specific risk that can be eliminated through diversification.',
+answers:['idiosyncratic risk','unsystematic risk','specific risk','diversifiable risk'],
+hint:'Can be eliminated in a well-diversified portfolio — CAPM does not compensate for this.',
+explanation:'Idiosyncratic risk includes management changes, product failures, and lawsuits. In a sufficiently diversified portfolio, these risks cancel out.'},
+
+{id:'r5',cat:'risk',catLabel:'Risk',points:10,
+definition:'The additional return per unit of total risk — portfolio return minus risk-free rate divided by standard deviation.',
+answers:['sharpe ratio','sharpe'],
+hint:'Higher is better — named after William Sharpe.',
+explanation:'Sharpe ratio = (Rp - Rf) / standard deviation. A ratio above 1 is generally good; 2+ is excellent. It penalises both upside and downside volatility equally.'},
+
+{id:'r6',cat:'risk',catLabel:'Risk',points:10,
+definition:'A risk-adjusted return measure using downside deviation rather than standard deviation — only penalising volatility below a target return.',
+answers:['sortino ratio'],
+hint:'Like Sharpe but only counts downside volatility.',
+explanation:'Sortino ratio = (Rp - Rf) / downside deviation. More appropriate for strategies with positive skew. Upside volatility is not penalised, giving a more complete picture for asymmetric strategies.'},
+
+{id:'r7',cat:'risk',catLabel:'Risk',points:10,
+definition:'The annualised standard deviation of a portfolio\'s excess returns relative to its benchmark.',
+answers:['tracking error','te','active risk'],
+hint:'Low value means the portfolio closely mirrors its benchmark.',
+explanation:'Tracking error = std dev of (portfolio return - benchmark return). High tracking error indicates an active, benchmark-agnostic strategy. An information ratio above 0.5 is considered good.'},
+
+{id:'r8',cat:'risk',catLabel:'Risk',points:10,
+definition:'Excess return over benchmark divided by tracking error — measuring active management skill per unit of active risk.',
+answers:['information ratio','ir'],
+hint:'Excess return per unit of active risk — abbreviated IR.',
+explanation:'Information ratio = (Portfolio return - Benchmark return) / Tracking error. IR above 0.5 is good; above 1.0 is excellent. It measures the skill of an active manager at generating alpha.'},
+
+{id:'r9',cat:'risk',catLabel:'Risk',points:10,
+definition:'The sensitivity of a bond\'s price to a 1 basis point change in interest rates.',
+answers:['dv01','dollar value of 01','pvbp','price value of a basis point'],
+hint:'Abbreviated DV01 — P&L impact of a 1bp rate move.',
+explanation:'DV01 = Modified Duration x Dirty Price / 10,000. Portfolio managers use DV01 to size interest rate hedges precisely and express duration in monetary terms.'},
+
+{id:'r10',cat:'risk',catLabel:'Risk',points:10,
+definition:'The peak-to-trough decline in portfolio value over a given period — measuring the worst historical loss experienced.',
+answers:['maximum drawdown','max drawdown'],
+hint:'The worst loss from a peak to a subsequent trough.',
+explanation:'The Calmar ratio = annual return / maximum drawdown, rewarding strong returns relative to worst-case losses. Maximum drawdown is critical for understanding investor experience through market cycles.'},
+
+{id:'r11',cat:'risk',catLabel:'Risk',points:15,
+definition:'The risk that a counterparty will default before settling a financial transaction.',
+answers:['counterparty risk','counterparty credit risk'],
+hint:'The risk your derivatives counterparty fails before the contract matures.',
+explanation:'Post-2008 reforms mandated central clearing through CCPs for standardised derivatives to reduce bilateral counterparty risk. Initial and variation margin requirements reduce exposure to surviving counterparties.'},
+
+{id:'r12',cat:'risk',catLabel:'Risk',points:10,
+definition:'The risk that a position cannot be liquidated at close to fair value due to wide bid-ask spreads, thin markets, or large position size.',
+answers:['liquidity risk','market liquidity risk'],
+hint:'The risk you cannot sell when you need to.',
+explanation:'Liquidity risk manifests as wider-than-expected spreads or market impact when exiting large positions. During crises, correlations rise and liquidity dries up simultaneously — a double blow to portfolios.'},
+
+{id:'r13',cat:'risk',catLabel:'Risk',points:10,
+definition:'The percentage of an asset\'s total return that can be attributed to factors beyond the specific factor being measured — used in performance attribution.',
+answers:['active share'],
+hint:'High active share = portfolio differs significantly from the benchmark.',
+explanation:'Active share measures how different a portfolio is from its benchmark. Above 60% indicates high conviction. Low active share suggests closet indexing. Used alongside tracking error for complete picture of active risk.'},
+
+{id:'r14',cat:'risk',catLabel:'Risk',points:10,
+definition:'The proportion of outstanding bond principal expected to be recovered after a default — typically 40-60% for senior secured debt.',
+answers:['recovery rate'],
+hint:'What you get back after a default — key input to credit models.',
+explanation:'Recovery rates vary by seniority: senior secured ~60-70%, senior unsecured ~40-50%, subordinated ~20-30%, equity ~0%. Recovery is higher in asset-heavy industries. Credit loss = PD x LGD x EAD where LGD = 1 - Recovery Rate.'},
+
+{id:'r15',cat:'risk',catLabel:'Risk',points:15,
+definition:'A stress testing approach starting from a specific failure outcome and working backwards to identify the scenarios that would cause it.',
+answers:['reverse stress testing'],
+hint:'Start from the outcome (bank failure) and work backwards.',
+explanation:'Reverse stress testing identifies vulnerabilities that traditional scenario analysis might miss. Regulators require banks to identify scenarios that would render the business model unviable. It complements forward-looking stress tests.'},
+
+{id:'r16',cat:'risk',catLabel:'Risk',points:10,
+definition:'The risk that losses from a single exposure or group of related exposures are large enough to threaten the institution\'s viability.',
+answers:['concentration risk'],
+hint:'Too many eggs in one basket — single counterparty or sector exposure.',
+explanation:'Concentration risk arises from large single exposures (names, sectors, geographies). Basel regulations limit single-name exposures to 25% of Tier 1 capital. Diversification is the primary mitigation, but true diversification in crises is rare.'},
+
+{id:'r17',cat:'risk',catLabel:'Risk',points:10,
+definition:'The risk arising from inadequate or failed internal processes, people, and systems — or from external events.',
+answers:['operational risk'],
+hint:'Non-financial risk — rogue traders, system failures, fraud.',
+explanation:'Operational risk includes fraud (Nick Leeson, Kweku Adoboli), IT failures, and legal risk. Basel requires banks to hold capital against operational risk using the standardised or advanced measurement approach. It is the hardest risk to quantify.'},
+
+{id:'r18',cat:'risk',catLabel:'Risk',points:15,
+definition:'The risk that a financial model will be incorrect or misused — particularly important for complex derivatives and risk management systems.',
+answers:['model risk'],
+hint:'All models are wrong; some are useful. This is the risk when they are wrong in costly ways.',
+explanation:'Model risk arises when models have incorrect assumptions, are incorrectly calibrated, or are applied outside their valid range. The 2008 crisis exposed massive model risk in CDO pricing (Gaussian copula) and VaR models.'},
+
+{id:'r19',cat:'risk',catLabel:'Risk',points:10,
+definition:'The risk that a financial institution\'s solvency or liquidity is threatened by funding outflows — particularly in stress scenarios.',
+answers:['funding risk','funding liquidity risk'],
+hint:'The risk of being unable to fund assets — distinct from market liquidity risk.',
+explanation:'Funding risk materialised in 2008 when interbank markets froze and banks could not roll over short-term funding. Basel III\'s NSFR and LCR requirements directly address funding risk by requiring stable funding and liquid asset buffers.'},
+
+{id:'r20',cat:'risk',catLabel:'Risk',points:10,
+definition:'The risk to an asset or business from physical impacts of climate change and the economic transition to a lower-carbon economy.',
+answers:['climate risk','physical climate risk','transition risk'],
+hint:'Physical (floods, heat) and transition (stranded assets, carbon taxes) are the two types.',
+explanation:'Physical risk affects real assets; transition risk affects fossil fuel companies (stranded assets) and carbon-intensive industries. The TCFD framework provides guidance on climate risk disclosure required by UK regulators.'},
+
+// ═══════════════════════════════════════════════════════════════
+// MARKETS & MACRO (m1–m20)
+// ═══════════════════════════════════════════════════════════════
+{id:'m1',cat:'markets',catLabel:'Markets',points:10,
+definition:'The process by which a central bank purchases assets to inject money into the economy when conventional policy is constrained.',
+answers:['quantitative easing','qe'],
+hint:'Abbreviated QE — the Fed, ECB, and BOE all deployed this post-2008.',
+explanation:'QE increases bank reserves and lowers long-term rates by buying government bonds. Critics argue it inflates asset prices without stimulating the real economy proportionately.'},
+
+{id:'m2',cat:'markets',catLabel:'Markets',points:10,
+definition:'The process by which a central bank reduces its balance sheet — allowing bonds to mature without reinvestment or actively selling assets.',
+answers:['quantitative tightening','qt','balance sheet runoff'],
+hint:'Abbreviated QT — the withdrawal of QE liquidity.',
+explanation:'QT reduces the money supply and can push long-term rates higher. The Fed began QT in 2022 alongside rate hikes to combat inflation.'},
+
+{id:'m3',cat:'markets',catLabel:'Markets',points:5,
+definition:'A measure of a stock\'s sensitivity to market movements — a value above 1 means more volatile than the market.',
+answers:['beta'],
+hint:'Greek letter — used in CAPM.',
+explanation:'Beta > 1: more volatile than market. Beta < 1: less volatile. Beta = 1: moves with market. In CAPM: Expected return = Rf + beta x (Rm - Rf).'},
+
+{id:'m4',cat:'markets',catLabel:'Markets',points:10,
+definition:'The return investors demand above the risk-free rate to compensate for bearing equity market risk.',
+answers:['equity risk premium','erp'],
+hint:'Abbreviated ERP — typically 4-6% historically.',
+explanation:'ERP = Expected equity return - Risk-free rate. A higher ERP raises WACC and lowers valuations. During crises, implied ERP rises as prices fall.'},
+
+{id:'m5',cat:'markets',catLabel:'Markets',points:10,
+definition:'The inverse relationship between unemployment and inflation — the central bank\'s fundamental trade-off.',
+answers:['phillips curve'],
+hint:'Lower unemployment tends to mean higher inflation — the central bank\'s dilemma.',
+explanation:'The short-run Phillips curve shows a trade-off. The long-run curve is vertical at the natural rate. The 1970s stagflation challenged the stable Phillips curve relationship.'},
+
+{id:'m6',cat:'markets',catLabel:'Markets',points:10,
+definition:'The theory that interest rate differentials between countries equal the expected change in exchange rates — preventing riskless arbitrage.',
+answers:['interest rate parity','irp'],
+hint:'Higher rates imply expected currency depreciation.',
+explanation:'Covered IRP: forward rate difference = interest rate differential. Covered IRP holds extremely well due to arbitrage. Uncovered IRP holds less reliably.'},
+
+{id:'m7',cat:'markets',catLabel:'Markets',points:10,
+definition:'The theory that exchange rates adjust to equalise purchasing power across countries — a long-run determinant of fair exchange rates.',
+answers:['purchasing power parity','ppp'],
+hint:'A Big Mac should cost the same everywhere in the long run.',
+explanation:'Absolute PPP: exchange rate = ratio of price levels. Relative PPP: rate of currency depreciation = inflation differential. The Economist\'s Big Mac Index is a famous PPP tracker.'},
+
+{id:'m8',cat:'markets',catLabel:'Markets',points:10,
+definition:'A period of high inflation combined with stagnating growth and high unemployment.',
+answers:['stagflation'],
+hint:'The 1970s oil crisis created this — the nightmare for central banks.',
+explanation:'Stagflation occurs when supply shocks raise inflation while reducing output. Central banks face an impossible choice: tighten to fight inflation or ease to support growth.'},
+
+{id:'m9',cat:'markets',catLabel:'Markets',points:10,
+definition:'A market where prices fully reflect all available information — making it impossible to consistently beat the market.',
+answers:['efficient market hypothesis','emh','efficient markets hypothesis'],
+hint:'Abbreviated EMH — proposed by Eugene Fama.',
+explanation:'Weak form: prices reflect past prices. Semi-strong: all public information. Strong: all information including private. Active managers argue markets are not perfectly efficient; passive managers argue the opposite.'},
+
+{id:'m10',cat:'markets',catLabel:'Markets',points:10,
+definition:'The mechanism by which information is rapidly incorporated into asset prices through trading activity.',
+answers:['price discovery'],
+hint:'The process by which markets find fair value.',
+explanation:'Price discovery occurs as buyers and sellers exchange information through trading. Futures markets often lead spot markets in price discovery. HFT firms and algorithmic traders play a major role in modern price discovery.'},
+
+{id:'m11',cat:'markets',catLabel:'Markets',points:10,
+definition:'A broad measure of the money supply including cash, current accounts, savings accounts, and money market instruments.',
+answers:['broad money','m2','m3'],
+hint:'A broader measure than base money — includes deposits and near-money instruments.',
+explanation:'Broad money growth is a leading indicator of inflation (Quantity Theory: MV=PQ). Central banks monitor broad money alongside credit growth. Excessive broad money growth without productivity gains tends to cause inflation.'},
+
+{id:'m12',cat:'markets',catLabel:'Markets',points:10,
+definition:'The stance of monetary policy that neither stimulates nor restricts economic activity — the theoretical resting point for interest rates.',
+answers:['neutral interest rate','r-star','natural rate of interest'],
+hint:'Also called r-star — where policy is neither tight nor loose.',
+explanation:'The neutral rate (r-star) is unobservable but estimated at approximately 2-3% for major economies. When the policy rate is above neutral, monetary policy is restrictive. Below neutral, it is accommodative.'},
+
+{id:'m13',cat:'markets',catLabel:'Markets',points:10,
+definition:'The difference between a government\'s expenditure and its revenues, excluding interest payments on existing debt.',
+answers:['primary surplus','primary deficit','primary balance'],
+hint:'Excludes interest payments — the structural fiscal position.',
+explanation:'A primary surplus means the government is generating enough revenue to cover non-interest spending. Countries need primary surpluses to stabilise debt/GDP ratios when the interest rate exceeds growth. This is the critical condition in debt sustainability analysis.'},
+
+{id:'m14',cat:'markets',catLabel:'Markets',points:15,
+definition:'The simultaneous current account and government budget deficits — a concern for currency stability and sovereign credit ratings.',
+answers:['twin deficits'],
+hint:'Current account deficit + fiscal deficit — associated with currency weakness.',
+explanation:'Twin deficits occurred in the US in the 1980s and 2000s. The current account deficit means foreign investment is financing domestic spending. If foreign investors lose confidence, the currency can weaken sharply.'},
+
+{id:'m15',cat:'markets',catLabel:'Markets',points:10,
+definition:'A government\'s fiscal strategy that increases spending or cuts taxes during downturns and does the opposite during booms.',
+answers:['countercyclical fiscal policy','automatic stabilisers','fiscal stimulus'],
+hint:'Spend more in downturns, save in booms — smoothing the economic cycle.',
+explanation:'Automatic stabilisers (unemployment benefits, tax receipts) naturally expand deficits in downturns without policy changes. Discretionary fiscal stimulus involves active government spending. The UK\'s Office for Budget Responsibility assesses fiscal sustainability.'},
+
+{id:'m16',cat:'markets',catLabel:'Markets',points:10,
+definition:'The rate of economic growth at which an economy can grow without causing inflation — determined by labour force growth and productivity.',
+answers:['potential gdp','potential output','trend growth'],
+hint:'The speed limit of the economy without causing inflation.',
+explanation:'When actual GDP exceeds potential GDP, an inflationary output gap opens. When below, a deflationary gap. Central banks try to keep the economy growing at the potential rate. The output gap is unobservable and estimated with significant uncertainty.'},
+
+{id:'m17',cat:'markets',catLabel:'Markets',points:10,
+definition:'Inflation that excludes food and energy prices — considered a better measure of underlying price pressure.',
+answers:['core inflation','core cpi'],
+hint:'CPI excluding food and energy — less volatile, more policy-relevant.',
+explanation:'Food and energy prices are highly volatile and driven by supply shocks outside central bank control. Core inflation is used to assess whether inflation is becoming embedded. Central bank targets typically refer to headline inflation but they monitor core closely.'},
+
+{id:'m18',cat:'markets',catLabel:'Markets',points:10,
+definition:'The current account plus the financial account — a comprehensive measure of a country\'s transactions with the rest of the world.',
+answers:['balance of payments','bop'],
+hint:'Current account + financial account must sum to zero.',
+explanation:'The BOP always balances: a current account deficit must be financed by a financial account surplus (capital inflows). Persistent BOP imbalances are unsustainable and typically resolved through currency adjustment or capital flow reversal.'},
+
+{id:'m19',cat:'markets',catLabel:'Markets',points:10,
+definition:'A central bank communication strategy committing to maintaining low rates for an extended period to influence long-term expectations.',
+answers:['forward guidance'],
+hint:'Influencing expectations about future policy before it happens.',
+explanation:'Forward guidance attempts to lower long-term rates by credibly committing to future policy. Calendar-based guidance ("rates will remain low until 2025") and state-contingent guidance ("until unemployment falls below X%") are two approaches.'},
+
+{id:'m20',cat:'markets',catLabel:'Markets',points:10,
+definition:'The increase in output for each additional unit of labour — the primary driver of sustainable long-run economic growth.',
+answers:['labour productivity','productivity growth','total factor productivity'],
+hint:'More output per worker — the only sustainable source of higher living standards.',
+explanation:'Labour productivity = GDP / Hours worked. Productivity growth is the key driver of sustainable wage growth and living standards. The UK has suffered from low productivity growth since 2008 — the "productivity puzzle".'},
+
+// ═══════════════════════════════════════════════════════════════
+// PORTFOLIO THEORY (pt1–pt15)
+// ═══════════════════════════════════════════════════════════════
+{id:'pt1',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'The process of finding portfolios offering the highest expected return for each level of risk — the foundation of modern portfolio theory.',
+answers:['mean-variance optimisation','mean variance optimisation','markowitz optimisation'],
+hint:'Markowitz\'s key contribution — balances expected return against variance.',
+explanation:'Mean-variance optimisation finds portfolio weights that maximise expected return for a given variance. The result is the efficient frontier. In practice, it is highly sensitive to input assumptions.'},
+
+{id:'pt2',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'The set of optimal portfolios offering the highest expected return for each level of risk.',
+answers:['efficient frontier'],
+hint:'The best possible portfolios — rational investors only hold portfolios on this.',
+explanation:'The efficient frontier is a hyperbola in return-risk space. Adding a risk-free asset creates the Capital Market Line. Portfolios below the frontier are inefficient.'},
+
+{id:'pt3',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'The tangent line from the risk-free rate to the efficient frontier — all rational investors hold a combination of the risk-free asset and this.',
+answers:['capital market line','cml'],
+hint:'Abbreviated CML — optimal portfolios when a risk-free asset exists.',
+explanation:'The CML has slope equal to the Sharpe ratio of the market portfolio. All investors hold the same risky portfolio (the market) combined with the risk-free asset.'},
+
+{id:'pt4',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'A model extending CAPM by adding size (SMB) and value (HML) factors to better explain the cross-section of equity returns.',
+answers:['fama-french three factor model','fama french model','three factor model'],
+hint:'Named after Fama and French — small-cap and value stocks earn premiums.',
+explanation:'Fama-French: E(R) = Rf + b1 x MKT + b2 x SMB + b3 x HML. Small-cap stocks and value stocks earned persistent historical premiums. Their later 5-factor model adds profitability and investment factors.'},
+
+{id:'pt5',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'A portfolio construction framework combining CAPM equilibrium returns with investor views using Bayesian statistics.',
+answers:['black-litterman model','black litterman'],
+hint:'Combines equilibrium returns with investor views — named after Fischer Black and Robert Litterman.',
+explanation:'Black-Litterman solves the problem of extreme weights from pure mean-variance optimisation. It starts from market equilibrium and adjusts proportionally to investor conviction in their views.'},
+
+{id:'pt6',cat:'portfolio',catLabel:'Portfolio Theory',points:15,
+definition:'A strategy allocating equal amounts of risk to each asset class rather than equal capital — typically giving bonds much more weight than equities.',
+answers:['risk parity'],
+hint:'Each asset contributes equally to portfolio risk.',
+explanation:'In a risk parity portfolio, bonds receive much higher capital allocation than equities so each contributes equally to total risk. Typically uses leverage on bonds. Risk parity struggled when bonds and equities fell simultaneously in 2022.'},
+
+{id:'pt7',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'An investment approach designing the asset allocation to match expected future liabilities — used by pension funds.',
+answers:['liability-driven investing','ldi'],
+hint:'Abbreviated LDI — pension funds immunise against liability changes.',
+explanation:'LDI uses long-duration bonds and interest rate swaps to match the duration and inflation sensitivity of pension liabilities. LDI growth contributed to the 2022 UK gilts crisis.'},
+
+{id:'pt8',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'A bet sizing framework stating the optimal fraction of capital to bet is the edge divided by the odds — maximising long-run compound growth.',
+answers:['kelly criterion','kelly formula'],
+hint:'Named after John Kelly — maximises long-run compound growth rate.',
+explanation:'Full Kelly: f = (bp - q) / b. Most practitioners use half or quarter Kelly for robustness against estimation errors. Full Kelly causes large drawdowns when inputs are uncertain.'},
+
+{id:'pt9',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'An investment strategy separating a portfolio into a passive core and an actively managed satellite.',
+answers:['core satellite strategy','core-satellite'],
+hint:'Index the bulk of the portfolio, actively manage a smaller portion.',
+explanation:'The core (70-80%) is passively managed at low cost. The satellite (20-30%) contains concentrated active bets. This balances cost efficiency with the potential for outperformance.'},
+
+{id:'pt10',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'An equity investment style focusing on companies with low valuations relative to their earnings, book value, or sales.',
+answers:['value investing'],
+hint:'Buy cheap stocks — associated with Benjamin Graham and Warren Buffett.',
+explanation:'Value stocks have low P/E, P/B, or P/CF ratios. The Fama-French HML factor captures the value premium. Value has underperformed growth since 2007 but historically earned a premium over long horizons.'},
+
+{id:'pt11',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'An equity investment style focusing on companies with high earnings growth rates — typically with high valuations justified by future potential.',
+answers:['growth investing'],
+hint:'Buy companies growing fast — associated with high P/E multiples.',
+explanation:'Growth stocks trade at high multiples justified by strong earnings growth expectations. They are highly sensitive to interest rate changes (long-duration assets). Growth dramatically outperformed value from 2010-2021 before reversing.'},
+
+{id:'pt12',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'An investment strategy buying recent outperformers and selling recent underperformers — exploiting the tendency for trends to persist over 3-12 months.',
+answers:['momentum investing','momentum strategy','momentum'],
+hint:'Buy what is going up, sell what is going down — tends to work over 3-12 months.',
+explanation:'Momentum is one of the most robust documented anomalies. Jegadeesh and Titman (1993) showed past 6-12 month winners outperform past losers. It can be explained by behavioural biases (anchoring, herding) and gradual information diffusion.'},
+
+{id:'pt13',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'An investment strategy selecting stocks based on robust fundamentals such as high return on equity, low debt, and stable earnings growth.',
+answers:['quality investing','quality factor'],
+hint:'Invest in high-quality businesses — high ROE, low debt, stable earnings.',
+explanation:'Quality is captured in the Fama-French 5-factor model\'s profitability and investment factors. Quality stocks tend to outperform in late cycle and defensive environments. They are less cyclical than pure value stocks.'},
+
+{id:'pt14',cat:'portfolio',catLabel:'Portfolio Theory',points:10,
+definition:'The proportion of an index weight held by a portfolio versus its benchmark weight — positive means overweight, negative means underweight.',
+answers:['active weight'],
+hint:'Portfolio weight minus benchmark weight.',
+explanation:'Active weight = Portfolio weight - Benchmark weight. Active share measures the sum of absolute active weights divided by 2. High active share (above 60%) is a prerequisite for meaningful outperformance.'},
+
+{id:'pt15',cat:'portfolio',catLabel:'Portfolio Theory',points:15,
+definition:'An investment strategy using options, futures, or dynamic trading to guarantee a minimum portfolio value while participating in upside.',
+answers:['portfolio insurance','cppi','constant proportion portfolio insurance'],
+hint:'Guarantees a floor value while maintaining upside participation.',
+explanation:'CPPI (Constant Proportion Portfolio Insurance) dynamically allocates between risky and safe assets. As the portfolio falls toward the floor, the risky allocation decreases. Portfolio insurance contributed to the 1987 crash by creating programmatic selling as markets fell.'},
+
+// ═══════════════════════════════════════════════════════════════
+// PRIVATE EQUITY & VC (pe1–pe20)
+// ═══════════════════════════════════════════════════════════════
+{id:'pe1',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'A transaction acquiring a company using a significant proportion of debt financing to amplify equity returns.',
+answers:['leveraged buyout','lbo'],
+hint:'Abbreviated LBO — high debt amplifies both gains and losses.',
+explanation:'LBO return drivers: EBITDA growth, multiple expansion, and debt paydown. Typical structure: 50-70% debt, 30-50% equity. Target IRR: 20-30%+. Good candidates: stable cash flows, low capex, strong market position.'},
+
+{id:'pe2',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'Total distributions divided by total invested capital — the multiple of money returned regardless of time taken.',
+answers:['moic','money on invested capital','multiple on invested capital'],
+hint:'A 3x means tripling your money — abbreviated MOIC.',
+explanation:'MOIC and IRR are complementary: MOIC shows magnitude of return, IRR shows speed. A 2x MOIC over 2 years (IRR ~41%) is far better than 2x over 7 years (IRR ~10%).'},
+
+{id:'pe3',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'The portion of fund profits above the hurdle rate paid to the general partner — typically 20% of gains.',
+answers:['carried interest','carry'],
+hint:'Typically 20% — the primary source of PE wealth creation.',
+explanation:'The 2 and 20 model means 2% management fee + 20% carry above 8% hurdle. Carry is taxed as capital gains in the UK, which is politically controversial.'},
+
+{id:'pe4',cat:'pe_vc',catLabel:'PE / VC',points:15,
+definition:'A clause requiring the general partner to return previously distributed carry if the fund underperforms on a portfolio-wide basis.',
+answers:['clawback','clawback provision'],
+hint:'Protects LPs if early winners are offset by later losses.',
+explanation:'Clawback ensures GPs cannot keep carry from early successful exits if subsequent deals lose money. It aligns GP and LP incentives over the full fund life.'},
+
+{id:'pe5',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'The minimum return that must be earned on the fund before the general partner participates in profits — typically 8% per annum.',
+answers:['hurdle rate','preferred return'],
+hint:'LPs get all profits until this threshold is met — typically 8%.',
+explanation:'Above the hurdle, profits are split (typically 80% LP, 20% GP). Some funds include a catch-up provision where the GP receives 100% until their carry percentage is restored.'},
+
+{id:'pe6',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'A PE strategy of acquiring a platform company and growing it through multiple additional acquisitions in the same sector.',
+answers:['buy and build','platform strategy','roll-up'],
+hint:'Acquire a platform, then bolt-on smaller competitors.',
+explanation:'Buy-and-build exploits valuation arbitrage: platforms trade at premium multiples while bolt-ons can be acquired at discount multiples. Combines size advantages with multiple expansion at exit.'},
+
+{id:'pe7',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'An acquisition made by a PE-backed company to add scale, capabilities, or market share at a lower multiple than the platform\'s exit multiple.',
+answers:['add-on acquisition','bolt-on acquisition','bolt-on'],
+hint:'Also called bolt-on — key source of multiple arbitrage in PE.',
+explanation:'Each pound of EBITDA acquired at 6x and exited at 10x creates 4x equity value. Add-ons are the primary execution vehicle for the buy-and-build strategy.'},
+
+{id:'pe8',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'Early-stage venture capital financing for a startup that has not yet reached product-market fit.',
+answers:['seed funding','seed round','seed stage'],
+hint:'The earliest formal financing stage — often less than £1m.',
+explanation:'Seed funding covers product development, initial hires, and early customer acquisition. Instruments include convertible notes (deferred valuation) and SAFEs. Angel investors and accelerators are common seed sources.'},
+
+{id:'pe9',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'A convertible security used in early-stage startup financing that converts to equity at a discount in a future priced round.',
+answers:['safe','simple agreement for future equity'],
+hint:'Created by Y Combinator — Simple Agreement for Future Equity.',
+explanation:'A SAFE converts to equity at a discount (typically 10-20%) or valuation cap in the next priced round. Unlike convertible notes, SAFEs are not debt and bear no interest.'},
+
+{id:'pe10',cat:'pe_vc',catLabel:'PE / VC',points:15,
+definition:'Investor protection preventing future funding rounds from diluting early investors more than proportionally — adjusting conversion price in down rounds.',
+answers:['anti-dilution protection','anti-dilution'],
+hint:'Protects early investors in a down round.',
+explanation:'Full ratchet anti-dilution: conversion price resets to the new round price. Weighted average is more founder-friendly, adjusting based on the size of the down round. Anti-dilution provisions can severely dilute founders.'},
+
+{id:'pe11',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'The right of preferred shareholders to be paid before common shareholders in a liquidation event.',
+answers:['liquidation preference'],
+hint:'Preferred shareholders get paid first in an exit.',
+explanation:'A 1x liquidation preference means preferred shareholders get their investment back before common shareholders receive anything. Participating preferred shareholders also share in remaining proceeds after the preference — very dilutive to founders.'},
+
+{id:'pe12',cat:'pe_vc',catLabel:'PE / VC',points:15,
+definition:'A provision giving existing investors the right to purchase new shares in future funding rounds to maintain their ownership percentage.',
+answers:['pro-rata rights','pre-emption rights','right to participate'],
+hint:'Allows existing investors to maintain their ownership percentage.',
+explanation:'Pro-rata rights allow early investors to avoid dilution in later rounds by investing proportionally. They are a key term in VC deal negotiations. Major investors may also negotiate "super pro-rata" rights to increase their ownership.'},
+
+{id:'pe13',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'The condition in a VC-backed company where total VC investment exceeds the company\'s valuation in an exit — resulting in founders and employees receiving nothing.',
+answers:['underwater','liquidation preference overhang'],
+hint:'When the preference stack exceeds exit proceeds — founders get zero.',
+explanation:'If a company with £50m in liquidation preferences exits for £30m, preference holders receive £30m and founders receive nothing. This creates misaligned incentives — founders have no upside below £50m.'},
+
+{id:'pe14',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'The sale of a portfolio company to another private equity firm rather than through an IPO or strategic acquisition.',
+answers:['secondary buyout','sbo'],
+hint:'PE to PE sale — the second most common PE exit route.',
+explanation:'Secondary buyouts are criticised for being financial engineering between PE firms rather than value creation. However, if the original PE firm maximised operational improvements and the new buyer sees financial structuring upside, the deal can create value.'},
+
+{id:'pe15',cat:'pe_vc',catLabel:'PE / VC',points:10,
+definition:'Capital returned to LP investors from PE fund exits that can be called again for new investments — reducing the effective cost of capital to the fund.',
+answers:['recycled capital','recycling'],
+hint:'Reusing returned capital for new investments within the investment period.',
+explanation:'Some fund agreements allow GPs to recycle exit proceeds into new investments during the investment period. This allows GPs to invest more than the committed capital over the fund life, potentially increasing management fees and returns.'},
+
+// ═══════════════════════════════════════════════════════════════
+// ACCOUNTING & FINANCIAL STATEMENT ANALYSIS (ac1–ac15)
+// ═══════════════════════════════════════════════════════════════
+{id:'ac1',cat:'accounting',catLabel:'Accounting',points:5,
+definition:'Total assets minus total liabilities — the residual interest of shareholders in a company.',
+answers:["shareholders equity","shareholders' equity",'book value of equity','net assets'],
+hint:'Also called book value — appears on the balance sheet.',
+explanation:"Shareholders' equity = Total assets - Total liabilities. Components: share capital, retained earnings, other reserves. Market cap often differs significantly from book equity."},
+
+{id:'ac2',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'An accounting charge reducing the carrying value of an asset when its recoverable amount falls below its book value.',
+answers:['impairment charge','impairment','write-down'],
+hint:'Non-cash charge — reduces book value but not operating cash flow.',
+explanation:'Impairments are tested annually for goodwill. They reduce net income and equity but add back in operating cash flow. Large impairments often signal an acquisition was overpriced.'},
+
+{id:'ac3',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'Revenue received in cash before goods or services have been delivered — a liability on the balance sheet.',
+answers:['deferred revenue','unearned revenue'],
+hint:'A liability — the company owes the customer a service not yet delivered.',
+explanation:'As revenue is earned, deferred revenue flows from the balance sheet to the income statement. SaaS companies often have large deferred revenue balances from upfront annual subscriptions.'},
+
+{id:'ac4',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'A financial statement reconciling net income to cash generated from operations, adjusting for non-cash items and working capital changes.',
+answers:['cash flow statement','statement of cash flows'],
+hint:'Three sections: operating, investing, and financing activities.',
+explanation:'The indirect method adds back D&A (non-cash) and adjusts for working capital changes. FCF = Operating CF - CapEx. The cash flow statement is the hardest to manipulate.'},
+
+{id:'ac5',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'Current assets minus current liabilities — measuring a company\'s ability to meet near-term obligations.',
+answers:['working capital','net working capital'],
+hint:'An increase uses cash — abbreviated NWC.',
+explanation:'Working capital = Current assets - Current liabilities. An increase in NWC is a cash outflow. Companies with negative working capital (retailers paid before suppliers) have a structural cash flow advantage.'},
+
+{id:'ac6',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'A non-cash expense allocating the cost of a tangible fixed asset over its useful economic life.',
+answers:['depreciation'],
+hint:'Non-cash P&L charge — added back in operating cash flow.',
+explanation:'Depreciation reduces net income but not operating cash flow. Straight-line vs accelerated depreciation affects reported earnings without affecting cash flows.'},
+
+{id:'ac7',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'The difference between the purchase price paid in an acquisition and the fair value of net identifiable assets acquired.',
+answers:['goodwill'],
+hint:'Arises only in acquisitions — tested annually for impairment under IFRS.',
+explanation:'Goodwill = Purchase price - Fair value of net assets. It represents brands, customer relationships, and synergies. Under IFRS, goodwill is not amortised but tested annually.'},
+
+{id:'ac8',cat:'accounting',catLabel:'Accounting',points:15,
+definition:'An analysis expressing each income statement line as a percentage of revenue and each balance sheet line as a percentage of total assets.',
+answers:['common size analysis','vertical analysis'],
+hint:'Expresses financials as percentages — makes cross-company comparison easy.',
+explanation:'Common size analysis removes scale effects, making it easier to compare companies of different sizes. It identifies structural differences between competitors and changes in cost structure over time.'},
+
+{id:'ac9',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'A profitability decomposition breaking return on equity into net profit margin, asset turnover, and financial leverage.',
+answers:['dupont analysis','du pont analysis'],
+hint:'ROE = Net margin x Asset turnover x Equity multiplier.',
+explanation:'DuPont: ROE = (Net income/Sales) x (Sales/Assets) x (Assets/Equity). It reveals whether ROE is driven by profitability, efficiency, or leverage. A company can have high ROE from leverage despite poor operations.'},
+
+{id:'ac10',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'The ratio of net income to total assets — measuring how efficiently assets generate profit.',
+answers:['return on assets','roa'],
+hint:'Abbreviated ROA — measures asset efficiency.',
+explanation:'ROA = Net income / Total assets. It is affected by both operating performance and capital structure. ROIC and ROCE are more common measures for investors because they focus on capital deployed.'},
+
+{id:'ac11',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'The accounting principle that revenue should be recognised when earned, not necessarily when cash is received.',
+answers:['revenue recognition','accruals basis','accrual accounting'],
+hint:'The basis of IFRS and GAAP — revenue recognised when obligations are met.',
+explanation:'Under IFRS 15, revenue is recognised when performance obligations are satisfied. This creates timing differences between revenue and cash receipts, recorded as accounts receivable or deferred revenue.'},
+
+{id:'ac12',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'An indicator measuring the quality of a company\'s earnings by comparing operating cash flow to net income.',
+answers:['earnings quality','accrual ratio','cash earnings ratio'],
+hint:'High quality earnings: operating cash flow approximately equals net income.',
+explanation:'Earnings quality = Operating CF / Net income. A ratio persistently below 1 suggests accruals are inflating earnings. Sloan (1996) showed companies with high accruals (low earnings quality) subsequently underperform.'},
+
+{id:'ac13',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'The time taken to convert resources into cash flows — calculated as days inventory plus days receivables minus days payables.',
+answers:['cash conversion cycle','operating cycle'],
+hint:'Shorter is better — how long cash is tied up in the business.',
+explanation:'CCC = DIO + DSO - DPO. A short cycle means cash is freed up quickly. Negative CCC (common in retail) means the company is effectively funded by suppliers and customers.'},
+
+{id:'ac14',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'An analysis comparing a company\'s financial metrics over multiple years to identify trends in revenue, margins, and capital efficiency.',
+answers:['trend analysis','horizontal analysis'],
+hint:'Year-on-year comparison — identifying improving or deteriorating trends.',
+explanation:'Horizontal analysis calculates percentage changes year-over-year. It identifies inflection points in growth, margin expansion/contraction, and leverage changes. Combined with common size analysis, it provides a complete picture of financial evolution.'},
+
+{id:'ac15',cat:'accounting',catLabel:'Accounting',points:10,
+definition:'A non-cash expense that allocates the cost of an intangible asset over its useful life.',
+answers:['amortisation','amortization'],
+hint:'Like depreciation but for intangible assets.',
+explanation:'Amortisation reduces the carrying value of intangibles (patents, trademarks, customer lists). It reduces earnings but not cash flow. Under IFRS, goodwill is not amortised — only tested for impairment.'},
+
+// ═══════════════════════════════════════════════════════════════
+// MARKET MICROSTRUCTURE & ALGO TRADING (mm1–mm15)
+// ═══════════════════════════════════════════════════════════════
+{id:'mm1',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'Trading strategies executed by computers at extremely high speeds to exploit tiny price discrepancies across markets.',
+answers:['high-frequency trading','hft','high frequency trading'],
+hint:'Abbreviated HFT — operates on microsecond timescales.',
+explanation:'HFT firms earn small profits on enormous volumes. They improve liquidity and tighten spreads in normal conditions but can amplify volatility (2010 Flash Crash). Regulatory scrutiny has increased since 2010.'},
+
+{id:'mm2',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'A queue of all outstanding buy and sell orders for a security at various price levels.',
+answers:['limit order book','order book'],
+hint:'Shows all outstanding buy and sell orders at each price level.',
+explanation:'The best bid and offer form the inside spread. Market depth refers to volume available at each price. HFT firms constantly monitor and react to order book changes. Dark pools operate without showing orders publicly.'},
+
+{id:'mm3',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'The simultaneous buying and selling of the same asset in different markets to profit from temporary price differences.',
+answers:['arbitrage'],
+hint:'Risk-free profit from price discrepancies across markets.',
+explanation:'Pure arbitrage is riskless and involves simultaneous trades. Statistical arbitrage exploits statistical relationships and involves more risk. Arbitrage activity keeps prices consistent across markets.'},
+
+{id:'mm4',cat:'microstructure',catLabel:'Market Microstructure',points:15,
+definition:'A strategy exploiting the historically stable relationship between two correlated securities — buying the underperformer when the spread diverges.',
+answers:['pairs trading','statistical arbitrage','stat arb'],
+hint:'Long/short strategy exploiting mean-reverting spreads between related stocks.',
+explanation:'Pairs trading relies on cointegration. When the spread widens beyond a threshold (typically 2 standard deviations), the trader goes long the underperformer and short the outperformer. Risk: the spread may not revert.'},
+
+{id:'mm5',cat:'microstructure',catLabel:'Market Microstructure',points:15,
+definition:'The process of continuously quoting bid and ask prices, providing liquidity to market participants in exchange for the bid-ask spread.',
+answers:['market making'],
+hint:'Profits from the bid-ask spread — provides liquidity.',
+explanation:'Market makers earn the spread but bear inventory risk. They must hedge positions to manage risk. Citadel Securities and Virtu Financial are major modern market makers.'},
+
+{id:'mm6',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'An algorithm breaking a large order into smaller pieces executed at regular intervals to minimise market impact.',
+answers:['twap','time-weighted average price'],
+hint:'Abbreviated TWAP — executes at regular intervals regardless of volume.',
+explanation:'TWAP splits an order equally over time. VWAP weights execution towards high-volume periods. Both aim to minimise market impact relative to a benchmark price.'},
+
+{id:'mm7',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'The adverse price movement caused by executing a large order — the difference between arrival price and achieved average execution price.',
+answers:['market impact','price impact'],
+hint:'Buying pushes prices up; selling pushes them down.',
+explanation:'Market impact is a key transaction cost alongside commissions and bid-ask spread. The square root model suggests impact scales with the square root of order size / daily volume.'},
+
+{id:'mm8',cat:'microstructure',catLabel:'Market Microstructure',points:15,
+definition:'The comprehensive measurement of all costs incurred when executing trades — including commissions, bid-ask spread, market impact, and timing costs.',
+answers:['transaction cost analysis','tca'],
+hint:'Abbreviated TCA — used to evaluate execution quality.',
+explanation:'TCA compares achieved execution price against benchmarks (VWAP, arrival price, close price). It is used to evaluate broker performance, algorithm selection, and trading desk quality. Regulatory requirements for TCA reporting have increased under MiFID II.'},
+
+{id:'mm9',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'A trading venue that allows large institutional investors to trade blocks of shares anonymously without revealing their orders to the market.',
+answers:['dark pool'],
+hint:'Anonymous off-exchange trading venue — no pre-trade transparency.',
+explanation:'Dark pools allow institutions to trade large blocks without telegraphing their intent to the market. This reduces market impact but reduces price discovery. Regulators have scrutinised dark pools for potential conflicts of interest.'},
+
+{id:'mm10',cat:'microstructure',catLabel:'Market Microstructure',points:10,
+definition:'An algorithm dynamically adjusting execution speed based on current market conditions, order book state, and remaining time to complete the order.',
+answers:['implementation shortfall','is algorithm','arrival price algorithm'],
+hint:'Minimises the difference between decision price and average execution price.',
+explanation:'IS algorithms trade off market impact against timing risk. They trade aggressively when the stock is moving adversely (opportunity cost) and patiently when conditions are stable. More sophisticated than TWAP/VWAP.'},
+
+// ═══════════════════════════════════════════════════════════════
+// STRUCTURED PRODUCTS (sp1–sp10)
+// ═══════════════════════════════════════════════════════════════
+{id:'sp1',cat:'structured',catLabel:'Structured Products',points:10,
+definition:'The process of pooling financial assets and issuing securities backed by the cash flows from that pool.',
+answers:['securitisation','securitization'],
+hint:'Mortgages to MBS, car loans to ABS — converts illiquid assets to liquid securities.',
+explanation:'Securitisation transfers assets off the bank balance sheet, freeing regulatory capital. The originator creates an SPV which issues tranched securities. The 2008 crisis exposed the risks of complex securitisation.'},
+
+{id:'sp2',cat:'structured',catLabel:'Structured Products',points:10,
+definition:'A debt security backed by a pool of residential mortgages — with cash flows from monthly mortgage payments passed through to investors.',
+answers:['mortgage-backed security','mbs','rmbs'],
+hint:'Abbreviated MBS — central to the 2008 financial crisis.',
+explanation:'MBS investors receive scheduled interest and principal payments from the mortgage pool. Pre-payment risk is key (homeowners refinance when rates fall). Agency MBS carries government backing; non-agency MBS does not.'},
+
+{id:'sp3',cat:'structured',catLabel:'Structured Products',points:10,
+definition:'A structured credit product where securities are divided into tranches with different seniority — senior tranches paid first and absorbing losses last.',
+answers:['collateralised debt obligation','cdo'],
+hint:'Abbreviated CDO — the structured product central to 2008.',
+explanation:'CDOs pool bonds or loans and issue tranches with different risk/return profiles. AAA-rated tranches were incorrectly assumed safe because models underestimated correlation between defaults in stress scenarios.'},
+
+{id:'sp4',cat:'structured',catLabel:'Structured Products',points:10,
+definition:'An agreement to sell securities with a commitment to repurchase them at a higher price — effectively a short-term collateralised loan.',
+answers:['repo','repurchase agreement'],
+hint:'The backbone of short-term wholesale funding markets.',
+explanation:'The repo rate is the implied interest rate. Repos are critical for bank funding and financial system liquidity. The 2008 repo market freeze was a key transmission mechanism of the crisis.'},
+
+{id:'sp5',cat:'structured',catLabel:'Structured Products',points:15,
+definition:'A legal entity created to hold financial assets separately from the originating firm — used in securitisation to isolate assets from the originator\'s credit risk.',
+answers:['special purpose vehicle','spv','special purpose entity'],
+hint:'Abbreviated SPV — bankruptcy-remote entity at the heart of securitisation.',
+explanation:'SPVs are bankruptcy-remote: if the originator fails, the SPV\'s assets are protected. Post-2008 regulatory changes (IFRS 10) made it harder to keep SPVs off balance sheet.'},
+
+{id:'sp6',cat:'structured',catLabel:'Structured Products',points:10,
+definition:'A security backed by pools of non-mortgage financial assets such as car loans, credit card receivables, or student loans.',
+answers:['asset-backed security','abs'],
+hint:'Abbreviated ABS — securitisation of non-mortgage assets.',
+explanation:'ABS transforms illiquid consumer loans into tradeable securities. The cash flows from loan payments are passed through to investors. ABS markets are important for the supply of consumer credit.'},
+
+// ═══════════════════════════════════════════════════════════════
+// ESG & ALTERNATIVES (esg1–esg5, alt1–alt10)
+// ═══════════════════════════════════════════════════════════════
+{id:'esg1',cat:'esg',catLabel:'ESG',points:10,
+definition:'A set of criteria evaluating a company\'s sustainability and ethical impact — covering environmental, social, and governance factors.',
+answers:['esg','environmental social governance'],
+hint:'Three letters — environmental, social, and governance.',
+explanation:'ESG integration ranges from negative screening to best-in-class selection and active engagement. The debate centres on whether ESG improves or hurts risk-adjusted returns. Regulatory requirements for disclosure are increasing globally.'},
+
+{id:'esg2',cat:'esg',catLabel:'ESG',points:10,
+definition:'The risk to assets from physical impacts of climate change and the economic transition to a lower-carbon economy.',
+answers:['climate risk','transition risk','physical climate risk'],
+hint:'Physical (floods) and transition (stranded assets, carbon taxes) are the two types.',
+explanation:'Physical risk affects real assets. Transition risk affects fossil fuel companies (stranded assets) and carbon-intensive industries. TCFD provides guidance on climate risk disclosure required by UK regulators.'},
+
+{id:'alt1',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'A fund using a diverse range of strategies — including long/short equity, macro, and arbitrage — to generate returns uncorrelated with traditional markets.',
+answers:['hedge fund'],
+hint:'Typically 2 and 20 fee structure — aims for absolute returns.',
+explanation:'Hedge funds can use leverage, short selling, and derivatives restricted for traditional funds. The 2 and 20 model has faced pressure as performance has disappointed. Assets under management exceeds $4 trillion globally.'},
+
+{id:'alt2',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'A strategy taking long positions in undervalued securities and short positions in overvalued ones — aiming to profit regardless of market direction.',
+answers:['long short equity','long/short equity'],
+hint:'Long cheap stocks, short expensive stocks.',
+explanation:'Long/short equity can be market-neutral or directional. The spread between long and short positions generates alpha regardless of market direction. Most L/S funds maintain net long exposure in practice.'},
+
+{id:'alt3',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'An investment approach using quantitative models and algorithms to generate trading signals — removing human judgment from the investment process.',
+answers:['quantitative investing','systematic investing','quant investing'],
+hint:'Rules-based, algorithm-driven — Renaissance Technologies and Two Sigma.',
+explanation:'Quant strategies use statistical models to identify patterns in price, fundamental, and alternative data. Renaissance Medallion Fund is the most famous quant success, generating approximately 66% gross annual returns since 1988.'},
+
+{id:'alt4',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'A hedge fund strategy attempting to profit from announced mergers by buying the target company and shorting the acquirer.',
+answers:['merger arbitrage','risk arbitrage'],
+hint:'Long target, short acquirer — profits from the spread narrowing.',
+explanation:'After a deal is announced, the target trades at a discount to the offer price (the spread) reflecting deal risk. The main risks are deal break and deal extension reducing annualised returns.'},
+
+{id:'alt5',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'The purchase of bonds or loans of companies in or near financial distress — typically at significant discounts to par value.',
+answers:['distressed debt','distressed investing'],
+hint:'Buying debt at 30-40 cents on the dollar.',
+explanation:'Distressed investors buy debt at discount hoping to recover more through restructuring or bankruptcy. Loan-to-own strategies involve acquiring debt to convert to equity — becoming the new owners.'},
+
+{id:'alt6',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'A macro hedge fund strategy taking views on currencies, interest rates, and commodities based on macroeconomic analysis.',
+answers:['global macro','macro hedge fund','discretionary macro'],
+hint:'George Soros\'s approach — top-down macroeconomic bets.',
+explanation:'Global macro funds take concentrated bets on currencies, rates, commodities, and equity indices based on macro analysis. Soros famously broke the Bank of England in 1992, shorting sterling before its ERM exit.'},
+
+{id:'alt7',cat:'alternatives',catLabel:'Alternatives',points:15,
+definition:'A strategy trading futures systematically based on price momentum signals — going long assets in uptrends and short those in downtrends.',
+answers:['cta','commodity trading advisor','trend following','managed futures'],
+hint:'Abbreviated CTA — trend following across commodities, currencies, and rates.',
+explanation:'CTAs historically diversify well against equity portfolios, performing well during crisis periods (2008, 2022) when equities fall and trends persist. The Societe Generale CTA Index measures performance across major managed futures funds.'},
+
+{id:'alt8',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'An investment vehicle providing retail investors with exposure to a portfolio of securities through exchange-traded shares rather than direct fund ownership.',
+answers:['etf','exchange-traded fund'],
+hint:'Abbreviated ETF — trades like a stock but holds a diversified basket.',
+explanation:'ETFs combine the diversification of mutual funds with the liquidity of stocks. Authorised participants can create or redeem ETF shares through in-kind creation/redemption, keeping ETF prices aligned with NAV. Passive ETFs have transformed asset management.'},
+
+{id:'alt9',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'A fund structure allowing institutional investors to access hedge fund strategies with lower fees and daily liquidity compared to traditional hedge funds.',
+answers:['ucits fund','ucits hedge fund'],
+hint:'European regulated fund wrapper — allows retail access to hedge fund strategies.',
+explanation:'UCITS (Undertakings for Collective Investment in Transferable Securities) is an EU regulatory framework. UCITS hedge funds offer hedge fund strategies with investor protections: daily liquidity, leverage limits, diversification requirements.'},
+
+{id:'alt10',cat:'alternatives',catLabel:'Alternatives',points:10,
+definition:'An investment in physical or tangible assets such as property, infrastructure, timber, or farmland — generating returns from income and capital appreciation.',
+answers:['real assets','real asset investing'],
+hint:'Physical assets — property, infrastructure, commodities.',
+explanation:'Real assets provide inflation protection (rents and infrastructure tariffs often index to inflation) and low correlation to financial assets. They typically have long lives, stable cash flows, and pricing power. Illiquidity is a key characteristic.'},
+
+// ═══════════════════════════════════════════════════════════════
+// BANKING & REGULATION (br1–br10)
+// ═══════════════════════════════════════════════════════════════
+{id:'br1',cat:'banking',catLabel:'Banking',points:10,
+definition:'International regulatory standards setting minimum capital requirements for banks.',
+answers:['basel framework','basel accords','basel iii'],
+hint:'Named after a Swiss city — sets global bank capital requirements.',
+explanation:'Basel I: credit risk. Basel II: added market and operational risk. Basel III (post-2008): higher quality capital, liquidity ratios (LCR, NSFR), leverage ratio. Basel IV (2023): standardises internal models.'},
+
+{id:'br2',cat:'banking',catLabel:'Banking',points:10,
+definition:'The ratio of liquid assets to total net cash outflows over a 30-day stress period — ensuring banks can survive a short-term liquidity crisis.',
+answers:['liquidity coverage ratio','lcr'],
+hint:'Abbreviated LCR — 30 days of liquid assets in stress.',
+explanation:'LCR = High Quality Liquid Assets / Net cash outflows over 30 days >= 100%. Introduced under Basel III after 2008 showed many banks could not fund themselves during stress.'},
+
+{id:'br3',cat:'banking',catLabel:'Banking',points:10,
+definition:'Capital of the highest quality held by banks — common equity and retained earnings, the first loss absorber in a bank failure.',
+answers:['common equity tier 1','cet1'],
+hint:'Abbreviated CET1 — the gold standard of bank capital.',
+explanation:'CET1 = Common shares + Retained earnings - Regulatory deductions. Basel III requires CET1 of at least 4.5% of risk-weighted assets plus a 2.5% conservation buffer.'},
+
+{id:'br4',cat:'banking',catLabel:'Banking',points:10,
+definition:'The process through which retail deposits are transformed into loans — with banks keeping only a fraction of deposits as reserves.',
+answers:['fractional reserve banking','fractional banking'],
+hint:'Banks keep only a fraction of deposits as reserves — the rest is lent out.',
+explanation:'A bank with 10% reserve ratio can support £1,000 of loans from £100 of deposits. Central bank reserve requirements set the minimum fraction retained. This is how commercial banks create money.'},
+
+{id:'br5',cat:'banking',catLabel:'Banking',points:10,
+definition:'A provision requiring banks to maintain sufficient stable funding over a one-year horizon relative to their asset composition.',
+answers:['net stable funding ratio','nsfr'],
+hint:'Abbreviated NSFR — requires stable funding to match long-term assets.',
+explanation:'NSFR = Available Stable Funding / Required Stable Funding >= 100%. It complements the LCR by addressing structural funding mismatches (short-term funding for long-term assets) over a one-year horizon.'},
+
+// ═══════════════════════════════════════════════════════════════
+// QUANTITATIVE FINANCE (qf1–qf10)
+// ═══════════════════════════════════════════════════════════════
+{id:'qf1',cat:'quant',catLabel:'Quantitative Finance',points:15,
+definition:'A stochastic process representing random continuous movement — the mathematical foundation of option pricing models.',
+answers:['brownian motion','wiener process'],
+hint:'Named after botanist Robert Brown — the mathematics of random continuous movement.',
+explanation:'Geometric Brownian Motion (GBM) models stock prices: dS = muSdt + sigmaSdW. GBM ensures stock prices stay positive. It underlies the Black-Scholes model for option pricing.'},
+
+{id:'qf2',cat:'quant',catLabel:'Quantitative Finance',points:15,
+definition:'A fundamental theorem in stochastic calculus providing the chain rule for functions of stochastic processes.',
+answers:["ito's lemma",'itos lemma','ito lemma'],
+hint:"Named after Kiyosi Ito — the chain rule for stochastic calculus.",
+explanation:"Ito's lemma adds a second-order correction term (half sigma-squared times the second derivative) absent in ordinary calculus. It is used to derive the Black-Scholes PDE and is fundamental to derivatives pricing."},
+
+{id:'qf3',cat:'quant',catLabel:'Quantitative Finance',points:10,
+definition:'A statistical technique identifying linear combinations of non-stationary time series that are themselves stationary — indicating a long-run equilibrium.',
+answers:['cointegration'],
+hint:'Two stocks that drift but always return to a fixed spread are cointegrated.',
+explanation:'Cointegration is the basis of pairs trading. Engle and Granger won the Nobel Prize for this work. Cointegrated pairs make good statistical arbitrage candidates because the spread is mean-reverting.'},
+
+{id:'qf4',cat:'quant',catLabel:'Quantitative Finance',points:10,
+definition:'A time series model where current volatility depends on both past squared errors and past volatility — used to model volatility clustering in financial returns.',
+answers:['garch','garch model'],
+hint:'Abbreviated GARCH — periods of high volatility tend to cluster.',
+explanation:'GARCH(1,1): variance = omega + alpha x lagged error squared + beta x lagged variance. It captures volatility clustering (large moves follow large moves) and mean reversion in volatility.'},
+
+{id:'qf5',cat:'quant',catLabel:'Quantitative Finance',points:10,
+definition:'A simulation technique using random sampling to estimate the distribution of outcomes for complex problems that cannot be solved analytically.',
+answers:['monte carlo simulation','monte carlo'],
+hint:'Named after the Monaco casino — uses random sampling to model uncertainty.',
+explanation:'Monte Carlo generates thousands of random scenarios and calculates outcomes for each. Used in options pricing, VaR estimation, and pension fund modelling. Quasi-Monte Carlo uses low-discrepancy sequences for faster convergence.'},
+
+{id:'qf6',cat:'quant',catLabel:'Quantitative Finance',points:10,
+definition:'A test measuring whether lagged values of one time series help predict another — used to identify predictive relationships.',
+answers:['granger causality','granger causality test'],
+hint:'Does X help predict Y beyond what Y already tells us?',
+explanation:'Granger causality tests whether lagged values of X significantly improve forecasts of Y. It is predictive precedence, not true causation. Granger shared the 2003 Nobel Prize with Robert Engle.'},
+
+{id:'qf7',cat:'quant',catLabel:'Quantitative Finance',points:15,
+definition:'A statistical model describing the joint distribution of multiple random variables by linking their marginal distributions.',
+answers:['copula','copula model','gaussian copula'],
+hint:'Links marginal distributions into a joint distribution — the Gaussian copula misfired in 2008.',
+explanation:"The Gaussian copula was used to price CDOs by modelling default correlations. Its failure to capture tail dependence contributed massively to 2008 losses. David Li's formula was described as the formula that killed Wall Street."},
+
+{id:'qf8',cat:'quant',catLabel:'Quantitative Finance',points:10,
+definition:'A phenomenon where financial data often exhibits fatter tails and higher peaks than a normal distribution — meaning extreme events occur more frequently than expected.',
+answers:['fat tails','leptokurtosis','excess kurtosis'],
+hint:'Returns have more extreme events than a normal distribution predicts.',
+explanation:'Fat tails mean that 3-sigma events occur far more frequently than the normal distribution predicts. This is why VaR models based on normal distributions systematically underestimate tail risk. The 2008 crisis included moves described as 25-sigma events.'},
+
+{id:'qf9',cat:'quant',catLabel:'Quantitative Finance',points:10,
+definition:'The tendency for extreme values to be followed by values closer to the average — a statistical phenomenon affecting financial returns and business performance.',
+answers:['mean reversion'],
+hint:'Extreme values tend to be followed by more average ones.',
+explanation:'Mean reversion is observed in volatility (high volatility periods are followed by lower volatility), valuations (high P/E ratios tend to revert), and operating performance (high margins attract competition). Some factors have mean-reverting spreads (value, quality).'},
+
+{id:'qf10',cat:'quant',catLabel:'Quantitative Finance',points:15,
+definition:'A measure of the relationship between an asset\'s return and a systematic risk factor — used in multi-factor models to attribute performance.',
+answers:['factor loading','factor exposure','beta loading'],
+hint:'How much of the asset\'s return is explained by this factor.',
+explanation:'Factor loadings quantify exposure to risk factors (market, size, value, momentum). A stock with a value loading of 0.8 earns approximately 0.8 x the value factor return. Factor attribution decomposes portfolio returns into factor contributions.'},
+
+// ═══════════════════════════════════════════════════════════════
+// BEHAVIOURAL FINANCE (bf1–bf10)
+// ═══════════════════════════════════════════════════════════════
+{id:'bf1',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The tendency to hold losing investments too long and sell winning investments too early — driven by loss aversion.',
+answers:['disposition effect'],
+hint:'Sell winners too soon, hold losers too long.',
+explanation:'The disposition effect leads to suboptimal tax outcomes and poor portfolio performance. Odean (1998) documented it across thousands of brokerage accounts. It arises because realising a loss causes more psychological pain than realising a gain provides pleasure.'},
+
+{id:'bf2',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The psychological tendency to rely too heavily on the first piece of information encountered when making decisions.',
+answers:['anchoring','anchoring bias'],
+hint:'First number heard disproportionately influences the final judgment.',
+explanation:'Analysts anchored to consensus estimates adjust insufficiently for new information. In negotiations, the first offer anchors discussion. In valuation, yesterday\'s share price anchors perceptions of fair value.'},
+
+{id:'bf3',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The phenomenon where investors extrapolate recent market performance too far into the future.',
+answers:['recency bias','recency effect'],
+hint:'Whatever happened recently must continue.',
+explanation:'Recency bias leads investors to overweight recent data. After long bull markets, investors extrapolate future gains. It helps explain momentum (short-run) and mean reversion (long-run).'},
+
+{id:'bf4',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The finding that investors feel the pain of losses approximately twice as strongly as the pleasure of equivalent gains.',
+answers:['loss aversion','prospect theory'],
+hint:'Losses hurt twice as much as gains feel good — Kahneman and Tversky.',
+explanation:'Kahneman and Tversky\'s prospect theory is one of the most robust findings in behavioural economics. Loss aversion drives the disposition effect, risk-off behaviour, and excessive portfolio turnover.'},
+
+{id:'bf5',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The tendency to search for, interpret, and recall information that confirms pre-existing beliefs.',
+answers:['confirmation bias'],
+hint:'Seeking evidence that confirms your view while ignoring contradictory data.',
+explanation:'Confirmation bias affects analysts (cherry-picking data to support buy recommendations) and fund managers (overweighting information consistent with existing positions). Structured investment processes and devil\'s advocate analysis help mitigate it.'},
+
+{id:'bf6',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The tendency to overestimate one\'s own abilities, knowledge, and the precision of one\'s forecasts.',
+answers:['overconfidence','overconfidence bias'],
+hint:'Investors overestimate their edge — the most common bias in financial markets.',
+explanation:'Overconfidence leads to excessive trading (Barber and Odean showed men trade more than women and underperform more). Analysts are overconfident in their earnings forecasts. Managers overestimate synergies in acquisitions.'},
+
+{id:'bf7',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The tendency of individuals to follow the behaviour of a larger group even when it conflicts with their own information or judgment.',
+answers:['herding','herd behaviour','herd mentality'],
+hint:'Following the crowd — amplifies market bubbles and crashes.',
+explanation:'Herding in financial markets arises from career concerns (career risk of being different), information cascades, and social proof. It contributes to momentum in the short run and to bubble formation and crash dynamics in the long run.'},
+
+{id:'bf8',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The tendency to attribute successes to one\'s own skill and failures to bad luck or external factors.',
+answers:['self-attribution bias'],
+hint:'I made money because I\'m skilled; I lost money because of the market.',
+explanation:'Self-attribution bias prevents learning from mistakes and contributes to overconfidence. Fund managers who attribute performance to skill rather than luck are likely to take excessive risk. Post-mortems of investment failures are more valuable than analyses of successes.'},
+
+{id:'bf9',cat:'behavioural',catLabel:'Behavioural Finance',points:10,
+definition:'The cognitive error of treating money differently based on its source or intended use — rather than its fungible economic value.',
+answers:['mental accounting'],
+hint:'Treating "house money" from winnings differently from own money.',
+explanation:'Mental accounting leads to irrational financial decisions: treating a tax refund as "found money" and spending it on luxuries rather than debt repayment. Investors keep winning stocks and risky losing positions in different mental accounts.'},
+
+{id:'bf10',cat:'behavioural',catLabel:'Behavioural Finance',points:15,
+definition:'The tendency to overweight small probabilities and underweight large probabilities — a key insight from prospect theory.',
+answers:['probability weighting','overweighting small probabilities'],
+hint:'Lottery tickets and insurance both exploit this.',
+explanation:'People overpay for small probabilities of large gains (lotteries) and large losses (insurance). In financial markets, OTM options are systematically overpriced because investors overweight tail probabilities. This creates profitable strategies for option sellers.'},
+
+// ═══════════════════════════════════════════════════════════════
+// COMMODITIES (com1–com10)
+// ═══════════════════════════════════════════════════════════════
+{id:'com1',cat:'commodities',catLabel:'Commodities',points:10,
+definition:'A market condition where future prices are higher than spot prices — the normal structure for storable commodities reflecting storage and financing costs.',
+answers:['contango'],
+hint:'Futures price greater than spot price — common in oil markets.',
+explanation:'Contango means the futures curve slopes upward. Rolling a long futures position in contango loses money (selling cheap nearby, buying expensive deferred). Oil was in steep contango in 2020 when storage was full.'},
+
+{id:'com2',cat:'commodities',catLabel:'Commodities',points:10,
+definition:'A market condition where futures prices are lower than spot prices — indicating near-term scarcity or high demand for immediate delivery.',
+answers:['backwardation'],
+hint:'Futures price less than spot price — signals tight physical markets.',
+explanation:'Backwardation occurs when physical supply is tight. Rolling a long futures position in backwardation earns a roll yield. Energy markets frequently switch between contango and backwardation with the supply/demand cycle.'},
+
+{id:'com3',cat:'commodities',catLabel:'Commodities',points:10,
+definition:'The total return from holding commodity futures exposure — reflecting spot price changes, roll yield, and collateral return.',
+answers:['commodity total return'],
+hint:'Three components: spot return plus roll yield plus collateral yield.',
+explanation:'Roll yield is often negative in contango markets, significantly dragging on returns even when spot prices rise. Spot exposure via ETFs typically significantly underperforms spot prices in contango markets.'},
+
+{id:'com4',cat:'commodities',catLabel:'Commodities',points:10,
+definition:'A measure of the benefit from holding physical commodity inventory rather than forward contracts — reflecting convenience of immediate availability.',
+answers:['convenience yield'],
+hint:'The premium for holding physical commodity over futures — high when supply is tight.',
+explanation:'Convenience yield is high when commodity supply is tight (users value the option to consume immediately). Spot price = Forward price x e^(r+s-c)T where s = storage cost and c = convenience yield. When c > r+s, the market is in backwardation.'},
+
+{id:'com5',cat:'commodities',catLabel:'Commodities',points:10,
+definition:'A cartel of major oil-producing nations coordinating production levels to influence global oil prices.',
+answers:['opec','organization of petroleum exporting countries'],
+hint:'Abbreviated OPEC — controls approximately 40% of global oil production.',
+explanation:'OPEC+ (including Russia) controls roughly 40% of global oil production. Production cuts raise prices; increases lower them. The 1973 oil embargo by Arab OPEC members created the first oil crisis and demonstrated commodity market power.'},
+
+];
+
+
+// ── STATE ──────────────────────────────────────────────────────────────
+let currentCategory = 'all';
+let sessionQuestions = [];
+let currentIdx = 0;
+let sessionCorrect = 0;
+let hintUsed = false;
+let answered = false;
+const DAILY_COUNT = 5;
+
+// ── PERSISTENCE ────────────────────────────────────────────────────────
+function getState() {
+  try {
+    const raw = localStorage.getItem('fcv_quiz');
+    return raw ? JSON.parse(raw) : {};
+  } catch(e) { return {}; }
+}
+function saveState(s) {
+  try { localStorage.setItem('fcv_quiz', JSON.stringify(s)); } catch(e) {}
+}
+function todayKey() {
+  return new Date().toISOString().slice(0,10); // YYYY-MM-DD
+}
+
+// ── INIT ───────────────────────────────────────────────────────────────
+function init() {
+  const state = getState();
+  document.getElementById('streakCount').textContent = state.streak || 0;
+  document.getElementById('totalPoints').textContent = state.totalPoints || 0;
+  document.getElementById('bestStreak').textContent = state.bestStreak || 0;
+
+  // Check if already completed today
+  if (state.lastCompleted === todayKey()) {
+    showComplete(state.todayPoints || 0, true);
+    return;
+  }
+  startSession();
+}
+
+function startSession() {
+  const pool = currentCategory === 'all'
+    ? ALL_QUESTIONS
+    : ALL_QUESTIONS.filter(q => q.cat === currentCategory);
+
+  // Shuffle and pick DAILY_COUNT
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  sessionQuestions = shuffled.slice(0, DAILY_COUNT);
+  currentIdx = 0;
+  sessionCorrect = 0;
+
+  renderDots();
+  loadQuestion();
+}
+
+function renderDots() {
+  const el = document.getElementById('progressDots');
+  el.innerHTML = sessionQuestions.map((_, i) =>
+    `<div class="dot ${i === 0 ? 'active' : ''}" id="dot${i}"></div>`
+  ).join('');
+}
+
+function updateDot(idx, result) {
+  const dot = document.getElementById('dot' + idx);
+  if (dot) dot.className = 'dot ' + (result ? 'done-correct' : 'done-wrong');
+  const next = document.getElementById('dot' + (idx + 1));
+  if (next) next.className = 'dot active';
+}
+
+// ── QUESTION LOGIC ─────────────────────────────────────────────────────
+function loadQuestion() {
+  const q = sessionQuestions[currentIdx];
+  if (!q) return;
+
+  answered = false;
+  hintUsed = false;
+
+  document.getElementById('qCategory').textContent = q.catLabel;
+  document.getElementById('qNumber').textContent = `Question ${currentIdx + 1} of ${DAILY_COUNT}`;
+  document.getElementById('qDefinition').textContent = q.definition;
+  document.getElementById('answerInput').value = '';
+  document.getElementById('answerInput').className = 'answer-input';
+  document.getElementById('answerInput').disabled = false;
+  document.getElementById('submitBtn').disabled = false;
+  document.getElementById('submitBtn').textContent = 'Submit';
+  document.getElementById('hintBtn').textContent = 'Show hint';
+  document.getElementById('hintText').textContent = q.hint;
+  document.getElementById('hintText').className = 'hint-text';
+  document.getElementById('resultPanel').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+
+  document.getElementById('answerInput').focus();
+}
+
+function toggleHint() {
+  const el = document.getElementById('hintText');
+  const btn = document.getElementById('hintBtn');
+  const visible = el.classList.contains('visible');
+  if (!visible) {
+    el.classList.add('visible');
+    btn.textContent = 'Hide hint';
+    hintUsed = true;
+  } else {
+    el.classList.remove('visible');
+    btn.textContent = 'Show hint';
+  }
+}
+
+function checkAnswer() {
+  if (answered) return;
+  const q = sessionQuestions[currentIdx];
+  const raw = document.getElementById('answerInput').value.trim().toLowerCase()
+    .replace(/[()]/g, '').replace(/\s+/g, ' ');
+
+  const correct = q.answers.some(a => {
+    const clean = a.toLowerCase().replace(/[()]/g, '').replace(/\s+/g, ' ');
+    return raw === clean || raw.includes(clean) || clean.includes(raw);
+  });
+
+  answered = true;
+  document.getElementById('answerInput').disabled = true;
+  document.getElementById('submitBtn').disabled = true;
+
+  const resultPanel = document.getElementById('resultPanel');
+  resultPanel.style.display = 'block';
+
+  if (correct) {
+    const pts = hintUsed ? Math.floor(q.points * 0.6) : q.points;
+    sessionCorrect++;
+    document.getElementById('answerInput').className = 'answer-input correct';
+    resultPanel.className = 'result-panel correct';
+    document.getElementById('resultIcon').textContent = '✓';
+    document.getElementById('resultTitle').textContent = `Correct! +${pts} points`;
+    document.getElementById('resultAnswer').textContent = `Answer: ${q.answers[0].toUpperCase()}`;
+    document.getElementById('resultExplanation').textContent = q.explanation;
+    updateDot(currentIdx, true);
+    addPoints(pts);
+  } else {
+    document.getElementById('answerInput').className = 'answer-input wrong';
+    resultPanel.className = 'result-panel wrong';
+    document.getElementById('resultIcon').textContent = '✗';
+    document.getElementById('resultTitle').textContent = 'Not quite.';
+    document.getElementById('resultAnswer').textContent = `The answer was: ${q.answers[0].toUpperCase()}`;
+    document.getElementById('resultExplanation').textContent = q.explanation;
+    updateDot(currentIdx, false);
+  }
+
+  const isLast = currentIdx === sessionQuestions.length - 1;
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.style.display = 'block';
+  nextBtn.textContent = isLast ? 'See results →' : 'Next question →';
+}
+
+function nextQuestion() {
+  currentIdx++;
+  if (currentIdx >= sessionQuestions.length) {
+    completeSession();
+  } else {
+    loadQuestion();
+  }
+}
+
+function completeSession() {
+  const state = getState();
+  const today = todayKey();
+  const lastCompleted = state.lastCompleted;
+
+  // Calculate if streak continues
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  const yesterdayKey = yesterday.toISOString().slice(0,10);
+
+  let newStreak = 1;
+  if (lastCompleted === yesterdayKey) {
+    newStreak = (state.streak || 0) + 1;
+  } else if (lastCompleted === today) {
+    newStreak = state.streak || 1;
+  }
+
+  const newBest = Math.max(newStreak, state.bestStreak || 0);
+
+  saveState({
+    ...state,
+    lastCompleted: today,
+    streak: newStreak,
+    bestStreak: newBest,
+    todayPoints: state.todayPoints || 0
+  });
+
+  // Update display
+  document.getElementById('streakCount').textContent = newStreak;
+  document.getElementById('bestStreak').textContent = newBest;
+  document.getElementById('totalPoints').textContent = state.totalPoints || 0;
+
+  showComplete(state.todayPoints || 0, false);
+}
+
+function showComplete(pts, alreadyDone) {
+  document.getElementById('quizCard').style.display = 'none';
+  document.getElementById('progressDots').style.display = 'none';
+  document.querySelector('.cat-tabs').style.display = 'none';
+  const el = document.getElementById('dailyComplete');
+  el.style.display = 'block';
+
+  if (alreadyDone) {
+    document.getElementById('completeIcon').textContent = '✅';
+    document.getElementById('completeTitle').textContent = 'Already completed today!';
+    document.getElementById('completeSub').textContent = 'Come back tomorrow to keep your streak going. Your progress is saved.';
+  } else {
+    const pct = Math.round((sessionCorrect / DAILY_COUNT) * 100);
+    document.getElementById('completeIcon').textContent = pct === 100 ? '🏆' : pct >= 60 ? '🎯' : '📚';
+    document.getElementById('completeTitle').textContent = pct === 100 ? 'Perfect score!' : pct >= 60 ? 'Good work!' : 'Keep practising!';
+    document.getElementById('completeSub').textContent = `You got ${sessionCorrect}/${DAILY_COUNT} correct. ${pct === 100 ? 'Exceptional — come back tomorrow.' : 'Come back tomorrow to improve your score.'}`;
+  }
+
+  document.getElementById('completeScore').textContent = pts + ' pts';
+}
+
+function addPoints(pts) {
+  const state = getState();
+  const newTotal = (state.totalPoints || 0) + pts;
+  const todayPts = (state.todayPoints || 0) + pts;
+  saveState({ ...state, totalPoints: newTotal, todayPoints: todayPts });
+  document.getElementById('totalPoints').textContent = newTotal;
+}
+
+function setCategory(cat, btn) {
+  currentCategory = cat;
+  document.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  startSession();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Start
+init();
+</script>
+</body>
+</html>
