@@ -226,6 +226,22 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 .vault-brand-name span { color:var(--accent); }
 .vault-auth-sub { font-size:13px; color:var(--ink-light); margin-bottom:24px; }
 </style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TWSP8CTP6B');
+</script>
+<!-- Microsoft Clarity -->
+<script type="text/javascript">
+  (function(c,l,a,r,i,t,y){
+    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+  })(window, document, "clarity", "script", "xerlyo9cn2");
+</script>
 </head>
 <body>
 
@@ -324,7 +340,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   <div style="display:flex;align-items:center;gap:12px">
     <span style="font-size:22px">🎯</span>
     <div>
-      <p style="font-size:13px;font-weight:600;color:white;margin-bottom:2px">Daily Finance Quiz — 223 questions across valuation, derivatives, risk, macro & more</p>
+      <p style="font-size:13px;font-weight:600;color:white;margin-bottom:2px">Daily Finance Quiz — a new 5-question challenge every day</p>
       <p style="font-size:12px;color:rgba(255,255,255,.55)">60 seconds a day. Build the technical knowledge that gets you through interview rounds. Free to try, included with every subscription.</p>
     </div>
   </div>
@@ -709,7 +725,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
             <div style="display:flex;gap:10px;align-items:flex-start">
               <span style="width:20px;height:20px;background:#F0FDF4;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px">✓</span>
               <div>
-                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">Daily finance quiz — 223 questions across 17 topics</p>
+                <p style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:1px">Daily finance quiz — new 5-question challenge every day</p>
                 <p style="font-size:12px;color:var(--ink-light)">60-second daily challenge covering valuation, derivatives, risk, macro, PE and more. Build the knowledge that gets you through technical rounds.</p>
               </div>
             </div>
@@ -1277,6 +1293,7 @@ async function handleSubmit() {
     }
 
     closeModal('submitModal');
+    if (typeof gtag !== 'undefined') gtag('event', 'question_submitted', { event_category: 'engagement' });
     showToast('✓ Question submitted! Redirecting to start your free trial…');
 
     // Redirect to Stripe with trial — card required, charged after 3 days
@@ -1504,6 +1521,7 @@ function selectPlan(plan) {
 
 function redirectToSubscribe() {
   if (!currentUser) { closeModal('subscribeModal'); openAuthModal('subscribe'); return; }
+  if (typeof gtag !== 'undefined') gtag('event', 'begin_checkout', { event_category: 'conversion', event_label: selectedPlan, value: selectedPlan === 'annual' ? 89 : 12, currency: 'GBP' });
   const link = selectedPlan === 'annual' ? STRIPE_ANNUAL_LINK : STRIPE_SUB_LINK;
   window.location.href = link + '?prefilled_email=' + encodeURIComponent(currentUser.email);
 }
