@@ -131,6 +131,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 4
     y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
   })(window, document, "clarity", "script", "xerlyo9cn2");
 </script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>
 <body>
 <nav>
@@ -194,6 +195,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 4
     <div class="streak-item">
       <span class="streak-num" id="bestStreak">0</span>
       <span class="streak-label">Best streak</span>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item" style="text-align:center">
+      <span id="syncStatus" style="font-size:11px;color:var(--ink-light)">Local only</span>
+      <span class="streak-label" style="margin-top:2px">Progress</span>
     </div>
   </div>
 
@@ -1672,6 +1678,20 @@ let hintUsed = false;
 let answered = false;
 const DAILY_COUNT = 5;
 
+// ── SUPABASE ────────────────────────────────────────────────────────────
+const SUPABASE_URL = 'https://yweyfioiwwrvbawwuttk.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl3ZXlmaW9pd3dydmJhd3d1dHRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIyMjg0OTksImV4cCI6MjA5NzgwNDQ5OX0.aBfrXzVPpjju0UKpLo02dw-hy7xdiPr0l4If5CsZfbk';
+let sb = null;
+let currentUser = null;
+
+async function initSupabase() {
+  if (window.supabase && !sb) {
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const { data: { session } } = await sb.auth.getSession();
+    currentUser = session?.user || null;
+  }
+}
+
 // ── PERSISTENCE ────────────────────────────────────────────────────────
 function getState() {
   try {
@@ -1681,9 +1701,46 @@ function getState() {
 }
 function saveState(s) {
   try { localStorage.setItem('fcv_quiz', JSON.stringify(s)); } catch(e) {}
+  // Also sync to Supabase if signed in
+  if (currentUser && sb) syncToSupabase(s);
 }
 function todayKey() {
-  return new Date().toISOString().slice(0,10); // YYYY-MM-DD
+  return new Date().toISOString().slice(0,10);
+}
+
+async function syncToSupabase(state) {
+  if (!currentUser || !sb) return;
+  try {
+    await sb.from('quiz_progress').upsert({
+      user_id: currentUser.id,
+      streak: state.streak || 0,
+      best_streak: state.bestStreak || 0,
+      total_points: state.totalPoints || 0,
+      last_completed: state.lastCompleted || null,
+      today_points: state.todayPoints || 0,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+  } catch(e) { console.warn('Quiz sync error (non-fatal):', e); }
+}
+
+async function loadFromSupabase() {
+  if (!currentUser || !sb) return null;
+  try {
+    const { data } = await sb.from('quiz_progress')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .single();
+    if (data) {
+      return {
+        streak: data.streak,
+        bestStreak: data.best_streak,
+        totalPoints: data.total_points,
+        lastCompleted: data.last_completed,
+        todayPoints: data.today_points
+      };
+    }
+  } catch(e) { console.warn('Quiz load error (non-fatal):', e); }
+  return null;
 }
 
 // ── INIT ───────────────────────────────────────────────────────────────
@@ -1901,8 +1958,34 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Start
-init();
+// Start — load from Supabase if signed in, fall back to localStorage
+(async () => {
+  await initSupabase();
+  const cloudState = await loadFromSupabase();
+  if (cloudState) {
+    // Merge cloud state with local — take higher streak/points
+    const local = getState();
+    const merged = {
+      streak: Math.max(cloudState.streak, local.streak || 0),
+      bestStreak: Math.max(cloudState.bestStreak, local.bestStreak || 0),
+      totalPoints: Math.max(cloudState.totalPoints, local.totalPoints || 0),
+      lastCompleted: cloudState.lastCompleted || local.lastCompleted,
+      todayPoints: cloudState.todayPoints || local.todayPoints || 0
+    };
+    saveState(merged);
+  }
+  init();
+  // Update sync status indicator
+  const syncEl = document.getElementById('syncStatus');
+  if (syncEl) {
+    if (currentUser) {
+      syncEl.textContent = '✓ Synced';
+      syncEl.style.color = 'var(--good)';
+    } else {
+      syncEl.innerHTML = '<a href="/vault.html" style="color:var(--accent);font-size:11px;text-decoration:none">Sign in to sync</a>';
+    }
+  }
+})();
 </script>
 </body>
 </html>
