@@ -168,7 +168,8 @@ Rules:
 
     if (data.error) {
       console.error('Anthropic error:', data.error);
-      return res.status(500).json({ error: 'AI analysis failed', details: data.error.message });
+      console.error('AI analysis error:', data.error.message);
+      return res.status(500).json({ error: 'Analysis temporarily unavailable. Please try again.' });
     }
 
     const raw = data.content
@@ -188,6 +189,7 @@ Rules:
 
   } catch (err) {
     console.error('Analysis error:', err);
-    return res.status(500).json({ error: 'Analysis failed', details: err.message });
+    console.error('Analysis error:', err.message);
+    return res.status(500).json({ error: 'Analysis temporarily unavailable. Please try again.' });
   }
 }
