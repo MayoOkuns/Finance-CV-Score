@@ -226,21 +226,26 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 .vault-brand-name span { color:var(--accent); }
 .vault-auth-sub { font-size:13px; color:var(--ink-light); margin-bottom:24px; }
 </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B"></script>
+<!-- Analytics loaded after cookie consent (PECR) -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TWSP8CTP6B');
-</script>
-<!-- Microsoft Clarity -->
-<script type="text/javascript">
-  (function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-  })(window, document, "clarity", "script", "xerlyo9cn2");
+(function(){
+  function loadAnalytics(){
+    var g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B';document.head.appendChild(g);
+    window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config','G-TWSP8CTP6B');
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","xerlyo9cn2");
+  }
+  var consent=localStorage.getItem('fcv_cookie_consent');
+  if(consent==='accepted'){loadAnalytics();return;}
+  if(consent==='rejected')return;
+  document.addEventListener('DOMContentLoaded',function(){
+    var b=document.createElement('div');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#0F172A;color:#fff;padding:14px 20px;z-index:9999;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;font-family:Inter,sans-serif;font-size:13px';
+    b.innerHTML='<span>We use analytics cookies to improve the product. <a href="#" onclick="openLegalModal&&openLegalModal(\'cookies\');return false" style="color:#93C5FD">Cookie notice</a></span><button id="fcvAccept" style="background:#2563EB;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Accept</button><button id="fcvReject" style="background:none;color:#94A3B8;border:1px solid #334155;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px">Reject</button>';
+    document.body.appendChild(b);
+    document.getElementById('fcvAccept').onclick=function(){localStorage.setItem('fcv_cookie_consent','accepted');b.remove();loadAnalytics();};
+    document.getElementById('fcvReject').onclick=function(){localStorage.setItem('fcv_cookie_consent','rejected');b.remove();};
+  });
+})();
 </script>
 </head>
 <body>
@@ -743,7 +748,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         🔒 Subscribe — £12/month
       </button>
       <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:12px;line-height:1.6">
-        Secure checkout via Stripe.<br>
+        By subscribing you request immediate access to digital content and acknowledge you lose your 14-day statutory cancellation right once access begins (Consumer Contracts Regulations 2013). Secure checkout via Stripe.<br>
         3-day free trial, then £12/month. First payment non-refundable once trial ends.<br>
         Cancel anytime before trial ends and pay nothing.
       </p>
@@ -1115,9 +1120,13 @@ function getFramework(question, subSector) {
   return null;
 }
 
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function renderQuestionCard(q, blurred) {
-  const yearTag = q.year_asked ? `<span class="q-tag q-tag-role">${q.year_asked}</span>` : '';
-  const roleTag = q.role ? `<span class="q-tag q-tag-role">${q.role}</span>` : '';
+  const yearTag = q.year_asked ? `<span class="q-tag q-tag-role">${escapeHtml(q.year_asked)}</span>` : '';
+  const roleTag = q.role ? `<span class="q-tag q-tag-role">${escapeHtml(q.role)}</span>` : '';
   const recent = isRecentQuestion(q.created_at);
   const cycleBadge = recent ? `<span class="cycle-badge">This cycle</span>` : '';
   const framework = getFramework(q.question_text, q.sub_sector);
@@ -1147,12 +1156,12 @@ function renderQuestionCard(q, blurred) {
   return `
     <div class="question-card${blurred ? ' blurred' : ''}">
       <div class="question-tags">
-        <span class="q-tag q-tag-firm">${q.firm}</span>
-        <span class="q-tag q-tag-sector">${q.sub_sector}</span>
-        ${q.stage ? `<span class="q-tag q-tag-stage">${q.stage}</span>` : ''}
+        <span class="q-tag q-tag-firm">${escapeHtml(q.firm)}</span>
+        <span class="q-tag q-tag-sector">${escapeHtml(q.sub_sector)}</span>
+        ${q.stage ? `<span class="q-tag q-tag-stage">${escapeHtml(q.stage)}</span>` : ''}
         ${roleTag}${yearTag}${cycleBadge}
       </div>
-      <p class="question-text">${q.question_text}</p>
+      <p class="question-text">${escapeHtml(q.question_text)}</p>
       ${frameworkHtml}
       <div class="question-meta">
         <span>${timeAgo(q.created_at)}</span>

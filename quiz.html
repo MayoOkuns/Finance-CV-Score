@@ -115,21 +115,26 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 4
 
 @media(max-width:600px){nav{padding:14px 20px}.page{padding:24px 16px}.quiz-card-header,.quiz-body{padding-left:20px;padding-right:20px}}
 </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B"></script>
+<!-- Analytics loaded after cookie consent (PECR) -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TWSP8CTP6B');
-</script>
-<!-- Microsoft Clarity -->
-<script type="text/javascript">
-  (function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-  })(window, document, "clarity", "script", "xerlyo9cn2");
+(function(){
+  function loadAnalytics(){
+    var g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B';document.head.appendChild(g);
+    window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config','G-TWSP8CTP6B');
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","xerlyo9cn2");
+  }
+  var consent=localStorage.getItem('fcv_cookie_consent');
+  if(consent==='accepted'){loadAnalytics();return;}
+  if(consent==='rejected')return;
+  document.addEventListener('DOMContentLoaded',function(){
+    var b=document.createElement('div');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#0F172A;color:#fff;padding:14px 20px;z-index:9999;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;font-family:Inter,sans-serif;font-size:13px';
+    b.innerHTML='<span>We use analytics cookies to improve the product. <a href="#" onclick="openLegalModal&&openLegalModal(\'cookies\');return false" style="color:#93C5FD">Cookie notice</a></span><button id="fcvAccept" style="background:#2563EB;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Accept</button><button id="fcvReject" style="background:none;color:#94A3B8;border:1px solid #334155;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px">Reject</button>';
+    document.body.appendChild(b);
+    document.getElementById('fcvAccept').onclick=function(){localStorage.setItem('fcv_cookie_consent','accepted');b.remove();loadAnalytics();};
+    document.getElementById('fcvReject').onclick=function(){localStorage.setItem('fcv_cookie_consent','rejected');b.remove();};
+  });
+})();
 </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 </head>

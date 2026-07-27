@@ -332,11 +332,15 @@ async function loadTab(tab) {
   }
 }
 
+function escapeHtml(s) {
+  if (s === null || s === undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
 function renderQuestionRow(q, tab) {
   const date = new Date(q.created_at).toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'});
   const actions = tab === 'pending' ? `
     <div class="action-btns">
-      <button class="btn-approve" onclick="approveQuestion('${q.id}','${q.firm}',\`${q.question_text.replace(/`/g,"'")}\`)">✓ Approve</button>
+      <button class="btn-approve" onclick="approveQuestion('${q.id}','${escapeHtml(q.firm)}',\`${q.question_text.replace(/`/g,"'")}\`)">✓ Approve</button>
       <button class="btn-reject" onclick="rejectQuestion('${q.id}')">✗ Reject</button>
     </div>` : tab === 'approved' ? `
     <div class="action-btns">
@@ -344,22 +348,22 @@ function renderQuestionRow(q, tab) {
       <button class="btn-delete" onclick="deleteQuestion('${q.id}')">Delete</button>
     </div>` : `
     <div class="action-btns">
-      <button class="btn-approve" onclick="approveQuestion('${q.id}','${q.firm}',\`${q.question_text.replace(/`/g,"'")}\`)">Re-approve</button>
+      <button class="btn-approve" onclick="approveQuestion('${q.id}','${escapeHtml(q.firm)}',\`${q.question_text.replace(/`/g,"'")}\`)">Re-approve</button>
       <button class="btn-delete" onclick="deleteQuestion('${q.id}')">Delete</button>
     </div>`;
 
   return `
     <tr>
       <td>
-        <p class="q-text">${q.question_text}</p>
-        ${q.year_asked ? `<p class="q-meta">Asked: ${q.year_asked}</p>` : ''}
+        <p class="q-text">${escapeHtml(q.question_text)}</p>
+        ${q.year_asked ? `<p class="q-meta">Asked: ${escapeHtml(q.year_asked)}</p>` : ''}
       </td>
       <td>
         <div style="display:flex;flex-direction:column;gap:4px">
-          <span class="tag tag-firm">${q.firm}</span>
-          <span class="tag tag-sector">${q.sub_sector}</span>
-          ${q.stage ? `<span class="tag tag-stage">${q.stage}</span>` : ''}
-          ${q.role ? `<span class="tag" style="background:var(--surface);color:var(--ink-light)">${q.role}</span>` : ''}
+          <span class="tag tag-firm">${escapeHtml(q.firm)}</span>
+          <span class="tag tag-sector">${escapeHtml(q.sub_sector)}</span>
+          ${q.stage ? `<span class="tag tag-stage">${escapeHtml(q.stage)}</span>` : ''}
+          ${q.role ? `<span class="tag" style="background:var(--surface);color:var(--ink-light)">${escapeHtml(q.role)}</span>` : ''}
         </div>
       </td>
       <td style="white-space:nowrap;color:var(--ink-light);font-size:12px">${date}</td>

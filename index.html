@@ -289,21 +289,26 @@
   .ind-btn.selected { border-color:var(--accent); background:var(--accent-light); color:var(--accent); font-weight:600; }
   @media(max-width:500px){ .industry-grid { grid-template-columns:repeat(2,1fr); } }
 </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B"></script>
+<!-- Analytics loaded after cookie consent (PECR) -->
 <script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-  gtag('config', 'G-TWSP8CTP6B');
-</script>
-<!-- Microsoft Clarity -->
-<script type="text/javascript">
-  (function(c,l,a,r,i,t,y){
-    c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
-    t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
-    y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
-  })(window, document, "clarity", "script", "xerlyo9cn2");
+(function(){
+  function loadAnalytics(){
+    var g=document.createElement('script');g.async=true;g.src='https://www.googletagmanager.com/gtag/js?id=G-TWSP8CTP6B';document.head.appendChild(g);
+    window.dataLayer=window.dataLayer||[];window.gtag=function(){dataLayer.push(arguments);};gtag('js',new Date());gtag('config','G-TWSP8CTP6B');
+    (function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","xerlyo9cn2");
+  }
+  var consent=localStorage.getItem('fcv_cookie_consent');
+  if(consent==='accepted'){loadAnalytics();return;}
+  if(consent==='rejected')return;
+  document.addEventListener('DOMContentLoaded',function(){
+    var b=document.createElement('div');
+    b.style.cssText='position:fixed;bottom:0;left:0;right:0;background:#0F172A;color:#fff;padding:14px 20px;z-index:9999;display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;font-family:Inter,sans-serif;font-size:13px';
+    b.innerHTML='<span>We use analytics cookies to improve the product. <a href="#" onclick="openLegalModal&&openLegalModal(\'cookies\');return false" style="color:#93C5FD">Cookie notice</a></span><button id="fcvAccept" style="background:#2563EB;color:#fff;border:none;padding:8px 18px;border-radius:8px;font-weight:600;cursor:pointer;font-size:13px">Accept</button><button id="fcvReject" style="background:none;color:#94A3B8;border:1px solid #334155;padding:8px 18px;border-radius:8px;cursor:pointer;font-size:13px">Reject</button>';
+    document.body.appendChild(b);
+    document.getElementById('fcvAccept').onclick=function(){localStorage.setItem('fcv_cookie_consent','accepted');b.remove();loadAnalytics();};
+    document.getElementById('fcvReject').onclick=function(){localStorage.setItem('fcv_cookie_consent','rejected');b.remove();};
+  });
+})();
 </script>
 </head>
 <body>
@@ -429,7 +434,7 @@
 
 <div class="proof-bar" id="proofBar">
   <div class="proof-stat"><span class="proof-num">12</span><span class="proof-label">finance sub-sectors covered</span></div>
-  <div class="proof-stat"><span class="proof-num">AI</span><span class="proof-label">powered analysis &amp; rewriting</span></div>
+  <div class="proof-stat"><span class="proof-num">AI</span><span class="proof-label">powered scoring &amp; keyword analysis</span></div>
   <div class="proof-stat"><span class="proof-num">Free</span><span class="proof-label">core ATS score, no signup</span></div>
 </div>
 
@@ -628,7 +633,7 @@
       </div>
 
       <div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:#92400E;line-height:1.5">
-        ⚠️ This is a one-time payment of £5. Non-refundable after purchase, except under our 30-day money-back guarantee. By proceeding you confirm you have read and agree to our <a href="#" onclick="showModal('termsModal');return false" style="color:#92400E;text-decoration:underline">Terms of Service</a>.
+        ⚠️ This is a one-time payment of £5 for digital content supplied immediately. By purchasing you consent to immediate supply and acknowledge you lose your 14-day statutory cancellation right (Consumer Contracts Regulations 2013). Our voluntary 30-day money-back guarantee still applies. By proceeding you confirm you have read and agree to our <a href="#" onclick="showModal('termsModal');return false" style="color:#92400E;text-decoration:underline">Terms of Service</a>.
       </div>
 
       <button class="pay-btn" id="payBtn" onclick="simulatePayment()">
@@ -1489,6 +1494,17 @@
       document.getElementById('percentileLockOverlay').style.display = 'none';
       document.getElementById('percentileSub').textContent =
         `Your score of ${data.overallScore} places you in an estimated ${result.percentile}${ordSuffix(result.percentile)} percentile for ${label} CVs (modelled average: ${result.mean}). See methodology below.`;
+
+      // Upgrade to REAL percentile once 50+ scores exist for this industry
+      getRealPercentile(data.overallScore, data.industry).then(real => {
+        if (real && real.isReal) {
+          marker.style.left = real.percentile + '%';
+          markerLabel.textContent = real.percentile >= 90 ? 'Top 10%' :
+            real.percentile >= 75 ? 'Top 25%' : `${real.percentile}th percentile`;
+          document.getElementById('percentileSub').textContent =
+            `Your score of ${data.overallScore} places you in the ${real.percentile}${ordSuffix(real.percentile)} percentile of ${real.sampleSize} real ${label} CVs scored on this platform.`;
+        }
+      }).catch(() => {});
     } else {
       markerLabel.textContent = '??';
       marker.style.left = '50%';
@@ -1923,7 +1939,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
       html: `<p class="legal-updated">Last updated: 16 June 2026</p>
         <div class="legal-section">
           <h4>Who we are</h4>
-          <p>Finance Career Vault ("we", "us") provides an online CV analysis and rewriting tool. This policy explains how we collect, use, and protect your personal data in line with UK GDPR and the Data Protection Act 2018.</p>
+          <p>Finance Career Vault ("we", "us") provides an online CV analysis and scoring tool. This policy explains how we collect, use, and protect your personal data in line with UK GDPR and the Data Protection Act 2018.</p>
         </div>
         <div class="legal-section">
           <h4>What data we collect</h4>
@@ -1979,6 +1995,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
         <div class="legal-section">
           <h4>3. Payments &amp; refunds</h4>
           <p><strong>CV Pro (£5 one-time):</strong> We offer a 30-day money-back guarantee. To request a refund, email hello@financecareervault.com within 30 days of purchase with your order reference. Refunds are processed within 5-10 business days to your original payment method. This does not affect your statutory rights under the Consumer Rights Act 2015.</p>
+          <p style="margin-top:8px"><strong>Digital content & cancellation rights:</strong> Both products are digital content supplied immediately. Under the Consumer Contracts Regulations 2013, by purchasing you expressly consent to immediate supply and acknowledge that you lose your statutory 14-day cancellation right once supply begins. This does not affect our voluntary guarantees above or your other statutory rights.</p>
           <p style="margin-top:8px"><strong>Interview Vault Subscription (£12/month):</strong> A 3-day free trial is available. Your payment method is required upfront but you will not be charged until the trial ends. If you cancel before the trial ends, no charge is made. The first monthly payment of £12 is non-refundable once the trial period has elapsed. Subsequent monthly payments may be refunded within 7 days of charge if the service has not been accessed during that billing period. Cancel anytime via your account page. Cancellation takes effect at the end of your current billing period.</p>
 
           <h4 style="margin-top:12px">3a. Marketing communications</h4>
