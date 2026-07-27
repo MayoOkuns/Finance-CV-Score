@@ -118,7 +118,7 @@ tr:hover td{background:#FAFAF9}
     <h1>Admin Login</h1>
     <p>Finance Career Vault — Moderation Dashboard</p>
     <input type="email" class="login-input" id="adminEmail" placeholder="Admin email">
-    <input type="password" class="login-input" id="adminPassword" placeholder="Password" onkeydown="if(event.key==='Enter')login()">
+    <input type="password" class="login-input" id="adminPassword" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()">
     <button class="login-btn" onclick="login()">Sign in</button>
     <p class="login-error" id="loginError"></p>
   </div>
@@ -173,6 +173,22 @@ tr:hover td{background:#FAFAF9}
       <div class="stat-card good">
         <span class="stat-num" id="statSubs">—</span>
         <span class="stat-label">Active subscribers</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statTrials">—</span>
+        <span class="stat-label">On trial now</span>
+      </div>
+      <div class="stat-card good">
+        <span class="stat-num" id="statMRR">—</span>
+        <span class="stat-label">Est. MRR</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statCvPro">—</span>
+        <span class="stat-label">CV Pro sales</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-num" id="statNewWeek">—</span>
+        <span class="stat-label">New users (7d)</span>
       </div>
     </div>
 
@@ -258,17 +274,28 @@ async function loadAll() {
 
 async function loadStats() {
   try {
-    const [pending, approved, profiles] = await Promise.all([
+    const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+    const [pending, approved, profiles, newWeek] = await Promise.all([
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','pending'),
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','approved'),
-      sb.from('profiles').select('subscription_status')
+      sb.from('profiles').select('subscription_status, cv_pro_purchased'),
+      sb.from('profiles').select('*',{count:'exact',head:true}).gte('created_at', weekAgo)
     ]);
+
+    const rows = profiles.data || [];
+    const activeSubs = rows.filter(p => p.subscription_status === 'active').length;
+    const trials = rows.filter(p => p.subscription_status === 'trial').length;
+    const cvProSales = rows.filter(p => p.cv_pro_purchased).length;
 
     document.getElementById('statPending').textContent = pending.count || 0;
     document.getElementById('statApproved').textContent = approved.count || 0;
-    document.getElementById('statUsers').textContent = profiles.data?.length || 0;
-    const activeSubs = (profiles.data || []).filter(p => p.subscription_status === 'active').length;
+    document.getElementById('statUsers').textContent = rows.length;
     document.getElementById('statSubs').textContent = activeSubs;
+    document.getElementById('statTrials').textContent = trials;
+    // Est MRR: active subs × £12. (Annual subs also net ~£7.42/mo but we treat all as £12 for a simple floor estimate.)
+    document.getElementById('statMRR').textContent = '£' + (activeSubs * 12).toLocaleString();
+    document.getElementById('statCvPro').textContent = cvProSales;
+    document.getElementById('statNewWeek').textContent = newWeek.count || 0;
   } catch(err) {
     console.error('Stats error:', err);
   }
@@ -429,16 +456,21 @@ async function loadUsers() {
       return;
     }
 
+    window._usersData = data; // store for CSV export
+
     content.innerHTML = `
       <div class="table-wrap">
         <div class="table-header">
           <h3>Users</h3>
-          <span class="table-count">${data.length} total</span>
+          <div style="display:flex;align-items:center;gap:12px">
+            <span class="table-count">${data.length} total</span>
+            <button onclick="exportUsersCsv()" style="background:var(--navy);color:white;border:none;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">⬇ Export CSV</button>
+          </div>
         </div>
         <table>
           <thead>
             <tr>
-              <th>User ID</th>
+              <th>Email</th>
               <th>Status</th>
               <th>Trial expires</th>
               <th>CV Pro</th>
@@ -453,9 +485,12 @@ async function loadUsers() {
                 : '—';
               const statusClass = p.subscription_status === 'active' ? 'status-active'
                 : p.subscription_status === 'trial' ? 'status-trial' : 'status-free';
+              const emailDisplay = p.email
+                ? escapeHtml(p.email)
+                : `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light)">${escapeHtml(p.id.substring(0,8))}…</span>`;
               return `<tr>
-                <td><span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light)">${p.id.substring(0,8)}…</span></td>
-                <td><span class="user-status ${statusClass}">${p.subscription_status}</span></td>
+                <td style="font-size:13px">${emailDisplay}</td>
+                <td><span class="user-status ${statusClass}">${escapeHtml(p.subscription_status || 'free')}</span></td>
                 <td style="font-size:12px;color:var(--ink-light)">${trial}</td>
                 <td style="font-size:13px">${p.cv_pro_purchased ? '✓' : '—'}</td>
                 <td style="font-size:12px;color:var(--ink-light);white-space:nowrap">${date}</td>
@@ -466,8 +501,28 @@ async function loadUsers() {
       </div>`;
   } catch(err) {
     console.error('Load users error:', err);
-    content.innerHTML = `<div class="empty-state"><h3>Error loading users</h3><p>${err.message}</p></div>`;
+    content.innerHTML = `<div class="empty-state"><h3>Error loading users</h3><p>${escapeHtml(err.message)}</p></div>`;
   }
+}
+
+function exportUsersCsv() {
+  const data = window._usersData || [];
+  if (!data.length) { showToast('No users to export'); return; }
+  const headers = ['email','subscription_status','cv_pro_purchased','trial_expires_at','created_at'];
+  const rows = data.map(p => headers.map(h => {
+    let v = p[h] === null || p[h] === undefined ? '' : String(p[h]);
+    if (v.includes(',') || v.includes('"') || v.includes('\n')) v = '"' + v.replace(/"/g,'""') + '"';
+    return v;
+  }).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fcv-users-${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast(`Exported ${data.length} users`);
 }
 
 function showToast(msg) {
