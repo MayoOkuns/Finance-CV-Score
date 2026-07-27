@@ -1,4 +1,27 @@
+// Simple in-memory rate limiter — 10 requests per IP per 10 minutes
+const rateLimitMap = new Map();
+const RATE_LIMIT = 10;
+const WINDOW_MS = 10 * 60 * 1000;
+
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip) || { count: 0, resetAt: now + WINDOW_MS };
+  if (now > entry.resetAt) {
+    entry.count = 0;
+    entry.resetAt = now + WINDOW_MS;
+  }
+  entry.count++;
+  rateLimitMap.set(ip, entry);
+  return entry.count > RATE_LIMIT;
+}
+
 export default async function handler(req, res) {
+  // Rate limiting
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || req.socket?.remoteAddress || 'unknown';
+  if (isRateLimited(ip)) {
+    return res.status(429).json({ error: 'Too many requests. Please wait a few minutes before trying again.' });
+  }
+
   // CORS
   const origin = req.headers.origin || '';
   const allowed = ['https://financecareervault.com','https://www.financecareervault.com'];
@@ -18,6 +41,39 @@ export default async function handler(req, res) {
   if (!apiKey) {
     return res.status(500).json({ error: 'API not configured' });
   }
+
+  // ── GLOBAL DAILY CAP (circuit breaker against runaway AI cost) ──
+  // Worst-case exposure at 500/day ≈ £10/day. Adjust DAILY_CAP as traffic grows.
+  const DAILY_CAP = parseInt(process.env.DAILY_ANALYSIS_CAP || '500', 10);
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+    if (supabaseUrl && supabaseAnonKey) {
+      const rpcRes = await fetch(`${supabaseUrl}/rest/v1/rpc/increment_daily_analysis`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseAnonKey,
+          'Authorization': `Bearer ${supabaseAnonKey}`
+        },
+        body: JSON.stringify({})
+      });
+      if (rpcRes.ok) {
+        const todayCount = await rpcRes.json();
+        if (typeof todayCount === 'number' && todayCount > DAILY_CAP) {
+          return res.status(429).json({
+            error: "We've hit today's free analysis limit. Please try again tomorrow — or unlock Pro for instant access.",
+            capReached: true
+          });
+        }
+      }
+      // If the counter call fails, fail OPEN (allow the analysis) — the per-IP
+      // limiter still applies, so we don't block real users over a counter hiccup.
+    }
+  } catch (capErr) {
+    console.warn('Daily cap check failed (non-fatal, failing open):', capErr.message);
+  }
+
 
   const industryLabels = {
     ib:'Investment Banking', am:'Asset Management', pe:'Private Equity',
