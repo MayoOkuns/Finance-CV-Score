@@ -3,6 +3,19 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 // Stripe webhook handler
 // Listens for subscription events and updates Supabase profiles accordingly
 
+// Vercel parses JSON bodies by default, which breaks Stripe signature
+// verification (Stripe signs the raw bytes). Disable the parser and read
+// the raw body ourselves.
+export const config = { api: { bodyParser: false } };
+
+async function readRawBody(req) {
+  const chunks = [];
+  for await (const chunk of req) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -18,35 +31,54 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
 
-  // Get raw body for signature verification
-  const rawBody = JSON.stringify(req.body);
+  // Read raw bytes (bodyParser is disabled above)
+  const rawBody = await readRawBody(req);
   const stripeSignature = req.headers['stripe-signature'];
 
   let event;
 
-  // Verify webhook signature if secret is set
-  if (webhookSecret && stripeSignature) {
-    try {
-      // Simple HMAC verification without the full Stripe SDK
-      const crypto = await import('crypto');
-      const [timestampPart, ...sigParts] = stripeSignature.split(',');
-      const timestamp = timestampPart.replace('t=', '');
-      const expectedSig = crypto.default
-        .createHmac('sha256', webhookSecret)
-        .update(`${timestamp}.${rawBody}`)
-        .digest('hex');
-      const receivedSig = sigParts.find(s => s.startsWith('v1='))?.replace('v1=', '');
-      if (expectedSig !== receivedSig) {
-        return res.status(400).json({ error: 'Invalid signature' });
-      }
-      event = req.body;
-    } catch(err) {
-      console.error('Signature verification error:', err);
-      return res.status(400).json({ error: 'Signature verification failed' });
+  // SECURITY: a webhook secret is MANDATORY. Without a verified signature,
+  // anyone could POST a fake subscription event and grant themselves access.
+  if (!webhookSecret) {
+    console.error('STRIPE_WEBHOOK_SECRET not set — refusing to process webhook.');
+    return res.status(500).json({ error: 'Webhook not configured' });
+  }
+  if (!stripeSignature) {
+    return res.status(400).json({ error: 'Missing signature' });
+  }
+
+  try {
+    const crypto = await import('crypto');
+    const parts = Object.fromEntries(
+      stripeSignature.split(',').map(kv => kv.split('=').map(s => s.trim()))
+    );
+    const timestamp = parts['t'];
+    const receivedSig = parts['v1'];
+    if (!timestamp || !receivedSig) {
+      return res.status(400).json({ error: 'Malformed signature' });
     }
-  } else {
-    // No webhook secret set — accept all events (development only)
-    event = req.body;
+
+    // Reject events older than 5 minutes (replay protection)
+    const age = Math.floor(Date.now() / 1000) - parseInt(timestamp, 10);
+    if (isNaN(age) || age > 300 || age < -300) {
+      return res.status(400).json({ error: 'Timestamp outside tolerance' });
+    }
+
+    const expectedSig = crypto.default
+      .createHmac('sha256', webhookSecret)
+      .update(`${timestamp}.${rawBody}`)
+      .digest('hex');
+
+    // Timing-safe comparison
+    const a = Buffer.from(expectedSig, 'hex');
+    const b = Buffer.from(receivedSig, 'hex');
+    if (a.length !== b.length || !crypto.default.timingSafeEqual(a, b)) {
+      return res.status(400).json({ error: 'Invalid signature' });
+    }
+    event = JSON.parse(rawBody);
+  } catch(err) {
+    console.error('Signature verification error:', err.message);
+    return res.status(400).json({ error: 'Signature verification failed' });
   }
 
   // Supabase admin client (service role — bypasses RLS)
@@ -94,6 +126,7 @@ export default async function handler(req, res) {
         // Update profile
         const { error } = await supabase.from('profiles').upsert({
           id: user.id,
+          email: email,
           subscription_status: profileStatus,
           subscription_id: subscription.id,
           trial_expires_at: subscription.trial_end
@@ -103,6 +136,37 @@ export default async function handler(req, res) {
 
         if (error) console.error('Profile update error:', error);
         else console.log(`Updated ${email} to status: ${profileStatus}`);
+
+        // Sync to Brevo — update contact with trial expiry date and list membership
+        // This triggers Brevo automations (trial reminder, welcome email)
+        try {
+          const brevoKey = process.env.BREVO_API_KEY;
+          const trialExpiresAt = subscription.trial_end
+            ? new Date(subscription.trial_end * 1000).toISOString().split('T')[0]
+            : null;
+
+          const brevoListId = profileStatus === 'trial'
+            ? parseInt(process.env.BREVO_TRIAL_LIST_ID || '4')   // Trial Users list
+            : parseInt(process.env.BREVO_SUBSCRIBERS_LIST_ID || '5'); // Active Subscribers list
+
+          await fetch('https://api.brevo.com/v3/contacts', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'api-key': brevoKey },
+            body: JSON.stringify({
+              email,
+              attributes: {
+                TRIAL_EXPIRES_AT: trialExpiresAt,
+                SUBSCRIPTION_STATUS: profileStatus
+              },
+              listIds: [brevoListId],
+              updateEnabled: true
+            })
+          });
+          console.log(`Brevo contact synced for ${email} — status: ${profileStatus}`);
+        } catch(brevoErr) {
+          console.warn('Brevo sync error (non-fatal):', brevoErr.message);
+        }
+
         break;
       }
 

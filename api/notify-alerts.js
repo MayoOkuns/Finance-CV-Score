@@ -1,22 +1,57 @@
+// Rate limiter — 20 requests per IP per 10 minutes
+const rateLimitMap = new Map();
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip) || { count: 0, resetAt: now + 600000 };
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + 600000; }
+  entry.count++;
+  rateLimitMap.set(ip, entry);
+  return entry.count > 20;
+}
+
 export default async function handler(req, res) {
-  // CORS
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  // CORS — restrict to own domain
+  const allowedOrigins = ['https://financecareervault.com','https://www.financecareervault.com'];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) res.setHeader('Access-Control-Allow-Origin', origin);
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  const { firm, questionText, questionId } = req.body;
-
-  if (!firm) return res.status(400).json({ error: 'Firm is required' });
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
+  if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
 
   const brevoKey = process.env.BREVO_API_KEY;
   const supabaseUrl = process.env.SUPABASE_URL;
   const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+  const adminEmail = process.env.ADMIN_EMAIL || 'mayo.okuns@gmail.com';
 
   if (!brevoKey || !supabaseUrl || !supabaseServiceKey) {
     return res.status(500).json({ error: 'Server configuration error' });
   }
+
+  // SECURITY: only the admin may trigger subscriber emails. Verify the caller's
+  // Supabase JWT and confirm it belongs to the admin account. Without this,
+  // anyone could hit this endpoint and spam your subscriber list.
+  const authHeader = req.headers['authorization'] || '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+  try {
+    const whoRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
+      headers: { 'apikey': supabaseServiceKey, 'Authorization': `Bearer ${token}` }
+    });
+    if (!whoRes.ok) return res.status(401).json({ error: 'Unauthorized' });
+    const who = await whoRes.json();
+    if (!who?.email || who.email !== adminEmail) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  } catch(e) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  const { firm, questionText, questionId } = req.body;
+
+  if (!firm) return res.status(400).json({ error: 'Firm is required' });
 
   try {
     // Find all users who have an alert set for this firm
@@ -121,6 +156,7 @@ export default async function handler(req, res) {
 
   } catch(err) {
     console.error('Notify alerts error:', err);
-    return res.status(500).json({ error: 'Failed to send alerts', details: err.message });
+    console.error('Alert send error:', err.message);
+    return res.status(500).json({ error: 'Failed to send alerts.' });
   }
 }
