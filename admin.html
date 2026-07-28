@@ -403,11 +403,15 @@ async function approveQuestion(id, firm, questionText) {
     const { error } = await sb.from('questions').update({ status: 'approved' }).eq('id', id);
     if (error) throw error;
 
-    // Trigger alert notifications
+    // Trigger alert notifications (send admin token so the endpoint can verify)
     try {
+      const { data: { session } } = await sb.auth.getSession();
       await fetch('/api/notify-alerts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + (session?.access_token || '')
+        },
         body: JSON.stringify({ firm, questionText, questionId: id })
       });
     } catch(e) {
