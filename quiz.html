@@ -2022,7 +2022,14 @@ async function loadRank() {
     const row = Array.isArray(data) ? data[0] : data;
     if (row && row.rank && row.rank > 0) {
       rankNum.textContent = '#' + row.rank;
-      rankLabel.textContent = (rankMode === 'weekly' ? 'This week' : 'All-time') + ' · of ' + row.total_players;
+      const period = rankMode === 'weekly' ? 'This week' : 'All-time';
+      // Only reveal the total player count once the board is meaningfully populated.
+      const RANK_TOTAL_THRESHOLD = 50;
+      if (row.total_players >= RANK_TOTAL_THRESHOLD) {
+        rankLabel.textContent = period + ' · of ' + row.total_players;
+      } else {
+        rankLabel.textContent = period + ' rank';
+      }
     } else {
       rankNum.textContent = '—';
       rankLabel.textContent = rankMode === 'weekly' ? 'Play to rank (week)' : 'Play to rank';
