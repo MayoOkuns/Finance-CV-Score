@@ -203,6 +203,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:16px 4
     </div>
     <div class="streak-divider"></div>
     <div class="streak-item" style="text-align:center">
+      <span class="streak-num" id="rankNum" style="font-size:16px">—</span>
+      <span class="streak-label" id="rankLabel">Rank</span>
+    </div>
+    <div class="streak-divider"></div>
+    <div class="streak-item" style="text-align:center">
       <span id="syncStatus" style="font-size:11px;color:var(--ink-light)">Local only</span>
       <span class="streak-label" style="margin-top:2px">Progress</span>
     </div>
@@ -1948,6 +1953,10 @@ function addPoints(pts) {
   const todayPts = (state.todayPoints || 0) + pts;
   saveState({ ...state, totalPoints: newTotal, todayPoints: todayPts });
   document.getElementById('totalPoints').textContent = newTotal;
+  // Update weekly counter server-side and refresh the rank badge (if signed in)
+  if (currentUser && sb) {
+    sb.rpc('add_quiz_points', { pts }).then(() => loadRank()).catch(() => {});
+  }
 }
 
 function setCategory(cat, btn) {
@@ -1987,10 +1996,126 @@ function showToast(msg) {
       syncEl.textContent = '✓ Synced';
       syncEl.style.color = 'var(--good)';
     } else {
-      syncEl.innerHTML = '<a href="/vault.html" style="color:var(--accent);font-size:11px;text-decoration:none">Sign in to sync</a>';
+      syncEl.innerHTML = '<a href="#" onclick="openQuizAuth();return false;" style="color:var(--accent);font-size:11px;text-decoration:none">Sign in to sync</a>';
     }
   }
+  loadRank();
 })();
+
+// ── LEADERBOARD RANK (privacy-safe: returns only your own rank via RPC) ──
+let rankMode = 'alltime'; // toggled by tapping the badge
+async function loadRank() {
+  const rankNum = document.getElementById('rankNum');
+  const rankLabel = document.getElementById('rankLabel');
+  if (!rankNum) return;
+  if (!currentUser || !sb) {
+    rankNum.textContent = '—';
+    rankLabel.innerHTML = '<a href="#" onclick="openQuizAuth();return false;" style="color:var(--accent)">Sign in to rank</a>';
+    rankNum.style.cursor = 'default';
+    rankNum.onclick = null;
+    return;
+  }
+  try {
+    const fn = rankMode === 'weekly' ? 'get_my_weekly_rank' : 'get_my_rank';
+    const { data, error } = await sb.rpc(fn);
+    if (error) throw error;
+    const row = Array.isArray(data) ? data[0] : data;
+    if (row && row.rank && row.rank > 0) {
+      rankNum.textContent = '#' + row.rank;
+      rankLabel.textContent = (rankMode === 'weekly' ? 'This week' : 'All-time') + ' · of ' + row.total_players;
+    } else {
+      rankNum.textContent = '—';
+      rankLabel.textContent = rankMode === 'weekly' ? 'Play to rank (week)' : 'Play to rank';
+    }
+    // Tapping the badge toggles all-time / weekly
+    rankNum.style.cursor = 'pointer';
+    rankNum.title = 'Tap to switch all-time / weekly';
+    rankNum.onclick = () => { rankMode = rankMode === 'weekly' ? 'alltime' : 'weekly'; loadRank(); };
+  } catch(e) {
+    console.warn('Rank load failed (non-fatal):', e.message);
+    rankNum.textContent = '—';
+    rankLabel.textContent = 'Rank';
+  }
+}
+
+// ── LIGHTWEIGHT SIGN-IN (so quiz users can sync without leaving the page) ──
+function openQuizAuth() {
+  document.getElementById('quizAuthModal').style.display = 'flex';
+  document.getElementById('quizAuthEmail').focus();
+}
+function closeQuizAuth() {
+  document.getElementById('quizAuthModal').style.display = 'none';
+  document.getElementById('quizAuthErr').textContent = '';
+}
+let quizAuthMode = 'signin';
+function toggleQuizAuthMode() {
+  quizAuthMode = quizAuthMode === 'signin' ? 'signup' : 'signin';
+  document.getElementById('quizAuthTitle').textContent = quizAuthMode === 'signin' ? 'Sign in to sync your progress' : 'Create an account';
+  document.getElementById('quizAuthSubmit').textContent = quizAuthMode === 'signin' ? 'Sign in' : 'Create account';
+  document.getElementById('quizAuthToggle').innerHTML = quizAuthMode === 'signin'
+    ? "Don't have an account? <a href='#' onclick='toggleQuizAuthMode();return false;' style='color:var(--accent)'>Create one</a>"
+    : "Already have an account? <a href='#' onclick='toggleQuizAuthMode();return false;' style='color:var(--accent)'>Sign in</a>";
+}
+async function submitQuizAuth() {
+  const email = document.getElementById('quizAuthEmail').value.trim();
+  const password = document.getElementById('quizAuthPassword').value;
+  const errEl = document.getElementById('quizAuthErr');
+  errEl.textContent = '';
+  if (!email || !password) { errEl.textContent = 'Please enter your email and password.'; return; }
+  if (password.length < 6) { errEl.textContent = 'Password must be at least 6 characters.'; return; }
+  await initSupabase();
+  const btn = document.getElementById('quizAuthSubmit');
+  btn.disabled = true; btn.textContent = 'Please wait…';
+  try {
+    let result;
+    if (quizAuthMode === 'signin') {
+      result = await sb.auth.signInWithPassword({ email, password });
+    } else {
+      result = await sb.auth.signUp({ email, password });
+    }
+    if (result.error) { errEl.textContent = result.error.message; btn.disabled = false; btn.textContent = quizAuthMode === 'signin' ? 'Sign in' : 'Create account'; return; }
+    currentUser = result.data.user || (result.data.session && result.data.session.user) || null;
+    if (typeof gtag !== 'undefined') gtag('event', 'login', { event_category: 'engagement', event_label: 'quiz' });
+
+    // Push current local progress up, and pull any cloud progress down
+    const local = getState();
+    const cloud = await loadFromSupabase();
+    if (cloud) {
+      const merged = {
+        streak: Math.max(cloud.streak, local.streak || 0),
+        bestStreak: Math.max(cloud.bestStreak, local.bestStreak || 0),
+        totalPoints: Math.max(cloud.totalPoints, local.totalPoints || 0),
+        lastCompleted: cloud.lastCompleted || local.lastCompleted,
+        todayPoints: cloud.todayPoints || local.todayPoints || 0
+      };
+      saveState(merged);
+    } else {
+      saveState(local); // upload local for the first time
+    }
+    closeQuizAuth();
+    const syncEl = document.getElementById('syncStatus');
+    if (syncEl) { syncEl.textContent = '✓ Synced'; syncEl.style.color = 'var(--good)'; }
+    showToast(quizAuthMode === 'signin' ? '✓ Signed in — progress synced' : '✓ Account created — progress synced');
+    init();
+    loadRank();
+  } catch(e) {
+    errEl.textContent = 'Something went wrong. Please try again.';
+    btn.disabled = false; btn.textContent = quizAuthMode === 'signin' ? 'Sign in' : 'Create account';
+  }
+}
 </script>
+<!-- Lightweight sign-in modal for quiz sync -->
+<div id="quizAuthModal" style="display:none;position:fixed;inset:0;background:rgba(15,23,42,.55);z-index:1000;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:16px;padding:28px;max-width:380px;width:100%;position:relative;box-shadow:0 20px 60px rgba(0,0,0,.2)">
+    <button onclick="closeQuizAuth()" style="position:absolute;top:14px;right:16px;background:none;border:none;font-size:18px;color:#94A3B8;cursor:pointer">✕</button>
+    <h3 id="quizAuthTitle" style="font-family:'Instrument Serif',serif;font-size:22px;color:var(--ink);margin-bottom:6px">Sign in to sync your progress</h3>
+    <p style="font-size:13px;color:var(--ink-light);margin-bottom:18px">Keep your streak and points across all your devices.</p>
+    <input id="quizAuthEmail" type="email" placeholder="Email" autocomplete="email" style="width:100%;padding:11px 14px;border:1.5px solid #E4E3DF;border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:10px;outline:none" onkeydown="if(event.key==='Enter')document.getElementById('quizAuthPassword').focus()">
+    <input id="quizAuthPassword" type="password" placeholder="Password" autocomplete="current-password" style="width:100%;padding:11px 14px;border:1.5px solid #E4E3DF;border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;margin-bottom:6px;outline:none" onkeydown="if(event.key==='Enter')submitQuizAuth()">
+    <p id="quizAuthErr" style="font-size:12px;color:#DC2626;margin:4px 0 10px;min-height:16px"></p>
+    <button id="quizAuthSubmit" onclick="submitQuizAuth()" style="width:100%;background:var(--accent);color:#fff;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Sign in</button>
+    <p id="quizAuthToggle" style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:14px">Don't have an account? <a href="#" onclick="toggleQuizAuthMode();return false;" style="color:var(--accent)">Create one</a></p>
+  </div>
+</div>
 </body>
 </html>
