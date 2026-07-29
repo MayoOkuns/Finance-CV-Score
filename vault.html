@@ -337,7 +337,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   <span class="how-arrow">→</span>
   <div class="how-step"><span class="how-step-num">2</span>Get 3 days free access</div>
   <span class="how-arrow">→</span>
-  <div class="how-step"><span class="how-step-num">3</span>Subscribe for £12/month — new questions added weekly</div>
+  <div class="how-step"><span class="how-step-num">3</span>Subscribe for £9.99/month — new questions added weekly</div>
 </div>
 
 <!-- QUIZ TEASER -->
@@ -478,7 +478,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <!-- Actions -->
       <div style="display:flex;flex-direction:column;gap:10px">
         <button id="accountUpgradeBtn" onclick="closeModal('accountModal');openSubscribeModal()" style="display:none;background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif">
-          Subscribe for £12/month
+          Subscribe for £9.99/month
         </button>
         <button onclick="handleSignOut()" style="background:var(--surface);color:var(--danger);font-size:14px;font-weight:500;padding:12px;border-radius:10px;border:1.5px solid #FECACA;cursor:pointer;font-family:'Inter',sans-serif;transition:all .15s" onmouseover="this.style.background='#FEF2F2'" onmouseout="this.style.background='var(--surface)'">
           Sign out
@@ -502,7 +502,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       <div class="trial-note">
         🎁 <strong>Submit a real question you've been asked</strong> to unlock a 3-day free trial.
         You'll be asked to enter your card details — you won't be charged until the trial ends.
-        After 3 days, £12/month applies automatically. Cancel anytime before the trial ends and pay nothing.
+        After 3 days, £9.99/month applies automatically. Cancel anytime before the trial ends and pay nothing.
       </div>
       <div class="modal-input-group">
         <label>Firm *</label>
@@ -692,12 +692,13 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     </div>
     <div class="modal-body">
       <!-- Plan toggle -->
-      <div style="display:flex;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:20px;gap:4px">
-        <button id="planMonthly" onclick="selectPlan('monthly')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;background:white;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)">Monthly £12</button>
-        <button id="planAnnual" onclick="selectPlan('annual')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;background:none;color:var(--ink-mid)">Annual £89 <span style="font-size:11px;background:#F0FDF4;color:var(--good);padding:2px 6px;border-radius:4px;font-weight:600">Save 38%</span></button>
+      <div style="display:flex;background:var(--surface);border-radius:10px;padding:4px;margin-bottom:8px;gap:4px">
+        <button id="planMonthly" onclick="selectPlan('monthly')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;background:white;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.1)">Monthly £9.99</button>
+        <button id="planAnnual" onclick="selectPlan('annual')" style="flex:1;padding:8px;border-radius:8px;border:none;font-size:13px;font-weight:500;cursor:pointer;font-family:'Inter',sans-serif;background:none;color:var(--ink-mid)">Annual £79 <span style="font-size:11px;background:#F0FDF4;color:var(--good);padding:2px 6px;border-radius:4px;font-weight:600">Save 34%</span></button>
       </div>
+      <p style="text-align:center;font-size:11px;color:var(--good);font-weight:600;margin-bottom:16px">★ Most students choose annual — just £6.58/month, billed yearly</p>
       <div id="planPriceDisplay" style="display:flex;align-items:baseline;gap:8px;margin-bottom:20px">
-        <span id="planPrice" style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;color:var(--ink)">£12</span>
+        <span id="planPrice" style="font-family:'JetBrains Mono',monospace;font-size:40px;font-weight:600;color:var(--ink)">£9.99</span>
         <span id="planPeriod" style="font-size:14px;color:var(--ink-light)">/month · cancel anytime</span>
       </div>
       <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px">
@@ -744,11 +745,11 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         </div>
       </div>
       <button class="option-primary" onclick="redirectToSubscribe()" style="width:100%;padding:15px;font-size:16px;font-family:'Inter',sans-serif">
-        🔒 Subscribe — £12/month
+        🔒 Subscribe — £9.99/month
       </button>
       <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:12px;line-height:1.6">
         By subscribing you request immediate access to digital content and acknowledge you lose your 14-day statutory cancellation right once access begins (Consumer Contracts Regulations 2013). Secure checkout via Stripe.<br>
-        3-day free trial, then £12/month. First payment non-refundable once trial ends.<br>
+        3-day free trial, then £9.99/month. First payment non-refundable once trial ends.<br>
         Cancel anytime before trial ends and pay nothing.
       </p>
     </div>
@@ -1022,11 +1023,11 @@ function renderFeed(questions) {
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
         <h3>Stay ahead of every recruiting cycle</h3>
-        <p>New questions added weekly from real interviews at Goldman, BlackRock, JPMorgan and more. Subscribe for £12/month — vault access, answer frameworks, daily quiz, and firm alerts included.</p>
+        <p>New questions added weekly from real interviews at Goldman, BlackRock, JPMorgan and more. Subscribe for £9.99/month — vault access, answer frameworks, daily quiz, and firm alerts included.</p>
         <div class="feed-paywall-options">
           <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — start free trial</button>
           <p class="option-divider">or</p>
-          <button class="option-secondary" onclick="openSubscribeModal()">Subscribe for £12/month</button>
+          <button class="option-secondary" onclick="openSubscribeModal()">Subscribe for £9.99/month</button>
         </div>
       </div>`;
   } else {
@@ -1438,14 +1439,14 @@ function openAccountModal() {
       <span class="status-pill status-trial">⏰ Trial active</span>
       <p style="font-size:13px;color:var(--ink-mid);margin-top:8px;line-height:1.5">
         ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining — trial ends ${expiryStr}.
-        After that, £12/month applies automatically.
+        After that, £9.99/month applies automatically.
       </p>`;
     upgradeBtn.style.display = 'none';
   } else if (profile.subscription_status === 'active') {
     statusBlock.innerHTML = `
       <span class="status-pill status-active">✓ Subscribed</span>
       <p style="font-size:13px;color:var(--ink-mid);margin-top:8px;line-height:1.5">
-        Full access to all interview questions. £12/month.
+        Full access to all interview questions. £9.99/month.
       </p>`;
     upgradeBtn.style.display = 'none';
     // Show manage subscription button
@@ -1519,17 +1520,17 @@ function selectPlan(plan) {
   if (plan === 'monthly') {
     monthBtn.style.background = 'white'; monthBtn.style.color = 'var(--ink)'; monthBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,.1)';
     annualBtn.style.background = 'none'; annualBtn.style.color = 'var(--ink-mid)'; annualBtn.style.boxShadow = 'none';
-    price.textContent = '£12'; period.textContent = '/month · cancel anytime';
+    price.textContent = '£9.99'; period.textContent = '/month · cancel anytime';
   } else {
     annualBtn.style.background = 'white'; annualBtn.style.color = 'var(--ink)'; annualBtn.style.boxShadow = '0 1px 3px rgba(0,0,0,.1)';
     monthBtn.style.background = 'none'; monthBtn.style.color = 'var(--ink-mid)'; monthBtn.style.boxShadow = 'none';
-    price.textContent = '£89'; period.textContent = '/year (£7.42/month) · save 38%';
+    price.textContent = '£79'; period.textContent = '/year (£6.58/month) · save 34%';
   }
 }
 
 function redirectToSubscribe() {
   if (!currentUser) { closeModal('subscribeModal'); openAuthModal('subscribe'); return; }
-  if (typeof gtag !== 'undefined') gtag('event', 'begin_checkout', { event_category: 'conversion', event_label: selectedPlan, value: selectedPlan === 'annual' ? 89 : 12, currency: 'GBP' });
+  if (typeof gtag !== 'undefined') gtag('event', 'begin_checkout', { event_category: 'conversion', event_label: selectedPlan, value: selectedPlan === 'annual' ? 79 : 9.99, currency: 'GBP' });
   const link = selectedPlan === 'annual' ? STRIPE_ANNUAL_LINK : STRIPE_SUB_LINK;
   window.location.href = link + '?prefilled_email=' + encodeURIComponent(currentUser.email);
 }
