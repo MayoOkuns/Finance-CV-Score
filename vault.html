@@ -100,6 +100,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 
 /* BLUR PREVIEW CARDS */
 .question-card.blurred{filter:blur(4px);user-select:none;pointer-events:none}
+.question-locked{color:var(--border);letter-spacing:1px;user-select:none}
 
 /* EMPTY STATE */
 .empty-state{text-align:center;padding:60px 24px;color:var(--ink-light)}
@@ -335,9 +336,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 <div class="how-it-works">
   <div class="how-step"><span class="how-step-num">1</span>Submit a question you've been asked</div>
   <span class="how-arrow">→</span>
-  <div class="how-step"><span class="how-step-num">2</span>Get 3 days free access</div>
+  <div class="how-step"><span class="how-step-num">2</span>Submit a question to unlock a free preview</div>
   <span class="how-arrow">→</span>
-  <div class="how-step"><span class="how-step-num">3</span>Subscribe for £9.99/month — new questions added weekly</div>
+  <div class="how-step"><span class="how-step-num">3</span>Subscribe for the full live feed — updated weekly</div>
 </div>
 
 <!-- QUIZ TEASER -->
@@ -500,9 +501,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
     </div>
     <div class="modal-body">
       <div class="trial-note">
-        🎁 <strong>Submit a real question you've been asked</strong> to unlock a 3-day free trial.
-        You'll be asked to enter your card details — you won't be charged until the trial ends.
-        After 3 days, £9.99/month applies automatically. Cancel anytime before the trial ends and pay nothing.
+        🎁 <strong>Submit a real question you've been asked</strong> to unlock a free preview — one real question for up to 3 firms of your choice, free for a week. No card required.
+        The full live feed, with new questions every week and firm alerts, comes with the subscription.
       </div>
       <div class="modal-input-group">
         <label>Firm *</label>
@@ -585,8 +585,13 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <textarea id="submitQuestion" placeholder="Type the interview question exactly as it was asked…" oninput="updateCharCount()" maxlength="500"></textarea>
         <div class="char-count" id="charCount">0 / 500 (minimum 30)</div>
       </div>
+      <div class="modal-input-group" id="previewFirmPicker">
+        <label>Unlock a free preview — pick up to 3 firms *</label>
+        <p style="font-size:12px;color:var(--ink-light);margin:-4px 0 8px">We'll unlock one real question for each firm you choose, free for a week.</p>
+        <div id="previewFirmChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
       <button class="submit-question-btn" id="submitQuestionBtn" onclick="handleSubmit()">
-        Submit &amp; start free trial
+        Submit &amp; unlock my preview
       </button>
       <p style="font-size:12px;color:var(--ink-light);margin-top:12px;text-align:center;line-height:1.5">
         By submitting you confirm this question is from your own experience and you are not sharing confidential information.
@@ -749,8 +754,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
       </button>
       <p style="font-size:12px;color:var(--ink-light);text-align:center;margin-top:12px;line-height:1.6">
         By subscribing you request immediate access to digital content and acknowledge you lose your 14-day statutory cancellation right once access begins (Consumer Contracts Regulations 2013). Secure checkout via Stripe.<br>
-        3-day free trial, then £9.99/month. First payment non-refundable once trial ends.<br>
-        Cancel anytime before trial ends and pay nothing.
+        £9.99/month for the full live feed. Cancel anytime from your account page.
       </p>
     </div>
   </div>
@@ -829,29 +833,39 @@ function updateNavAuth() {
   }
 }
 
-// ── LOAD QUESTIONS ───────────────────────────────────────────────────
+// ── LOAD QUESTIONS (server-gated: locked text never reaches the browser) ──
+let previewFirms = [];      // firms the user has an active preview for
 async function loadQuestions() {
   try {
-    const { data, error } = await supabaseClient
-      .from('questions')
-      .select('*')
-      .eq('status', 'approved')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Supabase error:', JSON.stringify(error));
-      // Table might not exist yet — use seed questions only
-      allQuestions = getSeedQuestions();
-    } else {
-      // Combine DB questions with seed questions
-      const seed = getSeedQuestions();
-      allQuestions = [...(data || []), ...seed];
+    const { data, error } = await supabaseClient.rpc('get_vault_feed');
+    if (error) throw error;
+    // Map RPC rows to the shape the UI expects
+    allQuestions = (data || []).map(r => ({
+      id: r.id,
+      firm: r.firm,
+      sub_sector: r.sub_sector,
+      stage: r.stage,
+      role: r.role,
+      year_asked: r.year_asked,
+      created_at: r.created_at,
+      upvotes: r.upvotes,
+      char_count: r.char_count,
+      question_text: r.question_text,   // null when locked
+      unlocked: r.unlocked
+    }));
+    // Track which firms are currently previewed (unlocked but not subscribed)
+    if (!userHasFullAccess()) {
+      previewFirms = [...new Set(allQuestions.filter(q => q.unlocked).map(q => q.firm))];
+    }
+    if (allQuestions.length === 0) {
+      // Fall back to seed questions (redacted) so a brand-new DB still shows something
+      allQuestions = getSeedQuestions().map(q => ({ ...q, char_count: (q.question_text||'').length, question_text: userHasFullAccess()? q.question_text : null, unlocked: userHasFullAccess() }));
     }
   } catch(err) {
     console.error('Load questions error:', err.message || err);
-    allQuestions = getSeedQuestions();
+    // Safe fallback — redacted seeds
+    allQuestions = getSeedQuestions().map(q => ({ ...q, char_count: (q.question_text||'').length, question_text: userHasFullAccess()? q.question_text : null, unlocked: userHasFullAccess() }));
   }
-  // Clear any browser-autofilled email from search before rendering
   const searchEl = document.getElementById('searchInput');
   if (searchEl && searchEl.value && searchEl.value.includes('@')) searchEl.value = '';
   renderFeed(allQuestions);
@@ -992,11 +1006,12 @@ function renderFeed(questions) {
   filteredQuestions = questions;
   const feed = document.getElementById('questionFeed');
   const paywallBlock = document.getElementById('paywallBlock');
-  const hasAccess = userHasAccess();
+  const fullAccess = userHasFullAccess();
+  const unlockedCount = questions.filter(q => q.unlocked).length;
 
   document.getElementById('feedCount').textContent =
     questions.length + ' question' + (questions.length !== 1 ? 's' : '') +
-    (hasAccess ? '' : ' · showing 3 free');
+    (fullAccess ? '' : (unlockedCount > 0 ? ` · ${unlockedCount} unlocked` : ' · locked'));
 
   if (questions.length === 0) {
     feed.innerHTML = `<div class="empty-state"><h3>No questions yet for this filter</h3><p>Be the first to submit one.</p></div>`;
@@ -1004,36 +1019,41 @@ function renderFeed(questions) {
     return;
   }
 
-  if (!hasAccess) {
-    // Pin the three designated preview questions first (from full seed list)
-    const allSeeds = getSeedQuestions();
-    const previewQuestions = PREVIEW_IDS
-      .map(id => allSeeds.find(q => q.id === id))
-      .filter(Boolean);
+  if (fullAccess) {
+    // Subscriber — full live feed
+    feed.innerHTML = questions.map(q => renderQuestionCard(q, false)).join('');
+    paywallBlock.style.display = 'none';
+    return;
+  }
 
-    // Then 3 blurred cards from filtered results (excluding preview questions)
-    const blurCandidates = questions
-      .filter(q => !PREVIEW_IDS.includes(q.id))
-      .slice(0, 3);
+  // Non-subscriber: render each card locked/unlocked per the server's flag.
+  // Locked cards have NO real text (question_text is null from the server).
+  feed.innerHTML = questions.map(q => renderQuestionCard(q, !q.unlocked)).join('');
 
-    feed.innerHTML = previewQuestions.map(q => renderQuestionCard(q, false)).join('');
-    feed.innerHTML += blurCandidates.map(q => renderQuestionCard(q, true)).join('');
-
-    paywallBlock.style.display = 'block';
+  // Paywall / preview prompt
+  paywallBlock.style.display = 'block';
+  if (hasActivePreview()) {
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
-        <h3>Stay ahead of every recruiting cycle</h3>
-        <p>New questions added weekly from real interviews at Goldman, BlackRock, JPMorgan and more. Subscribe for £9.99/month — vault access, answer frameworks, daily quiz, and firm alerts included.</p>
+        <h3>You're previewing the feed</h3>
+        <p>You've unlocked one question for ${previewFirms.map(escapeHtml).join(', ')}. The full <strong>live feed</strong> — every question, new ones added weekly, plus firm alerts and answer frameworks — is part of the subscription.</p>
         <div class="feed-paywall-options">
-          <button class="option-primary" onclick="openSubmitModal()">+ Submit a question — start free trial</button>
+          <button class="option-primary" onclick="openSubscribeModal()">Unlock the full live feed — £9.99/month</button>
           <p class="option-divider">or</p>
-          <button class="option-secondary" onclick="openSubscribeModal()">Subscribe for £9.99/month</button>
+          <button class="option-secondary" onclick="openSubmitModal()">Submit another question</button>
         </div>
       </div>`;
   } else {
-    // Subscribed — show all questions
-    feed.innerHTML = questions.map(q => renderQuestionCard(q, false)).join('');
-    paywallBlock.style.display = 'none';
+    paywallBlock.innerHTML = `
+      <div class="feed-paywall">
+        <h3>Unlock a free preview</h3>
+        <p>Submit one interview question of your own and we'll unlock a real question for up to three firms of your choice, free for a week. The full <strong>live feed</strong> — updated weekly with firm alerts — comes with the subscription.</p>
+        <div class="feed-paywall-options">
+          <button class="option-primary" onclick="openSubmitModal()">Submit a question — unlock a free preview</button>
+          <p class="option-divider">or</p>
+          <button class="option-secondary" onclick="openSubscribeModal()">Get the full live feed — £9.99/month</button>
+        </div>
+      </div>`;
   }
 }
 
@@ -1130,7 +1150,7 @@ function renderQuestionCard(q, blurred) {
   const recent = isRecentQuestion(q.created_at);
   const cycleBadge = recent ? `<span class="cycle-badge">This cycle</span>` : '';
   const framework = getFramework(q.question_text, q.sub_sector);
-  const hasAccess = userHasAccess();
+  const hasAccess = userHasFullAccess();
 
   let frameworkHtml = '';
   if (framework && !blurred) {
@@ -1153,6 +1173,16 @@ function renderQuestionCard(q, blurred) {
     }
   }
 
+  // Locked cards have no real text from the server. Show a realistic
+  // placeholder sized to the real question so the blur looks genuine.
+  let bodyHtml;
+  if (q.question_text) {
+    bodyHtml = `<p class="question-text">${escapeHtml(q.question_text)}</p>`;
+  } else {
+    const n = Math.max(40, Math.min(q.char_count || 90, 180));
+    bodyHtml = `<p class="question-text question-locked" aria-hidden="true">${'█'.repeat(Math.round(n/6)).replace(/█/g,'▒ ')}</p>`;
+  }
+
   return `
     <div class="question-card${blurred ? ' blurred' : ''}">
       <div class="question-tags">
@@ -1161,7 +1191,7 @@ function renderQuestionCard(q, blurred) {
         ${q.stage ? `<span class="q-tag q-tag-stage">${escapeHtml(q.stage)}</span>` : ''}
         ${roleTag}${yearTag}${cycleBadge}
       </div>
-      <p class="question-text">${escapeHtml(q.question_text)}</p>
+      ${bodyHtml}
       ${frameworkHtml}
       <div class="question-meta">
         <span>${timeAgo(q.created_at)}</span>
@@ -1179,12 +1209,14 @@ function toggleFramework(id, btn) {
   btn.textContent = isOpen ? '💡 Answer framework' : '💡 Hide framework';
 }
 
-function userHasAccess() {
+function userHasFullAccess() {
+  // Full live-feed access = active subscriber only. (No more time-based trial.)
   if (!userProfile) return false;
-  if (userProfile.subscription_status === 'active') return true;
-  if (userProfile.trial_expires_at && new Date(userProfile.trial_expires_at) > new Date()) return true;
-  return false;
+  return userProfile.subscription_status === 'active';
 }
+// Back-compat alias used in a few older spots
+function userHasAccess() { return userHasFullAccess(); }
+function hasActivePreview() { return previewFirms && previewFirms.length > 0; }
 
 // ── FILTERS ──────────────────────────────────────────────────────────
 function filterByFirm(btn) {
@@ -1264,6 +1296,12 @@ async function handleSubmit() {
   const words = question.split(/\s+/).filter(w => /^[a-zA-Z]{2,}$/.test(w));
   if (words.length < 4) { showToast('Please enter a real interview question in English.'); return; }
 
+  // Non-subscribers must pick at least one firm to preview
+  if (!userHasFullAccess() && selectedPreviewFirms.length === 0) {
+    showToast('Pick at least one firm to unlock your free preview.');
+    return;
+  }
+
   const btn = document.getElementById('submitQuestionBtn');
   btn.disabled = true;
   btn.textContent = 'Submitting…';
@@ -1295,29 +1333,35 @@ async function handleSubmit() {
       await supabaseClient.from('submissions').insert({
         user_id: currentUser.id,
         question_id: qData.id,
-        trial_granted: true
+        trial_granted: false
       });
     } catch(subErr) {
       console.warn('Submission log (non-fatal):', subErr);
     }
 
-    closeModal('submitModal');
     if (typeof gtag !== 'undefined') gtag('event', 'question_submitted', { event_category: 'engagement' });
-    showToast('✓ Question submitted! Redirecting to start your free trial…');
 
-    // Redirect to Stripe with trial — card required, charged after 3 days
-    // Small delay so user sees the toast
-    setTimeout(() => {
-      const stripeUrl = STRIPE_SUB_LINK + '?prefilled_email=' + encodeURIComponent(currentUser.email);
-      window.location.href = stripeUrl;
-    }, 1200);
+    // Grant / refresh the 7-day preview for the firms they picked
+    let firmsToUnlock = selectedPreviewFirms.slice(0, 3);
+    if (firmsToUnlock.length === 0 && firm) firmsToUnlock = [firm]; // fall back to the firm they submitted about
+    try {
+      await supabaseClient.rpc('set_preview_firms', { chosen_firms: firmsToUnlock });
+    } catch(previewErr) {
+      console.warn('Preview grant (non-fatal):', previewErr);
+    }
+
+    closeModal('submitModal');
+    showToast('✓ Question submitted! Preview unlocked for ' + firmsToUnlock.join(', ') + ' — thank you.');
+
+    // Reload the feed so the newly-unlocked previews appear
+    await loadQuestions();
 
   } catch(err) {
     console.error('Submit error:', JSON.stringify(err), err.message);
     showToast('Something went wrong — ' + (err.message || 'please try again.'));
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Submit & start free trial';
+    btn.textContent = 'Submit & unlock my preview';
   }
 }
 
@@ -1551,9 +1595,35 @@ function playVaultAnimation() {
   setTimeout(() => { interior.classList.add('open'); f.classList.add('open'); }, 900);
 }
 
+let selectedPreviewFirms = [];
 function openSubmitModal() {
   document.getElementById('submitModal').classList.add('open');
   document.body.style.overflow = 'hidden';
+  renderPreviewFirmChips();
+}
+function renderPreviewFirmChips() {
+  const wrap = document.getElementById('previewFirmChips');
+  const picker = document.getElementById('previewFirmPicker');
+  if (!wrap) return;
+  // Subscribers don't need a preview — hide the picker for them
+  if (userHasFullAccess()) { if (picker) picker.style.display = 'none'; return; }
+  if (picker) picker.style.display = '';
+  selectedPreviewFirms = [];
+  wrap.innerHTML = ALERT_FIRMS.map(firm => `
+    <button type="button" class="preview-chip" data-firm="${escapeHtml(firm)}" onclick="togglePreviewFirm(this)"
+      style="font-size:12px;padding:6px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--white);color:var(--ink-mid);cursor:pointer;font-family:'Inter',sans-serif">${escapeHtml(firm)}</button>`).join('');
+}
+function togglePreviewFirm(btn) {
+  const firm = btn.dataset.firm;
+  const i = selectedPreviewFirms.indexOf(firm);
+  if (i >= 0) {
+    selectedPreviewFirms.splice(i, 1);
+    btn.style.background = 'var(--white)'; btn.style.color = 'var(--ink-mid)'; btn.style.borderColor = 'var(--border)';
+  } else {
+    if (selectedPreviewFirms.length >= 3) { showToast('You can preview up to 3 firms.'); return; }
+    selectedPreviewFirms.push(firm);
+    btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
+  }
 }
 function openSubscribeModal() {
   document.getElementById('subscribeModal').classList.add('open');
