@@ -871,19 +871,32 @@ async function loadQuestions() {
   renderFeed(allQuestions);
 }
 
+// Round DOWN to nearest 100 and show as "N+" (100+, 200+ …). Min 100+.
+function roundedPlus(n) {
+  if (n < 100) return '100+';        // always present at least 100+ pre-launch
+  return (Math.floor(n / 100) * 100) + '+';
+}
+
 async function loadStats() {
+  // Derive everything from the feed we already loaded (works for anon + subscribers,
+  // and never blocked by RLS since get_vault_feed returns rows to everyone).
   try {
-    const { count: qCount } = await supabaseClient
-      .from('questions').select('*', {count:'exact',head:true}).eq('status','approved');
-    const total = (qCount || 0) + getSeedQuestions().length;
-    document.getElementById('statQuestions').textContent = (total > 100 ? '100+' : total + '+');
-    // Count unique firms
-    const firms = [...new Set(allQuestions.map(q => q.firm))].length;
-    document.getElementById('statFirms').textContent = firms + '+';
+    const qs = (allQuestions && allQuestions.length) ? allQuestions : getSeedQuestions();
+    const totalQuestions = qs.length;
+    const firms = [...new Set(qs.map(q => q.firm).filter(Boolean))].length;
+    const sectors = [...new Set(qs.map(q => q.sub_sector).filter(Boolean))].length;
+
+    // Questions: rounded to 100 interval, shown as "100+", "200+" …
+    document.getElementById('statQuestions').textContent = roundedPlus(totalQuestions);
+    // Firms & sectors: exact counts (with a sensible fallback)
+    document.getElementById('statFirms').textContent = firms > 0 ? firms : '—';
+    const sectorEl = document.getElementById('statSectors');
+    if (sectorEl && sectors > 0) sectorEl.textContent = sectors;
   } catch(err) {
+    console.warn('Stats derive failed:', err.message);
     const seed = getSeedQuestions();
-    document.getElementById('statQuestions').textContent = seed.length + '+';
-    document.getElementById('statFirms').textContent = [...new Set(seed.map(q=>q.firm))].length + '+';
+    document.getElementById('statQuestions').textContent = roundedPlus(seed.length);
+    document.getElementById('statFirms').textContent = [...new Set(seed.map(q=>q.firm))].length || '—';
   }
 }
 
@@ -1009,9 +1022,21 @@ function renderFeed(questions) {
   const fullAccess = userHasFullAccess();
   const unlockedCount = questions.filter(q => q.unlocked).length;
 
-  document.getElementById('feedCount').textContent =
-    questions.length + ' question' + (questions.length !== 1 ? 's' : '') +
-    (fullAccess ? '' : (unlockedCount > 0 ? ` · ${unlockedCount} unlocked` : ' · locked'));
+  // Feed count. For a non-subscriber viewing the whole vault, show a rounded
+  // "100+" style figure (not an exact number that fluctuates as they submit).
+  // When they're filtering, or subscribed, show the exact filtered count.
+  const isFiltered = (typeof activeFirmFilter !== 'undefined' && activeFirmFilter) ||
+    (document.getElementById('searchInput') && document.getElementById('searchInput').value.trim()) ||
+    (document.getElementById('sectorFilter') && document.getElementById('sectorFilter').value);
+  let countLabel;
+  if (fullAccess || isFiltered) {
+    countLabel = questions.length + ' question' + (questions.length !== 1 ? 's' : '') +
+      (fullAccess ? '' : (unlockedCount > 0 ? ` · ${unlockedCount} unlocked` : ' · locked'));
+  } else {
+    countLabel = roundedPlus(questions.length) + ' questions' +
+      (unlockedCount > 0 ? ` · ${unlockedCount} unlocked` : ' · locked');
+  }
+  document.getElementById('feedCount').textContent = countLabel;
 
   if (questions.length === 0) {
     feed.innerHTML = `<div class="empty-state"><h3>No questions yet for this filter</h3><p>Be the first to submit one.</p></div>`;
