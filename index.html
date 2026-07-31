@@ -691,7 +691,7 @@
   // Called at bottom of script after all functions are defined
   function checkPaidReturn() {
     const params = new URLSearchParams(window.location.search);
-    if (params.get('paid') === 'true') {
+    if (params.get('paid') === 'true' || params.get('cvpro') === 'success') {
       window.history.replaceState({}, '', window.location.pathname);
       try {
         const savedEmail = sessionStorage.getItem('fcvs_email');
@@ -1613,7 +1613,7 @@
   function closePaymentModal() { document.getElementById('paymentModal').classList.remove('open'); document.body.style.overflow=''; }
   document.getElementById('paymentModal').addEventListener('click', function(e) { if (e.target === this) closePaymentModal(); });
 
-  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/test_4gMaEX1vCbJJdWb6Mi9k401';
+  const STRIPE_PAYMENT_LINK = 'https://buy.stripe.com/bJe9ATgqo8jx94Q5f2gA800';
 
   function simulatePayment() {
     if (typeof gtag !== 'undefined') gtag('event', 'begin_checkout', { event_category: 'conversion', value: 5, currency: 'GBP', items: [{item_name: 'CV Pro'}] });
