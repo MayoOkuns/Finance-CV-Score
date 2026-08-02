@@ -869,6 +869,7 @@ async function loadQuestions() {
   const searchEl = document.getElementById('searchInput');
   if (searchEl && searchEl.value && searchEl.value.includes('@')) searchEl.value = '';
   renderFeed(allQuestions);
+  try { loadStats(); } catch(e) { console.warn('stats', e); }
 }
 
 // Round DOWN to nearest 100 and show as "N+" (100+, 200+ …). Min 100+.
@@ -877,26 +878,32 @@ function roundedPlus(n) {
   return (Math.floor(n / 100) * 100) + '+';
 }
 
-async function loadStats() {
-  // Derive everything from the feed we already loaded (works for anon + subscribers,
-  // and never blocked by RLS since get_vault_feed returns rows to everyone).
+function loadStats() {
+  // Derive from the feed we already loaded. Fully synchronous and defensive so
+  // it can never silently fail and leave dashes on screen.
   try {
-    const qs = (allQuestions && allQuestions.length) ? allQuestions : getSeedQuestions();
-    const totalQuestions = qs.length;
-    const firms = [...new Set(qs.map(q => q.firm).filter(Boolean))].length;
-    const sectors = [...new Set(qs.map(q => q.sub_sector).filter(Boolean))].length;
+    let qs = (typeof allQuestions !== 'undefined' && allQuestions && allQuestions.length)
+      ? allQuestions : getSeedQuestions();
+    if (!qs || !qs.length) qs = getSeedQuestions();
 
-    // Questions: rounded to 100 interval, shown as "100+", "200+" …
-    document.getElementById('statQuestions').textContent = roundedPlus(totalQuestions);
-    // Firms & sectors: exact counts (with a sensible fallback)
-    document.getElementById('statFirms').textContent = firms > 0 ? firms : '—';
-    const sectorEl = document.getElementById('statSectors');
-    if (sectorEl && sectors > 0) sectorEl.textContent = sectors;
+    const totalQuestions = qs.length;
+    const firms = [...new Set(qs.map(q => q && q.firm).filter(Boolean))].length;
+    const sectors = [...new Set(qs.map(q => q && q.sub_sector).filter(Boolean))].length;
+
+    const qEl = document.getElementById('statQuestions');
+    const fEl = document.getElementById('statFirms');
+    const sEl = document.getElementById('statSectors');
+    if (qEl) qEl.textContent = roundedPlus(totalQuestions);
+    if (fEl) fEl.textContent = firms > 0 ? firms : [...new Set(getSeedQuestions().map(q=>q.firm))].length;
+    if (sEl && sectors > 0) sEl.textContent = sectors;
   } catch(err) {
-    console.warn('Stats derive failed:', err.message);
+    console.warn('Stats derive failed:', err && err.message);
+    // Last-resort fallback so the UI never shows dashes
     const seed = getSeedQuestions();
-    document.getElementById('statQuestions').textContent = roundedPlus(seed.length);
-    document.getElementById('statFirms').textContent = [...new Set(seed.map(q=>q.firm))].length || '—';
+    const qEl = document.getElementById('statQuestions');
+    const fEl = document.getElementById('statFirms');
+    if (qEl) qEl.textContent = roundedPlus(seed.length);
+    if (fEl) fEl.textContent = [...new Set(seed.map(q=>q.firm))].length;
   }
 }
 
