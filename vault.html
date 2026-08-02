@@ -858,7 +858,8 @@ async function loadQuestions() {
       previewFirms = [...new Set(allQuestions.filter(q => q.unlocked).map(q => q.firm))];
     }
     if (allQuestions.length === 0) {
-      // Fall back to seed questions (redacted) so a brand-new DB still shows something
+      // DB genuinely returned nothing — show redacted seeds as an emergency fallback.
+      // (After running seed-import-migration.sql this branch should never trigger.)
       allQuestions = getSeedQuestions().map(q => ({ ...q, char_count: (q.question_text||'').length, question_text: userHasFullAccess()? q.question_text : null, unlocked: userHasFullAccess() }));
     }
   } catch(err) {
