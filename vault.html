@@ -1473,10 +1473,17 @@ async function handleAuth() {
 
     if (result.error) throw result.error;
 
-    closeModal('authModal');
-    showToast(authMode === 'signin' ? '✓ Signed in' : '✓ Account created — check your email to verify');
+    // With email confirmation off, signUp returns an active session — treat as signed in
+    const user = result.data.user || (result.data.session && result.data.session.user);
+    if (user) await setUser(user);
 
-    if (pendingAction === 'submit') openSubmitModal();
+    closeModal('authModal');
+    showToast(authMode === 'signin' ? '✓ Signed in' : '✓ Account created');
+
+    if (typeof gtag !== 'undefined') gtag('event', 'login', { event_category: 'engagement', event_label: authMode });
+
+    // Resume whatever they were trying to do (e.g. submit a question to unlock a preview)
+    if (pendingAction === 'submit') { pendingAction = null; openSubmitModal(); }
 
   } catch(err) {
     errEl.textContent = err.message || 'Authentication failed.';
