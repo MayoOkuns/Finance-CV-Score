@@ -101,6 +101,12 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 /* BLUR PREVIEW CARDS */
 .question-card.blurred{filter:blur(4px);user-select:none;pointer-events:none}
 .question-locked{color:var(--border);letter-spacing:1px;user-select:none}
+#feedOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:flex-start;justify-content:center;pointer-events:none;z-index:20;padding-top:140px}
+.feed-overlay-btn{position:sticky;top:120px;pointer-events:auto;display:flex;align-items:center;gap:14px;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:16px 24px;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 12px 32px rgba(37,99,235,.35);max-width:440px;text-align:left;transition:transform .15s ease,box-shadow .15s ease}
+.feed-overlay-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(37,99,235,.45)}
+.feed-overlay-plus{font-size:28px;font-weight:400;line-height:1;flex-shrink:0}
+.feed-overlay-title{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.feed-overlay-sub{display:block;font-size:12px;color:rgba(255,255,255,.8);line-height:1.4}
 
 /* EMPTY STATE */
 .empty-state{text-align:center;padding:60px 24px;color:var(--ink-light)}
@@ -443,8 +449,19 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <option value="firm">By firm</option>
       </select>
     </div>
-    <div id="questionFeed">
-      <div class="loading-feed"><div class="feed-spinner"></div><p>Loading questions…</p></div>
+    <div id="feedWrap" style="position:relative">
+      <div id="questionFeed">
+        <div class="loading-feed"><div class="feed-spinner"></div><p>Loading questions…</p></div>
+      </div>
+      <div id="feedOverlay" style="display:none">
+        <button class="feed-overlay-btn" onclick="openSubmitModal()">
+          <span class="feed-overlay-plus">+</span>
+          <span>
+            <span class="feed-overlay-title">Submit a question &amp; unlock a preview</span>
+            <span class="feed-overlay-sub">Share one question you were asked → unlock real questions for 3 firms, free for a week</span>
+          </span>
+        </button>
+      </div>
     </div>
     <div id="paywallBlock" style="display:none"></div>
   </main>
@@ -1046,9 +1063,12 @@ function renderFeed(questions) {
   }
   document.getElementById('feedCount').textContent = countLabel;
 
+  const overlay = document.getElementById('feedOverlay');
+
   if (questions.length === 0) {
     feed.innerHTML = `<div class="empty-state"><h3>No questions yet for this filter</h3><p>Be the first to submit one.</p></div>`;
     paywallBlock.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
     return;
   }
 
@@ -1056,12 +1076,16 @@ function renderFeed(questions) {
     // Subscriber — full live feed
     feed.innerHTML = questions.map(q => renderQuestionCard(q, false)).join('');
     paywallBlock.style.display = 'none';
+    if (overlay) overlay.style.display = 'none';
     return;
   }
 
   // Non-subscriber: render each card locked/unlocked per the server's flag.
   // Locked cards have NO real text (question_text is null from the server).
   feed.innerHTML = questions.map(q => renderQuestionCard(q, !q.unlocked)).join('');
+
+  // Floating CTA overlay — show only when they haven't unlocked a preview yet
+  if (overlay) overlay.style.display = hasActivePreview() ? 'none' : 'flex';
 
   // Paywall / preview prompt
   paywallBlock.style.display = 'block';
