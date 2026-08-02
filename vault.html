@@ -858,17 +858,17 @@ async function loadQuestions() {
     if (error) throw error;
     // Map RPC rows to the shape the UI expects
     allQuestions = (data || []).map(r => ({
-      id: r.id,
-      firm: r.firm,
-      sub_sector: r.sub_sector,
-      stage: r.stage,
-      role: r.role,
-      year_asked: r.year_asked,
-      created_at: r.created_at,
-      upvotes: r.upvotes,
-      char_count: r.char_count,
-      question_text: r.question_text,   // null when locked
-      unlocked: r.unlocked
+      id: r.out_id,
+      firm: r.out_firm,
+      sub_sector: r.out_sub_sector,
+      stage: r.out_stage,
+      role: r.out_role,
+      year_asked: r.out_year_asked,
+      created_at: r.out_created_at,
+      upvotes: r.out_upvotes,
+      char_count: r.out_char_count,
+      question_text: r.out_question_text,   // null when locked
+      unlocked: r.out_unlocked
     }));
     // Track which firms are currently previewed (unlocked but not subscribed)
     if (!userHasFullAccess()) {
@@ -1435,17 +1435,34 @@ async function handleSubmit() {
     // Grant / refresh the 7-day preview for the firms they picked
     let firmsToUnlock = selectedPreviewFirms.slice(0, 3);
     if (firmsToUnlock.length === 0 && firm) firmsToUnlock = [firm]; // fall back to the firm they submitted about
+    let grantOk = false;
     try {
-      await supabaseClient.rpc('set_preview_firms', { chosen_firms: firmsToUnlock });
+      const { error: pErr } = await supabaseClient.rpc('set_preview_firms', { chosen_firms: firmsToUnlock });
+      if (pErr) { console.error('Preview grant failed:', pErr); }
+      else { grantOk = true; }
     } catch(previewErr) {
-      console.warn('Preview grant (non-fatal):', previewErr);
+      console.error('Preview grant threw:', previewErr);
     }
 
     closeModal('submitModal');
-    showToast('✓ Question submitted! Preview unlocked for ' + firmsToUnlock.join(', ') + ' — thank you.');
+    if (grantOk) {
+      showToast('✓ Question submitted! Preview unlocked for ' + firmsToUnlock.join(', '));
+    } else {
+      showToast('✓ Question submitted! It will appear once approved.');
+    }
 
-    // Reload the feed so the newly-unlocked previews appear
+    // Small delay to ensure the grant has committed, then reload so previews appear
+    await new Promise(r => setTimeout(r, 400));
     await loadQuestions();
+    // Jump the user to their unlocked firm so they SEE the preview immediately
+    if (grantOk && firmsToUnlock.length) {
+      const firstUnlocked = allQuestions.find(q => q.unlocked);
+      if (firstUnlocked) {
+        const pill = document.querySelector(`.firm-pill[data-firm="${firstUnlocked.firm}"]`);
+        if (pill) { activeFirmFilter = firstUnlocked.firm; applyFilters();
+          document.querySelectorAll('.firm-pill').forEach(p=>p.classList.remove('active')); pill.classList.add('active'); }
+      }
+    }
 
   } catch(err) {
     console.error('Submit error:', JSON.stringify(err), err.message);
