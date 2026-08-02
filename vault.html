@@ -101,6 +101,9 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 /* BLUR PREVIEW CARDS */
 .question-card.blurred{filter:blur(4px);user-select:none;pointer-events:none}
 .question-locked{color:var(--border);letter-spacing:1px;user-select:none}
+.feed-divider{display:flex;align-items:center;text-align:center;margin:24px 0 18px;color:var(--ink-light);font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.feed-divider::before,.feed-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+.feed-divider span{padding:0 14px}
 #feedOverlay{position:absolute;top:0;left:0;right:0;bottom:0;display:flex;align-items:flex-start;justify-content:center;pointer-events:none;z-index:20;padding-top:140px}
 .feed-overlay-btn{position:sticky;top:120px;pointer-events:auto;display:flex;align-items:center;gap:14px;background:var(--accent);color:#fff;border:none;border-radius:14px;padding:16px 24px;cursor:pointer;font-family:'Inter',sans-serif;box-shadow:0 12px 32px rgba(37,99,235,.35);max-width:440px;text-align:left;transition:transform .15s ease,box-shadow .15s ease}
 .feed-overlay-btn:hover{transform:translateY(-2px);box-shadow:0 16px 40px rgba(37,99,235,.45)}
@@ -1082,7 +1085,16 @@ function renderFeed(questions) {
 
   // Non-subscriber: render each card locked/unlocked per the server's flag.
   // Locked cards have NO real text (question_text is null from the server).
-  feed.innerHTML = questions.map(q => renderQuestionCard(q, !q.unlocked)).join('');
+  // Put unlocked previews at the TOP so the user sees their reward immediately,
+  // then the locked cards below (preserving the original recency order within each group).
+  const unlocked = questions.filter(q => q.unlocked);
+  const locked = questions.filter(q => !q.unlocked);
+  let feedHtml = unlocked.map(q => renderQuestionCard(q, false)).join('');
+  if (unlocked.length && locked.length) {
+    feedHtml += `<div class="feed-divider"><span>Subscribe to unlock the full live feed</span></div>`;
+  }
+  feedHtml += locked.map(q => renderQuestionCard(q, true)).join('');
+  feed.innerHTML = feedHtml;
 
   // Floating CTA overlay — show only when they haven't unlocked a preview yet
   if (overlay) overlay.style.display = hasActivePreview() ? 'none' : 'flex';
@@ -1454,15 +1466,10 @@ async function handleSubmit() {
     // Small delay to ensure the grant has committed, then reload so previews appear
     await new Promise(r => setTimeout(r, 400));
     await loadQuestions();
-    // Jump the user to their unlocked firm so they SEE the preview immediately
-    if (grantOk && firmsToUnlock.length) {
-      const firstUnlocked = allQuestions.find(q => q.unlocked);
-      if (firstUnlocked) {
-        const pill = document.querySelector(`.firm-pill[data-firm="${firstUnlocked.firm}"]`);
-        if (pill) { activeFirmFilter = firstUnlocked.firm; applyFilters();
-          document.querySelectorAll('.firm-pill').forEach(p=>p.classList.remove('active')); pill.classList.add('active'); }
-      }
-    }
+    // Unlocked previews now sort to the top of the feed automatically, so the user
+    // sees them straight away without scrolling. Bring the feed into view.
+    const feedTop = document.getElementById('feedWrap');
+    if (grantOk && feedTop) feedTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch(err) {
     console.error('Submit error:', JSON.stringify(err), err.message);
