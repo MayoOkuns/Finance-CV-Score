@@ -292,8 +292,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
   <h1>Real interview questions.<br><em>From real candidates.</em></h1>
   <p>Every question here was reported by a candidate from a real interview — at firms like Goldman Sachs, BlackRock, JPMorgan and KKR. Searchable by firm, sub-sector, role, and interview stage. Updated every week as new candidates share their experiences.</p>
   <div class="vault-stats">
-    <div class="vault-stat"><span class="vault-stat-num" id="statQuestions">—</span><span class="vault-stat-label">real questions</span></div>
-    <div class="vault-stat"><span class="vault-stat-num" id="statFirms">—</span><span class="vault-stat-label">firms covered</span></div>
+    <div class="vault-stat"><span class="vault-stat-num" id="statQuestions">100+</span><span class="vault-stat-label">real questions</span></div>
+    <div class="vault-stat"><span class="vault-stat-num" id="statFirms">20+</span><span class="vault-stat-label">firms covered</span></div>
     <div class="vault-stat"><span class="vault-stat-num" id="statSectors">12</span><span class="vault-stat-label">sub-sectors</span></div>
   </div>
 </section>
@@ -1095,6 +1095,7 @@ function isRecentQuestion(dateStr) {
 }
 
 function getFramework(question, subSector) {
+  if (!question) return null;   // locked questions have no text — no framework
   const q = question.toLowerCase();
   const frameworks = {
     dcf: {
@@ -1270,8 +1271,8 @@ function applyFilters() {
     if (sector && q.sub_sector !== sector) return false;
     if (stage && q.stage !== stage) return false;
     if (role && q.role !== role) return false;
-    if (search && !q.question_text.toLowerCase().includes(search) &&
-        !q.firm.toLowerCase().includes(search)) return false;
+    if (search && !((q.question_text || '').toLowerCase().includes(search)) &&
+        !((q.firm || '').toLowerCase().includes(search))) return false;
     return true;
   });
 
