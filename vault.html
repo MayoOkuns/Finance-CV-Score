@@ -1332,8 +1332,24 @@ function updateCharCount() {
   el.classList.toggle('warn', len > 450);
 }
 
+let savedSubmission = null;
 async function handleSubmit() {
-  if (!currentUser) { closeModal('submitModal'); openAuthModal('submit'); return; }
+  if (!currentUser) {
+    // Capture what they've filled in so we can restore + auto-submit after sign-in
+    savedSubmission = {
+      firm: document.getElementById('submitFirm').value,
+      firmOther: document.getElementById('submitFirmOther') ? document.getElementById('submitFirmOther').value : '',
+      sector: document.getElementById('submitSector').value,
+      role: document.getElementById('submitRole').value,
+      stage: document.getElementById('submitStage').value,
+      year: document.getElementById('submitYear').value,
+      question: document.getElementById('submitQuestion').value,
+      previewFirms: [...selectedPreviewFirms]
+    };
+    closeModal('submitModal');
+    openAuthModal('submit');
+    return;
+  }
 
   // Ensure the Supabase client has a live session attached (right after signup the
   // in-memory currentUser can be set before the auth token is applied to requests,
@@ -1490,8 +1506,24 @@ async function handleAuth() {
 
     if (result.error) throw result.error;
 
-    // With email confirmation off, signUp returns an active session — treat as signed in
-    const user = result.data.user || (result.data.session && result.data.session.user);
+    // With email confirmation off, signUp returns an active session — treat as signed in.
+    // If confirmation is still ON in Supabase, no session comes back — sign them in directly.
+    let user = result.data.user || (result.data.session && result.data.session.user);
+    if (authMode === 'signup' && !result.data.session) {
+      // No session returned — try an immediate sign-in (works when confirmation is OFF).
+      const si = await supabaseClient.auth.signInWithPassword({ email, password });
+      if (!si.error && si.data.session) {
+        user = si.data.session.user;
+      } else {
+        // Confirmation is genuinely required — tell them plainly.
+        errEl.textContent = 'Account created. Please check your email to confirm, then sign in.';
+        errEl.style.display = 'block';
+        btn.disabled = false;
+        btn.textContent = 'Sign in';
+        authMode = 'signin';
+        return;
+      }
+    }
     if (user) await setUser(user);
 
     closeModal('authModal');
@@ -1499,8 +1531,35 @@ async function handleAuth() {
 
     if (typeof gtag !== 'undefined') gtag('event', 'login', { event_category: 'engagement', event_label: authMode });
 
-    // Resume whatever they were trying to do (e.g. submit a question to unlock a preview)
-    if (pendingAction === 'submit') { pendingAction = null; openSubmitModal(); }
+    // Resume a pending question submission: restore their form data and submit for them
+    if (pendingAction === 'submit') {
+      pendingAction = null;
+      if (savedSubmission) {
+        openSubmitModal();
+        // Restore the fields they filled in before signing in
+        const s = savedSubmission;
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
+        setVal('submitFirm', s.firm);
+        setVal('submitFirmOther', s.firmOther);
+        setVal('submitSector', s.sector);
+        setVal('submitRole', s.role);
+        setVal('submitStage', s.stage);
+        setVal('submitYear', s.year);
+        setVal('submitQuestion', s.question);
+        // Re-select their preview firms visually + in state
+        selectedPreviewFirms = [...(s.previewFirms || [])];
+        document.querySelectorAll('#previewFirmChips .preview-chip').forEach(btn => {
+          if (selectedPreviewFirms.includes(btn.dataset.firm)) {
+            btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
+          }
+        });
+        savedSubmission = null;
+        // Auto-complete the submission
+        setTimeout(() => handleSubmit(), 300);
+      } else {
+        openSubmitModal();
+      }
+    }
 
   } catch(err) {
     errEl.textContent = err.message || 'Authentication failed.';
@@ -1602,9 +1661,12 @@ async function handleSignOut() {
   await supabaseClient.auth.signOut();
   currentUser = null;
   userProfile = null;
+  previewFirms = [];
   closeModal('accountModal');
   updateNavAuth();
-  renderFeed(allQuestions);
+  // Reload from the server so questions are re-redacted for a logged-out visitor
+  // (allQuestions currently holds the unlocked text from the signed-in session).
+  await loadQuestions();
   showToast('Signed out successfully');
 }
 
