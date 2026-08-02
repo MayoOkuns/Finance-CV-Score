@@ -1335,6 +1335,23 @@ function updateCharCount() {
 async function handleSubmit() {
   if (!currentUser) { closeModal('submitModal'); openAuthModal('submit'); return; }
 
+  // Ensure the Supabase client has a live session attached (right after signup the
+  // in-memory currentUser can be set before the auth token is applied to requests,
+  // which makes auth.uid() null server-side and trips the RLS insert policy).
+  try {
+    const { data: { session } } = await supabaseClient.auth.getSession();
+    if (!session) {
+      showToast('Please sign in again to submit.');
+      closeModal('submitModal');
+      openAuthModal('submit');
+      return;
+    }
+    currentUser = session.user;
+  } catch(e) {
+    showToast('Please sign in again to submit.');
+    return;
+  }
+
   const firmSelect = document.getElementById('submitFirm').value;
   const firm = firmSelect === 'Other'
     ? document.getElementById('submitFirmOther').value.trim()
