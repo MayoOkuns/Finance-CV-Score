@@ -528,8 +528,11 @@ async function resetUser(email, mode) {
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session?.access_token || '') },
       body: JSON.stringify({ email, mode })
     });
-    const out = await res.json();
-    if (!res.ok) { showToast(out.error || 'Action failed'); return; }
+    // Read as text first so a non-JSON error page doesn't crash the parse
+    const raw = await res.text();
+    let out = {};
+    try { out = raw ? JSON.parse(raw) : {}; } catch { out = { error: raw.slice(0, 120) || 'Unexpected server response' }; }
+    if (!res.ok) { showToast(out.error || `Action failed (${res.status})`); return; }
     showToast(isDelete ? `✓ Deleted ${email} — email is free to reuse` : `✓ Reset ${email} to free`);
     loadAll();
   } catch(err) {
