@@ -1439,30 +1439,50 @@ async function handleSubmit(savedData) {
 
   try {
     // Insert question (status = pending, goes to moderation)
+    // Use the freshly-verified session user id (most reliable right after signup)
+    let submitterId = currentUser.id;
+    try {
+      const { data: { session: liveSession } } = await supabaseClient.auth.getSession();
+      if (liveSession?.user?.id) submitterId = liveSession.user.id;
+    } catch(e) {}
+
     const insertData = {
         firm,
         sub_sector: sector,
         role: role || null,
         stage,
         question_text: question,
-        submitted_by: currentUser.id,
+        submitted_by: submitterId,
         status: 'pending',
         upvotes: 0
       };
       // Only include year_asked if provided — column may not exist in older DB schemas
       if (year) insertData.year_asked = year;
 
-    const { data: qData, error: qError } = await supabaseClient
+    let qData, qError;
+    ({ data: qData, error: qError } = await supabaseClient
       .from('questions')
       .insert(insertData)
-      .select().single();
+      .select().single());
+
+    // If the submitted_by foreign key still complains, retry WITHOUT that column
+    // (the question is still recorded; it just won't be linked to the submitter).
+    if (qError && /submitted_by|foreign key/i.test(qError.message || '')) {
+      console.warn('submitted_by FK failed, retrying without it:', qError.message);
+      const fallback = { ...insertData };
+      delete fallback.submitted_by;
+      ({ data: qData, error: qError } = await supabaseClient
+        .from('questions')
+        .insert(fallback)
+        .select().single());
+    }
 
     if (qError) throw qError;
 
     // Log submission (non-blocking)
     try {
       await supabaseClient.from('submissions').insert({
-        user_id: currentUser.id,
+        user_id: submitterId,
         question_id: qData.id,
         trial_granted: false
       });
