@@ -1,68 +1,91 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-
 // Admin-only: reset or fully delete a user by email, so a real email can be
 // re-used to test the full sign-up / subscribe / cancel flow end-to-end.
 //
+// Uses direct Supabase REST calls (not the SDK admin helpers) for reliability
+// in the serverless runtime, and always returns JSON — even on error — so the
+// client never tries to parse an HTML error page.
+//
 // mode = 'reset'  → clears subscription + preview access, keeps the account
 // mode = 'delete' → removes preview access, profile row, AND the auth user
-//                    (so "create an account" works again with the same email)
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  res.setHeader('Content-Type', 'application/json');
 
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_KEY;
-  const adminEmail = process.env.ADMIN_EMAIL || 'mayo.okuns@gmail.com';
-  if (!supabaseUrl || !serviceKey) return res.status(500).json({ error: 'Server not configured' });
-
-  // Verify caller is the admin (their Supabase JWT, checked server-side)
-  const authHeader = req.headers['authorization'] || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
   try {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+
+    const supabaseUrl = process.env.SUPABASE_URL;
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY;
+    const adminEmail = process.env.ADMIN_EMAIL || 'mayo.okuns@gmail.com';
+    if (!supabaseUrl || !serviceKey) {
+      return res.status(500).json({ error: 'Server not configured (missing Supabase service key)' });
+    }
+
+    const authHeader = req.headers['authorization'] || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+    if (!token) return res.status(401).json({ error: 'Unauthorized — no token' });
+
     const whoRes = await fetch(`${supabaseUrl}/auth/v1/user`, {
       headers: { 'apikey': serviceKey, 'Authorization': `Bearer ${token}` }
     });
-    if (!whoRes.ok) return res.status(401).json({ error: 'Unauthorized' });
+    if (!whoRes.ok) return res.status(401).json({ error: 'Unauthorized — invalid token' });
     const who = await whoRes.json();
-    if (!who?.email || who.email !== adminEmail) return res.status(403).json({ error: 'Forbidden' });
-  } catch(e) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+    if (!who?.email || who.email.toLowerCase() !== adminEmail.toLowerCase()) {
+      return res.status(403).json({ error: 'Forbidden — admin only' });
+    }
 
-  const { email, mode } = req.body || {};
-  if (!email) return res.status(400).json({ error: 'Email required' });
+    let body = req.body;
+    if (typeof body === 'string') { try { body = JSON.parse(body); } catch { body = {}; } }
+    const email = body?.email;
+    const mode = body?.mode || 'reset';
+    if (!email) return res.status(400).json({ error: 'Email required' });
 
-  const admin = createClient(supabaseUrl, serviceKey);
+    const H = {
+      'apikey': serviceKey,
+      'Authorization': `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json'
+    };
 
-  try {
-    // Find the auth user by email
-    const { data: list, error: listErr } = await admin.auth.admin.listUsers();
-    if (listErr) throw listErr;
-    const user = (list?.users || []).find(u => (u.email || '').toLowerCase() === email.toLowerCase());
+    const listRes = await fetch(`${supabaseUrl}/auth/v1/admin/users?per_page=200`, { headers: H });
+    if (!listRes.ok) {
+      const t = await listRes.text();
+      console.error('List users failed:', t);
+      return res.status(500).json({ error: 'Could not list users' });
+    }
+    const listJson = await listRes.json();
+    const users = listJson?.users || listJson || [];
+    const user = users.find(u => (u.email || '').toLowerCase() === String(email).toLowerCase());
     if (!user) return res.status(404).json({ error: 'No user found with that email' });
 
-    // Always clear preview access
-    await admin.from('preview_access').delete().eq('user_id', user.id);
+    await fetch(`${supabaseUrl}/rest/v1/preview_access?user_id=eq.${user.id}`, {
+      method: 'DELETE', headers: H
+    });
 
     if (mode === 'delete') {
-      // Remove profile row, then the auth user entirely
-      await admin.from('profiles').delete().eq('id', user.id);
-      const { error: delErr } = await admin.auth.admin.deleteUser(user.id);
-      if (delErr) throw delErr;
+      await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, { method: 'DELETE', headers: H });
+      const delRes = await fetch(`${supabaseUrl}/auth/v1/admin/users/${user.id}`, {
+        method: 'DELETE', headers: H
+      });
+      if (!delRes.ok) {
+        const t = await delRes.text();
+        console.error('Delete user failed:', t);
+        return res.status(500).json({ error: 'Could not delete the auth user' });
+      }
       return res.status(200).json({ ok: true, action: 'deleted', email });
     } else {
-      // Reset: keep the account but clear subscription + CV Pro flags
-      await admin.from('profiles').update({
-        subscription_status: 'free',
-        subscription_id: null,
-        trial_expires_at: null,
-        cv_pro_purchased: false
-      }).eq('id', user.id);
+      await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({
+          subscription_status: 'free',
+          subscription_id: null,
+          trial_expires_at: null,
+          cv_pro_purchased: false
+        })
+      });
       return res.status(200).json({ ok: true, action: 'reset', email });
     }
-  } catch(err) {
-    console.error('Reset user error:', err.message);
-    return res.status(500).json({ error: 'Could not complete the action.' });
+  } catch (err) {
+    console.error('reset-user fatal:', err && err.message);
+    return res.status(500).json({ error: 'Server error: ' + (err && err.message ? err.message : 'unknown') });
   }
 }
