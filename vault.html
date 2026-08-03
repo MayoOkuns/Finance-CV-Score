@@ -1439,23 +1439,17 @@ async function handleSubmit(savedData) {
 
   try {
     // Insert question (status = pending, goes to moderation)
-    // Use the freshly-verified session user id (most reliable right after signup)
-    let submitterId = currentUser.id;
-    try {
-      const { data: { session: liveSession } } = await supabaseClient.auth.getSession();
-      if (liveSession?.user?.id) submitterId = liveSession.user.id;
-    } catch(e) {}
-
     const insertData = {
         firm,
         sub_sector: sector,
         role: role || null,
         stage,
         question_text: question,
-        submitted_by: submitterId,
         status: 'pending',
         upvotes: 0
       };
+      // submitted_by is set automatically by the database default (auth.uid()),
+      // avoiding a post-signup timing gap where the client id isn't yet a valid FK.
       // Only include year_asked if provided — column may not exist in older DB schemas
       if (year) insertData.year_asked = year;
 
@@ -1465,24 +1459,12 @@ async function handleSubmit(savedData) {
       .insert(insertData)
       .select().single());
 
-    // If the submitted_by foreign key still complains, retry WITHOUT that column
-    // (the question is still recorded; it just won't be linked to the submitter).
-    if (qError && /submitted_by|foreign key/i.test(qError.message || '')) {
-      console.warn('submitted_by FK failed, retrying without it:', qError.message);
-      const fallback = { ...insertData };
-      delete fallback.submitted_by;
-      ({ data: qData, error: qError } = await supabaseClient
-        .from('questions')
-        .insert(fallback)
-        .select().single());
-    }
-
     if (qError) throw qError;
 
     // Log submission (non-blocking)
     try {
       await supabaseClient.from('submissions').insert({
-        user_id: submitterId,
+        user_id: currentUser.id,
         question_id: qData.id,
         trial_granted: false
       });
@@ -1496,28 +1478,41 @@ async function handleSubmit(savedData) {
     let firmsToUnlock = chosenPreviewFirms.slice(0, 3);
     if (firmsToUnlock.length === 0 && firm) firmsToUnlock = [firm]; // fall back to the firm they submitted about
     let grantOk = false;
+    // Ensure a live session is attached (right after signup auth.uid() can be null
+    // server-side for a moment, which makes the grant a silent no-op).
     try {
-      const { error: pErr } = await supabaseClient.rpc('set_preview_firms', { chosen_firms: firmsToUnlock });
-      if (pErr) { console.error('Preview grant failed:', pErr); }
-      else { grantOk = true; }
-    } catch(previewErr) {
-      console.error('Preview grant threw:', previewErr);
+      const { data: { session: gs } } = await supabaseClient.auth.getSession();
+      if (!gs) { await new Promise(r => setTimeout(r, 500)); }
+    } catch(e) {}
+    for (let attempt = 0; attempt < 2 && !grantOk; attempt++) {
+      try {
+        const { error: pErr } = await supabaseClient.rpc('set_preview_firms', { chosen_firms: firmsToUnlock });
+        if (pErr) { console.error('Preview grant failed:', pErr); await new Promise(r => setTimeout(r, 400)); }
+        else { grantOk = true; }
+      } catch(previewErr) {
+        console.error('Preview grant threw:', previewErr);
+        await new Promise(r => setTimeout(r, 400));
+      }
     }
 
     closeModal('submitModal');
     if (grantOk) {
-      showToast('✓ Question submitted! Preview unlocked for ' + firmsToUnlock.join(', '));
+      showToast('✓ Preview unlocked for ' + firmsToUnlock.join(', ') + ' — thanks for submitting!');
     } else {
-      showToast('✓ Question submitted! It will appear once approved.');
+      showToast('✓ Question submitted — thank you!');
     }
 
-    // Small delay to ensure the grant has committed, then reload so previews appear
+    // Reload so the newly-unlocked previews appear; verify they actually unlocked
     await new Promise(r => setTimeout(r, 400));
     await loadQuestions();
-    // Unlocked previews now sort to the top of the feed automatically, so the user
-    // sees them straight away without scrolling. Bring the feed into view.
+    // If the grant reported OK but nothing shows unlocked, try one more grant+reload
+    if (grantOk && !allQuestions.some(q => q.unlocked)) {
+      try { await supabaseClient.rpc('set_preview_firms', { chosen_firms: firmsToUnlock }); } catch(e){}
+      await new Promise(r => setTimeout(r, 400));
+      await loadQuestions();
+    }
     const feedTop = document.getElementById('feedWrap');
-    if (grantOk && feedTop) feedTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (feedTop && allQuestions.some(q => q.unlocked)) feedTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
   } catch(err) {
     console.error('Submit error:', JSON.stringify(err), err.message);
