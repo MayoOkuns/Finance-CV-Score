@@ -1351,7 +1351,7 @@ function updateCharCount() {
 }
 
 let savedSubmission = null;
-async function handleSubmit() {
+async function handleSubmit(savedData) {
   if (!currentUser) {
     // Capture what they've filled in so we can restore + auto-submit after sign-in
     savedSubmission = {
@@ -1386,15 +1386,28 @@ async function handleSubmit() {
     return;
   }
 
-  const firmSelect = document.getElementById('submitFirm').value;
-  const firm = firmSelect === 'Other'
-    ? document.getElementById('submitFirmOther').value.trim()
-    : firmSelect;
-  const sector = document.getElementById('submitSector').value;
-  const role = document.getElementById('submitRole').value;
-  const stage = document.getElementById('submitStage').value;
-  const year = document.getElementById('submitYear').value;
-  const question = document.getElementById('submitQuestion').value.trim();
+  // Use saved data if provided (post-signup auto-submit), else read from the form
+  let firm, sector, role, stage, year, question, chosenPreviewFirms;
+  if (savedData) {
+    firm = savedData.firm === 'Other' ? (savedData.firmOther || '').trim() : savedData.firm;
+    sector = savedData.sector;
+    role = savedData.role;
+    stage = savedData.stage;
+    year = savedData.year;
+    question = (savedData.question || '').trim();
+    chosenPreviewFirms = [...(savedData.previewFirms || [])];
+  } else {
+    const firmSelect = document.getElementById('submitFirm').value;
+    firm = firmSelect === 'Other'
+      ? document.getElementById('submitFirmOther').value.trim()
+      : firmSelect;
+    sector = document.getElementById('submitSector').value;
+    role = document.getElementById('submitRole').value;
+    stage = document.getElementById('submitStage').value;
+    year = document.getElementById('submitYear').value;
+    question = document.getElementById('submitQuestion').value.trim();
+    chosenPreviewFirms = [...selectedPreviewFirms];
+  }
 
   if (!firm) { showToast('Please select or enter a firm.'); return; }
   if (!sector) { showToast('Please select a sub-sector.'); return; }
@@ -1406,14 +1419,13 @@ async function handleSubmit() {
   if (words.length < 4) { showToast('Please enter a real interview question in English.'); return; }
 
   // Non-subscribers must pick at least one firm to preview
-  if (!userHasFullAccess() && selectedPreviewFirms.length === 0) {
+  if (!userHasFullAccess() && chosenPreviewFirms.length === 0) {
     showToast('Pick at least one firm to unlock your free preview.');
     return;
   }
 
   const btn = document.getElementById('submitQuestionBtn');
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
 
   try {
     // Insert question (status = pending, goes to moderation)
@@ -1451,7 +1463,7 @@ async function handleSubmit() {
     if (typeof gtag !== 'undefined') gtag('event', 'question_submitted', { event_category: 'engagement' });
 
     // Grant / refresh the 7-day preview for the firms they picked
-    let firmsToUnlock = selectedPreviewFirms.slice(0, 3);
+    let firmsToUnlock = chosenPreviewFirms.slice(0, 3);
     if (firmsToUnlock.length === 0 && firm) firmsToUnlock = [firm]; // fall back to the firm they submitted about
     let grantOk = false;
     try {
@@ -1481,8 +1493,7 @@ async function handleSubmit() {
     console.error('Submit error:', JSON.stringify(err), err.message);
     showToast('Something went wrong — ' + (err.message || 'please try again.'));
   } finally {
-    btn.disabled = false;
-    btn.textContent = 'Submit & unlock my preview';
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit & unlock my preview'; }
   }
 }
 
@@ -1561,33 +1572,14 @@ async function handleAuth() {
 
     if (typeof gtag !== 'undefined') gtag('event', 'login', { event_category: 'engagement', event_label: authMode });
 
-    // Resume a pending question submission: restore their form data and submit for them
+    // Resume a pending question submission: submit directly with their saved data.
     if (pendingAction === 'submit') {
       pendingAction = null;
       if (savedSubmission) {
-        openSubmitModal();
-        // Restore the fields they filled in before signing in
-        const s = savedSubmission;
-        const setVal = (id, v) => { const el = document.getElementById(id); if (el && v != null) el.value = v; };
-        setVal('submitFirm', s.firm);
-        setVal('submitFirmOther', s.firmOther);
-        setVal('submitSector', s.sector);
-        setVal('submitRole', s.role);
-        setVal('submitStage', s.stage);
-        setVal('submitYear', s.year);
-        setVal('submitQuestion', s.question);
-        // Re-select their preview firms visually + in state
-        selectedPreviewFirms = [...(s.previewFirms || [])];
-        document.querySelectorAll('#previewFirmChips .preview-chip').forEach(btn => {
-          if (selectedPreviewFirms.includes(btn.dataset.firm)) {
-            btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
-          }
-        });
+        const data = savedSubmission;
         savedSubmission = null;
-        // Auto-complete the submission
-        setTimeout(() => handleSubmit(), 300);
-      } else {
-        openSubmitModal();
+        // Give the auth session a moment to attach, then submit directly (no modal round-trip)
+        setTimeout(() => handleSubmit(data), 400);
       }
     }
 
