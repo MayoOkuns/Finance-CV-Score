@@ -839,8 +839,18 @@ async function init() {
 async function setUser(user) {
   currentUser = user;
   // Fetch profile
-  const { data } = await supabaseClient
+  let { data } = await supabaseClient
     .from('profiles').select('*').eq('id', user.id).single();
+
+  // Brand-new users get a profile row created by a server-side trigger
+  // (on_auth_user_created). If it's not visible on the very first read due to
+  // timing, retry once after a short delay so downstream FKs (submitted_by) work.
+  if (!data) {
+    await new Promise(r => setTimeout(r, 500));
+    const retry = await supabaseClient.from('profiles').select('*').eq('id', user.id).single();
+    data = retry.data;
+  }
+
   userProfile = data;
   updateNavAuth();
   checkTrialStatus();
