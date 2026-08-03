@@ -1775,7 +1775,11 @@ function renderPreviewFirmChips() {
   if (userHasFullAccess()) { if (picker) picker.style.display = 'none'; return; }
   if (picker) picker.style.display = '';
   selectedPreviewFirms = [];
-  wrap.innerHTML = ALERT_FIRMS.map(firm => `
+  // Only offer firms that actually have questions in the vault, so every pick
+  // yields a real unlocked preview (picking 3 always gives 3 questions).
+  const firmsWithQuestions = [...new Set((allQuestions || []).map(q => q.firm).filter(Boolean))].sort();
+  const pickable = firmsWithQuestions.length ? firmsWithQuestions : ALERT_FIRMS;
+  wrap.innerHTML = pickable.map(firm => `
     <button type="button" class="preview-chip" data-firm="${escapeHtml(firm)}" onclick="togglePreviewFirm(this)"
       style="font-size:12px;padding:6px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--white);color:var(--ink-mid);cursor:pointer;font-family:'Inter',sans-serif">${escapeHtml(firm)}</button>`).join('');
 }
