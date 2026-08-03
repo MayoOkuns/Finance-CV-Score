@@ -479,6 +479,7 @@ async function loadUsers() {
               <th>Trial expires</th>
               <th>CV Pro</th>
               <th>Joined</th>
+              <th>Test tools</th>
             </tr>
           </thead>
           <tbody>
@@ -492,12 +493,17 @@ async function loadUsers() {
               const emailDisplay = p.email
                 ? escapeHtml(p.email)
                 : `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-light)">${escapeHtml(p.id.substring(0,8))}…</span>`;
+              const emailAttr = p.email ? escapeHtml(p.email) : '';
+              const actions = p.email ? `
+                <button onclick="resetUser('${emailAttr}','reset')" title="Clear subscription & preview (keep account)" style="background:#FEF3C7;color:#92400E;border:none;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;margin-right:4px;font-family:'Inter',sans-serif">Reset</button>
+                <button onclick="resetUser('${emailAttr}','delete')" title="Delete account entirely (frees the email)" style="background:#FEE2E2;color:#991B1B;border:none;padding:4px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">Delete</button>` : '—';
               return `<tr>
                 <td style="font-size:13px">${emailDisplay}</td>
                 <td><span class="user-status ${statusClass}">${escapeHtml(p.subscription_status || 'free')}</span></td>
                 <td style="font-size:12px;color:var(--ink-light)">${trial}</td>
                 <td style="font-size:13px">${p.cv_pro_purchased ? '✓' : '—'}</td>
                 <td style="font-size:12px;color:var(--ink-light);white-space:nowrap">${date}</td>
+                <td style="white-space:nowrap">${actions}</td>
               </tr>`;
             }).join('')}
           </tbody>
@@ -506,6 +512,28 @@ async function loadUsers() {
   } catch(err) {
     console.error('Load users error:', err);
     content.innerHTML = `<div class="empty-state"><h3>Error loading users</h3><p>${escapeHtml(err.message)}</p></div>`;
+  }
+}
+
+async function resetUser(email, mode) {
+  const isDelete = mode === 'delete';
+  const msg = isDelete
+    ? `DELETE the account for ${email}? This removes the auth user entirely so the email can be re-used to sign up again. Use this to re-test the full flow.`
+    : `Reset ${email} back to free? This clears their subscription and preview access but keeps the account.`;
+  if (!confirm(msg)) return;
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch('/api/reset-user', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + (session?.access_token || '') },
+      body: JSON.stringify({ email, mode })
+    });
+    const out = await res.json();
+    if (!res.ok) { showToast(out.error || 'Action failed'); return; }
+    showToast(isDelete ? `✓ Deleted ${email} — email is free to reuse` : `✓ Reset ${email} to free`);
+    loadAll();
+  } catch(err) {
+    showToast('Error: ' + err.message);
   }
 }
 
