@@ -137,34 +137,44 @@ export default async function handler(req, res) {
         if (error) console.error('Profile update error:', error);
         else console.log(`Updated ${email} to status: ${profileStatus}`);
 
-        // Sync to Brevo — update contact with trial expiry date and list membership
-        // This triggers Brevo automations (trial reminder, welcome email)
+        // Sync to Brevo — add/update contact and list membership.
+        // A Brevo automation on the Subscribers list sends the welcome email.
         try {
           const brevoKey = process.env.BREVO_API_KEY;
           const trialExpiresAt = subscription.trial_end
             ? new Date(subscription.trial_end * 1000).toISOString().split('T')[0]
             : null;
 
+          // Correct default list IDs: Trial Users = 11, Active Subscribers = 10
           const brevoListId = profileStatus === 'trial'
-            ? parseInt(process.env.BREVO_TRIAL_LIST_ID || '4')   // Trial Users list
-            : parseInt(process.env.BREVO_SUBSCRIBERS_LIST_ID || '5'); // Active Subscribers list
+            ? parseInt(process.env.BREVO_TRIAL_LIST_ID || '11')
+            : parseInt(process.env.BREVO_SUBSCRIBERS_LIST_ID || '10');
 
-          await fetch('https://api.brevo.com/v3/contacts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'api-key': brevoKey },
-            body: JSON.stringify({
-              email,
-              attributes: {
-                TRIAL_EXPIRES_AT: trialExpiresAt,
-                SUBSCRIPTION_STATUS: profileStatus
-              },
-              listIds: [brevoListId],
-              updateEnabled: true
-            })
-          });
-          console.log(`Brevo contact synced for ${email} — status: ${profileStatus}`);
+          if (!brevoKey) {
+            console.error('BREVO_API_KEY not set — cannot add contact to Brevo');
+          } else {
+            const brevoRes = await fetch('https://api.brevo.com/v3/contacts', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json', 'api-key': brevoKey },
+              body: JSON.stringify({
+                email,
+                attributes: {
+                  TRIAL_EXPIRES_AT: trialExpiresAt,
+                  SUBSCRIPTION_STATUS: profileStatus
+                },
+                listIds: [brevoListId],
+                updateEnabled: true
+              })
+            });
+            if (!brevoRes.ok) {
+              const errText = await brevoRes.text();
+              console.error(`Brevo add failed (${brevoRes.status}) for ${email}:`, errText);
+            } else {
+              console.log(`Brevo contact synced for ${email} → list ${brevoListId}, status: ${profileStatus}`);
+            }
+          }
         } catch(brevoErr) {
-          console.warn('Brevo sync error (non-fatal):', brevoErr.message);
+          console.error('Brevo sync error:', brevoErr.message);
         }
 
         break;
