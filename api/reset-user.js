@@ -40,6 +40,11 @@ export default async function handler(req, res) {
     const mode = body?.mode || 'reset';
     if (!email) return res.status(400).json({ error: 'Email required' });
 
+    // Safety: never delete the admin's own account (would lock you out of admin).
+    if (mode === 'delete' && email.toLowerCase() === adminEmail.toLowerCase()) {
+      return res.status(400).json({ error: 'Cannot delete the admin account. Use Reset instead to clear its subscription.' });
+    }
+
     const H = {
       'apikey': serviceKey,
       'Authorization': `Bearer ${serviceKey}`,
