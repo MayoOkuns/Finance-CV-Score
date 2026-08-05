@@ -50,6 +50,15 @@ nav{background:var(--navy);padding:14px 32px;display:flex;align-items:center;jus
 .stat-label{font-size:12px;color:var(--ink-light);margin-top:4px;text-transform:uppercase;letter-spacing:0.06em}
 .stat-card.pending .stat-num{color:var(--warn)}
 .stat-card.good .stat-num{color:var(--good)}
+/* Analytics panel */
+.analytics-panel{margin-bottom:32px;display:flex;flex-direction:column;gap:20px}
+.an-section{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px 24px}
+.an-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:16px}
+.an-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+.an-item{display:flex;flex-direction:column}
+.an-num{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:var(--navy)}
+.an-lbl{font-size:11px;color:var(--ink-light);margin-top:3px}
+.an-note{font-size:12px;color:var(--ink-light);background:var(--surface);border-radius:10px;padding:14px 16px;line-height:1.5}
 
 /* TABS */
 .tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--white);border:1px solid var(--border);border-radius:10px;padding:4px;width:fit-content}
@@ -192,6 +201,43 @@ tr:hover td{background:#FAFAF9}
       </div>
     </div>
 
+    <!-- ANALYTICS PANEL -->
+    <div class="analytics-panel">
+      <div class="an-section">
+        <h3 class="an-title">💰 Revenue</h3>
+        <div class="an-grid">
+          <div class="an-item"><span class="an-num" id="anMrr">—</span><span class="an-lbl">MRR (monthly recurring)</span></div>
+          <div class="an-item"><span class="an-num" id="anArr">—</span><span class="an-lbl">ARR (annual run-rate)</span></div>
+          <div class="an-item"><span class="an-num" id="anCvProRev">—</span><span class="an-lbl">CV Pro revenue (total)</span></div>
+          <div class="an-item"><span class="an-num" id="anTotalRev">—</span><span class="an-lbl">Combined run-rate</span></div>
+        </div>
+      </div>
+
+      <div class="an-section">
+        <h3 class="an-title">📈 Conversion rates</h3>
+        <div class="an-grid">
+          <div class="an-item"><span class="an-num" id="anScanToPro">—</span><span class="an-lbl">CV scan → CV Pro</span></div>
+          <div class="an-item"><span class="an-num" id="anSubToSub">—</span><span class="an-lbl">Question submit → subscriber</span></div>
+          <div class="an-item"><span class="an-num" id="anPreviewToSub">—</span><span class="an-lbl">Preview → subscriber</span></div>
+          <div class="an-item"><span class="an-num" id="anUserToSub">—</span><span class="an-lbl">User → subscriber</span></div>
+        </div>
+      </div>
+
+      <div class="an-section">
+        <h3 class="an-title">🔬 Engagement & volume</h3>
+        <div class="an-grid">
+          <div class="an-item"><span class="an-num" id="anTotalScans">—</span><span class="an-lbl">CV scans (all time)</span></div>
+          <div class="an-item"><span class="an-num" id="anScansWeek">—</span><span class="an-lbl">CV scans (7d)</span></div>
+          <div class="an-item"><span class="an-num" id="anSubmissions">—</span><span class="an-lbl">Questions submitted</span></div>
+          <div class="an-item"><span class="an-num" id="anPreviews">—</span><span class="an-lbl">Previews unlocked</span></div>
+          <div class="an-item"><span class="an-num" id="anRejected">—</span><span class="an-lbl">Questions rejected</span></div>
+          <div class="an-item"><span class="an-num" id="anApprovalRate">—</span><span class="an-lbl">Approval rate</span></div>
+        </div>
+      </div>
+
+      <p class="an-note">📊 For quiz usage, returning visitors, traffic sources, and per-page funnels, see <strong>Google Analytics 4</strong> (property G-TWSP8CTP6B) → Reports → Engagement & Acquisition. GA4 tracks behavioural data this panel can't derive from the database.</p>
+    </div>
+
     <!-- TABS -->
     <div class="tabs">
       <button class="tab active" id="tabPending" onclick="switchTab('pending')">Pending</button>
@@ -275,27 +321,69 @@ async function loadAll() {
 async function loadStats() {
   try {
     const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
-    const [pending, approved, profiles, newWeek] = await Promise.all([
+    const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString();
+    const [pending, approved, rejected, profiles, newWeek, subsCount, previewCount, scanWeek, scanTotal] = await Promise.all([
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','pending'),
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','approved'),
-      sb.from('profiles').select('subscription_status, cv_pro_purchased'),
-      sb.from('profiles').select('*',{count:'exact',head:true}).gte('created_at', weekAgo)
+      sb.from('questions').select('*',{count:'exact',head:true}).eq('status','rejected'),
+      sb.from('profiles').select('subscription_status, cv_pro_purchased, created_at'),
+      sb.from('profiles').select('*',{count:'exact',head:true}).gte('created_at', weekAgo),
+      sb.from('submissions').select('*',{count:'exact',head:true}),
+      sb.from('preview_access').select('*',{count:'exact',head:true}),
+      sb.from('cv_scores').select('*',{count:'exact',head:true}).gte('submitted_at', weekAgo),
+      sb.from('cv_scores').select('*',{count:'exact',head:true})
     ]);
 
     const rows = profiles.data || [];
+    const totalUsers = rows.length;
     const activeSubs = rows.filter(p => p.subscription_status === 'active').length;
     const trials = rows.filter(p => p.subscription_status === 'trial').length;
     const cvProSales = rows.filter(p => p.cv_pro_purchased).length;
+    const totalSubmissions = subsCount.count || 0;
+    const totalPreviews = previewCount.count || 0;
+    const totalScans = scanTotal.count || 0;
 
+    // ── Core stat cards ──
     document.getElementById('statPending').textContent = pending.count || 0;
     document.getElementById('statApproved').textContent = approved.count || 0;
-    document.getElementById('statUsers').textContent = rows.length;
+    document.getElementById('statUsers').textContent = totalUsers;
     document.getElementById('statSubs').textContent = activeSubs;
     document.getElementById('statTrials').textContent = trials;
-    // Est MRR: active subs × £12. (Annual subs also net ~£7.42/mo but we treat all as £12 for a simple floor estimate.)
-    document.getElementById('statMRR').textContent = '£' + (activeSubs * 12).toLocaleString();
+    // MRR at current pricing: monthly £9.99. (Annual subs net £6.58/mo but we use
+    // £9.99 as a simple, conservative per-active-sub figure.)
+    document.getElementById('statMRR').textContent = '£' + (activeSubs * 9.99).toFixed(2);
     document.getElementById('statCvPro').textContent = cvProSales;
     document.getElementById('statNewWeek').textContent = newWeek.count || 0;
+
+    // ── Analytics panel (conversion + engagement) ──
+    const setIf = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+
+    // Revenue
+    const mrr = activeSubs * 9.99;
+    const cvProRevenue = cvProSales * 7.99;
+    setIf('anMrr', '£' + mrr.toFixed(2));
+    setIf('anArr', '£' + (mrr * 12).toFixed(0));
+    setIf('anCvProRev', '£' + cvProRevenue.toFixed(2));
+    setIf('anTotalRev', '£' + (cvProRevenue + mrr).toFixed(2) + '/mo run-rate');
+
+    // Conversion rates
+    const scanToProRate = totalScans > 0 ? ((cvProSales / totalScans) * 100).toFixed(1) + '%' : '—';
+    const subToSubRate = totalSubmissions > 0 ? ((activeSubs / totalSubmissions) * 100).toFixed(1) + '%' : '—';
+    const previewToSubRate = totalPreviews > 0 ? ((activeSubs / totalPreviews) * 100).toFixed(1) + '%' : '—';
+    const userToSubRate = totalUsers > 0 ? ((activeSubs / totalUsers) * 100).toFixed(1) + '%' : '—';
+    setIf('anScanToPro', scanToProRate);
+    setIf('anSubToSub', subToSubRate);
+    setIf('anPreviewToSub', previewToSubRate);
+    setIf('anUserToSub', userToSubRate);
+
+    // Engagement / volume
+    setIf('anTotalScans', totalScans.toLocaleString());
+    setIf('anScansWeek', (scanWeek.count || 0).toLocaleString());
+    setIf('anSubmissions', totalSubmissions.toLocaleString());
+    setIf('anPreviews', totalPreviews.toLocaleString());
+    setIf('anRejected', (rejected.count || 0).toLocaleString());
+    setIf('anApprovalRate', (approved.count + rejected.count) > 0
+      ? ((approved.count / (approved.count + rejected.count)) * 100).toFixed(0) + '%' : '—');
   } catch(err) {
     console.error('Stats error:', err);
   }
