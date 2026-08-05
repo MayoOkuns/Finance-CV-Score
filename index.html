@@ -686,10 +686,35 @@
         }
         sessionStorage.removeItem('fcvs_email');
       } catch(e) {}
-      showToast('🎉 Payment successful! Run your CV analysis below, then Pro will unlock automatically.');
       trackEvent('pro_purchased');
-      if (analysisData) { unlockPro(); }
-      else { window._pendingProUnlock = true; }
+
+      // Restore the analysis saved before checkout, so we can show their results
+      // with Pro unlocked immediately — no need to re-run the whole scan.
+      let restored = false;
+      try {
+        const saved = sessionStorage.getItem('fcvs_analysis');
+        if (saved) {
+          const s = JSON.parse(saved);
+          analysisData = s.analysisData;
+          cvText = s.cvText || '';
+          jobRole = s.jobRole || '';
+          jdText = s.jdText || '';
+          if (s.industry) selectedIndustry = s.industry;
+          sessionStorage.removeItem('fcvs_analysis');
+          restored = true;
+        }
+      } catch(e) {}
+
+      if (analysisData) {
+        // Show their results (if not already visible) then unlock Pro
+        showToast('🎉 Payment successful — unlocking your full analysis…');
+        showResults(analysisData);
+        setTimeout(() => unlockPro(), 300);
+      } else {
+        // Fallback: no saved analysis (e.g. sessionStorage cleared) — ask them to re-run
+        showToast('🎉 Payment successful! Run your CV analysis and Pro will unlock automatically.');
+        window._pendingProUnlock = true;
+      }
     }
   }
 
@@ -1610,8 +1635,15 @@
     btn.disabled = true;
     btn.innerHTML = '<div class="rewrite-spinner" style="width:20px;height:20px;border-width:2px;margin:0"></div> Redirecting to checkout…';
 
-    // Store email so we can pre-fill Stripe checkout and capture it on return
-    try { sessionStorage.setItem('fcvs_email', email); } catch(e) {}
+    // Store email + the analysis so we can restore it and auto-unlock Pro on return
+    try {
+      sessionStorage.setItem('fcvs_email', email);
+      if (analysisData) {
+        sessionStorage.setItem('fcvs_analysis', JSON.stringify({
+          analysisData, cvText, jobRole, jdText, industry: selectedIndustry
+        }));
+      }
+    } catch(e) {}
 
     // Small delay for UX then redirect to Stripe
     setTimeout(() => {
