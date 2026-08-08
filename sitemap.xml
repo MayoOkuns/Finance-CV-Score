@@ -16,7 +16,37 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://www.financecareervault.com/firms/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://www.financecareervault.com/firms/goldman-sachs.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.financecareervault.com/firms/jpmorgan.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.financecareervault.com/firms/blackrock.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.financecareervault.com/firms/morgan-stanley.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.financecareervault.com/firms/kkr.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.financecareervault.com/firms/citadel.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
