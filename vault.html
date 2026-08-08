@@ -7,6 +7,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Interview Vault — Finance Career Vault</title>
 <meta name="description" content="Real interview questions candidates were asked at Goldman Sachs, BlackRock, JPMorgan and more — reported by people who've been through the process. Searchable by firm, role, and stage.">
+<link rel="canonical" href="https://www.financecareervault.com/vault.html">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Interview Vault — Finance Career Vault">
+<meta property="og:description" content="Real interview questions candidates were asked at Goldman Sachs, BlackRock, JPMorgan and more. Searchable by firm, role, and stage.">
+<meta property="og:url" content="https://www.financecareervault.com/vault.html">
+<meta property="og:site_name" content="Finance Career Vault">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Interview Vault — Finance Career Vault">
+<meta name="twitter:description" content="Real interview questions candidates were asked at Goldman Sachs, BlackRock, JPMorgan and more.">
+<meta name="robots" content="index, follow">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -816,6 +826,23 @@ async function init() {
     // Load questions
     await loadQuestions();
     await loadStats();
+
+    // Support linking straight to a firm (e.g. from a public guide page):
+    // /vault.html?firm=Goldman%20Sachs pre-selects that firm's pill and filter.
+    const urlParams = new URLSearchParams(window.location.search);
+    const firmParam = urlParams.get('firm');
+    if (firmParam) {
+      activeFirmFilter = firmParam;
+      applyFilters();
+      // Reflect the selection visually once pills have rendered
+      setTimeout(() => {
+        document.querySelectorAll('.firm-pill').forEach(p => {
+          p.classList.toggle('active', p.dataset.firm === firmParam);
+        });
+        const feedTop = document.getElementById('feedWrap');
+        if (feedTop) feedTop.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 300);
+    }
     // Auth state listener
     supabaseClient.auth.onAuthStateChange(async (event, session) => {
       if (session) await setUser(session.user);
