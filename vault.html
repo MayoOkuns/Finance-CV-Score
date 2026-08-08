@@ -183,6 +183,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 .firm-pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px;max-width:900px;margin-left:auto;margin-right:auto;padding:0 24px}
 .firm-pill{background:var(--white);border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:500;color:var(--ink-mid);cursor:pointer;transition:all .15s;white-space:nowrap}
 .firm-pill:hover,.firm-pill.active{background:var(--accent-light);border-color:var(--accent);color:var(--accent)}
+.firm-pill-count{font-size:11px;opacity:.6;margin-left:4px;font-weight:400}
 
 /* CYCLE BADGE */
 .cycle-badge { display:inline-flex; align-items:center; gap:4px; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px; background:#FEF3C7; color:#B45309; letter-spacing:0.04em; }
@@ -370,20 +371,10 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 <div style="padding:24px 24px 0;max-width:1100px;margin:0 auto">
   <div class="firm-pills" id="firmPills">
     <button class="firm-pill active" data-firm="" onclick="filterByFirm(this)">All firms</button>
-    <button class="firm-pill" data-firm="Goldman Sachs" onclick="filterByFirm(this)">Goldman Sachs</button>
-    <button class="firm-pill" data-firm="JPMorgan" onclick="filterByFirm(this)">JPMorgan</button>
-    <button class="firm-pill" data-firm="BlackRock" onclick="filterByFirm(this)">BlackRock</button>
-    <button class="firm-pill" data-firm="Morgan Stanley" onclick="filterByFirm(this)">Morgan Stanley</button>
-    <button class="firm-pill" data-firm="Blackstone" onclick="filterByFirm(this)">Blackstone</button>
-    <button class="firm-pill" data-firm="Citadel" onclick="filterByFirm(this)">Citadel</button>
-    <button class="firm-pill" data-firm="KKR" onclick="filterByFirm(this)">KKR</button>
-    <button class="firm-pill" data-firm="Apollo" onclick="filterByFirm(this)">Apollo</button>
-    <button class="firm-pill" data-firm="Citi" onclick="filterByFirm(this)">Citi</button>
-    <button class="firm-pill" data-firm="Barclays" onclick="filterByFirm(this)">Barclays</button>
-    <button class="firm-pill" data-firm="Fidelity" onclick="filterByFirm(this)">Fidelity</button>
-    <button class="firm-pill" data-firm="Schroders" onclick="filterByFirm(this)">Schroders</button>
+    <!-- Remaining pills are rendered dynamically from the live question data (renderFirmPills) -->
   </div>
 </div>
+<div id="depthNote" style="text-align:center;font-size:12px;color:var(--ink-light);margin:-14px 0 20px;padding:0 24px"></div>
 
 <!-- MAIN LAYOUT -->
 <div class="vault-layout">
@@ -905,6 +896,7 @@ async function loadQuestions() {
   if (searchEl && searchEl.value && searchEl.value.includes('@')) searchEl.value = '';
   renderFeed(allQuestions);
   try { loadStats(); } catch(e) { console.warn('stats', e); }
+  try { renderFirmPills(); } catch(e) { console.warn('firm pills', e); }
 }
 
 // Round DOWN to nearest 100 and show as "N+" (100+, 200+ …). Min 100+.
@@ -1305,6 +1297,44 @@ function userHasAccess() { return userHasFullAccess(); }
 function hasActivePreview() { return previewFirms && previewFirms.length > 0; }
 
 // ── FILTERS ──────────────────────────────────────────────────────────
+
+// Build the firm pill row from whatever firms actually have questions right
+// now, sorted deepest-first so the vault's real depth is the first thing a
+// visitor sees — rather than a static, easily-outdated hardcoded list.
+function renderFirmPills() {
+  const wrap = document.getElementById('firmPills');
+  if (!wrap) return;
+
+  const counts = {};
+  (allQuestions || []).forEach(q => {
+    if (!q.firm) return;
+    counts[q.firm] = (counts[q.firm] || 0) + 1;
+  });
+
+  const firms = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+
+  // Preserve whichever pill is currently active across re-renders
+  const currentActive = activeFirmFilter || '';
+
+  let html = `<button class="firm-pill${currentActive === '' ? ' active' : ''}" data-firm="" onclick="filterByFirm(this)">All firms</button>`;
+  html += firms.map(firm => `
+    <button class="firm-pill${currentActive === firm ? ' active' : ''}" data-firm="${escapeHtml(firm)}" onclick="filterByFirm(this)">
+      ${escapeHtml(firm)}<span class="firm-pill-count">${counts[firm]}</span>
+    </button>`).join('');
+
+  wrap.innerHTML = html;
+
+  // Small trust-building note under the pills, e.g. "227 questions across 21 firms"
+  const noteEl = document.getElementById('depthNote');
+  if (noteEl) {
+    const totalQ = (allQuestions || []).length;
+    const totalFirms = firms.length;
+    noteEl.textContent = totalQ && totalFirms
+      ? `${totalQ} questions across ${totalFirms} firms — updated weekly`
+      : '';
+  }
+}
+
 function filterByFirm(btn) {
   document.querySelectorAll('.firm-pill').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
