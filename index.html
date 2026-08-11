@@ -86,6 +86,8 @@
 
   /* SCORE CARD */
   .score-grid { display:grid; grid-template-columns:auto 1fr; gap:24px; background:var(--white); border-radius:16px; padding:32px; margin-bottom:24px; border:1px solid var(--border); align-items:center; }
+  .score-blurred .score-grid { filter:blur(9px); user-select:none; pointer-events:none; transition:filter .35s ease; }
+  .score-unlocked .score-grid { filter:none; }
   .score-ring-wrap { position:relative; width:120px; height:120px; flex-shrink:0; }
   .score-ring-wrap canvas { position:absolute; top:0; left:0; }
   .score-center { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); text-align:center; }
@@ -463,13 +465,15 @@
     <div class="pro-banner-text"><strong>Pro unlocked.</strong> Your full keyword gap analysis, percentile ranking, and JD match are ready below.</div>
   </div>
 
-  <!-- SCORE -->
-  <div class="score-grid">
-    <div class="score-ring-wrap"><canvas id="scoreCanvas" width="120" height="120"></canvas><div class="score-center"><div class="score-number" id="scoreNumber">--</div><div class="score-label">/ 100</div></div></div>
-    <div class="score-meta">
-      <h3 id="scoreTitle">Analysing…</h3>
-      <p class="score-verdict" id="scoreVerdict"></p>
-      <div class="score-pills" id="scorePills"></div>
+  <!-- SCORE — blurred until email gate is passed -->
+  <div id="scoreGridWrap" class="score-blurred">
+    <div class="score-grid">
+      <div class="score-ring-wrap"><canvas id="scoreCanvas" width="120" height="120"></canvas><div class="score-center"><div class="score-number" id="scoreNumber">--</div><div class="score-label">/ 100</div></div></div>
+      <div class="score-meta">
+        <h3 id="scoreTitle">Analysing…</h3>
+        <p class="score-verdict" id="scoreVerdict"></p>
+        <div class="score-pills" id="scorePills"></div>
+      </div>
     </div>
   </div>
 
@@ -484,12 +488,12 @@
 
   <!-- EMAIL GATE — shown after score/issues, before detailed breakdown -->
   <div id="emailGate" style="display:none;background:var(--white);border:2px solid var(--accent);border-radius:16px;padding:28px 32px;margin-bottom:24px;text-align:center">
-    <div style="width:48px;height:48px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px">🔍</div>
-    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px;margin-bottom:8px">See your full breakdown &amp; key issues</h3>
-    <p style="font-size:14px;color:var(--ink-mid);max-width:400px;margin:0 auto 20px;line-height:1.5">Enter your email to unlock your score breakdown, key issues, and where you rank against other applicants — free. You'll also get access to the free daily finance quiz and interview question previews.</p>
+    <div style="width:48px;height:48px;background:var(--accent-light);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px">🎯</div>
+    <h3 style="font-family:'Instrument Serif',serif;font-size:20px;letter-spacing:-0.3px;margin-bottom:8px">Your CV score is ready</h3>
+    <p style="font-size:14px;color:var(--ink-mid);max-width:400px;margin:0 auto 20px;line-height:1.5">Enter your email to reveal your score, full breakdown, key issues, and where you rank against other applicants — free. You'll also get access to the free daily finance quiz and interview question previews.</p>
     <div style="display:flex;gap:8px;max-width:400px;margin:0 auto 8px;flex-wrap:wrap;justify-content:center">
       <input type="email" id="gateEmailInput" placeholder="your@email.com" autocomplete="off" style="flex:1;min-width:200px;padding:12px 14px;border:1.5px solid var(--border);border-radius:10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
-      <button onclick="submitEmailGate()" id="gateBtn" style="background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Unlock my results</button>
+      <button onclick="submitEmailGate()" id="gateBtn" style="background:var(--accent);color:white;font-size:14px;font-weight:600;padding:12px 22px;border-radius:10px;border:none;cursor:pointer;font-family:'Inter',sans-serif;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">Reveal my score</button>
     </div>
     <p style="font-size:11px;color:var(--ink-light);margin-top:8px">No spam, ever. Just your results and the occasional useful update.</p>
   </div>
@@ -2176,12 +2180,16 @@ BSc Business Management | University of Manchester | 2015–2018`;
     } catch(e) {}
     document.getElementById('emailGate').style.display = 'block';
     document.getElementById('gatedContent').style.display = 'none';
+    const wrap = document.getElementById('scoreGridWrap');
+    if (wrap) { wrap.classList.add('score-blurred'); wrap.classList.remove('score-unlocked'); }
   }
 
   function unlockGatedContent() {
     emailGatePassed = true;
     document.getElementById('emailGate').style.display = 'none';
     document.getElementById('gatedContent').style.display = 'block';
+    const wrap = document.getElementById('scoreGridWrap');
+    if (wrap) { wrap.classList.remove('score-blurred'); wrap.classList.add('score-unlocked'); }
     try { localStorage.setItem('fcv_gate_passed', '1'); } catch(e) {}
   }
 
