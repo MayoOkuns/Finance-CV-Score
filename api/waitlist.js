@@ -1,3 +1,14 @@
+// Rate limiter — 20 requests per IP per 10 minutes
+const rateLimitMap = new Map();
+function isRateLimited(ip) {
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip) || { count: 0, resetAt: now + 600000 };
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + 600000; }
+  entry.count++;
+  rateLimitMap.set(ip, entry);
+  return entry.count > 20;
+}
+
 export default async function handler(req, res) {
   // CORS
   const origin = req.headers.origin || '';
@@ -13,6 +24,8 @@ export default async function handler(req, res) {
 
   if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+  const ip = req.headers['x-forwarded-for']?.split(',')[0] || 'unknown';
+  if (isRateLimited(ip)) return res.status(429).json({ error: 'Too many requests' });
 
   // Parse body
   let email;
@@ -27,18 +40,20 @@ export default async function handler(req, res) {
   }
 
   const apiKey = process.env.BREVO_API_KEY;
-  const listId = parseInt(process.env.BREVO_LIST_ID || '0');
+  // Fallback to the known "Waitlist" list (#8) if the env var isn't set,
+  // so a missing/misconfigured env var can't silently swallow every signup.
+  const listId = parseInt(process.env.BREVO_LIST_ID || '8');
 
   // Log for debugging (visible in Vercel function logs)
   console.log('Waitlist signup attempt:', email);
   console.log('API key present:', !!apiKey);
   console.log('List ID:', listId);
 
-  if (!apiKey || !listId) {
-    console.error('Missing env vars - BREVO_API_KEY:', !!apiKey, 'BREVO_LIST_ID:', listId);
-    // Still return success to user — we'll fix the env vars
-    // Email is logged above so we can manually add it if needed
-    return res.status(200).json({ success: true, note: 'logged' });
+  if (!apiKey) {
+    console.error('Missing BREVO_API_KEY — cannot capture email:', email);
+    // Be honest with the client if this is genuinely broken, rather than
+    // silently reporting success while the email is lost.
+    return res.status(200).json({ success: true, warning: 'not_delivered_to_list' });
   }
 
   try {
@@ -82,4 +97,3 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, note: 'fetch_error_logged' });
   }
 }
-
