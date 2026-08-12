@@ -1419,18 +1419,50 @@ function updateCharCount() {
 
 let savedSubmission = null;
 async function handleSubmit(savedData) {
+  // Resolve the submission data from saved (post-auth resume) or the current form.
+  let firm, sector, role, stage, year, question, chosenPreviewFirms;
+  if (savedData) {
+    firm = savedData.firm;
+    sector = savedData.sector;
+    role = savedData.role;
+    stage = savedData.stage;
+    year = savedData.year;
+    question = savedData.question;
+    chosenPreviewFirms = [...(savedData.previewFirms || [])];
+  } else {
+    const firmSelect = document.getElementById('submitFirm').value;
+    firm = firmSelect === 'Other'
+      ? document.getElementById('submitFirmOther').value.trim()
+      : firmSelect;
+    sector = document.getElementById('submitSector').value;
+    role = document.getElementById('submitRole').value;
+    stage = document.getElementById('submitStage').value;
+    year = document.getElementById('submitYear').value;
+    question = document.getElementById('submitQuestion').value.trim();
+    chosenPreviewFirms = [...selectedPreviewFirms];
+  }
+
+  // Validate EVERYTHING before requiring an account — so a not-yet-signed-in
+  // user is prompted to fix any issue (missing firm, short question, no
+  // preview firms picked, etc.) before being sent through sign-up, rather
+  // than discovering the problem only after their account already exists.
+  if (!firm) { showToast('Please select or enter a firm.'); return; }
+  if (!sector) { showToast('Please select a sub-sector.'); return; }
+  if (!stage) { showToast('Please select an interview stage.'); return; }
+  if (question.length < 30) { showToast('Question must be at least 30 characters.'); return; }
+
+  const words = question.split(/\s+/).filter(w => /^[a-zA-Z]{2,}$/.test(w));
+  if (words.length < 4) { showToast('Please enter a real interview question in English.'); return; }
+
+  if (!userHasFullAccess() && chosenPreviewFirms.length === 0) {
+    showToast('Pick at least one firm to unlock your free preview.');
+    return;
+  }
+
+  // Everything is valid. If not signed in, save this exact validated data and
+  // send to sign-in/sign-up — it will auto-submit as-is once they're back.
   if (!currentUser) {
-    // Capture what they've filled in so we can restore + auto-submit after sign-in
-    savedSubmission = {
-      firm: document.getElementById('submitFirm').value,
-      firmOther: document.getElementById('submitFirmOther') ? document.getElementById('submitFirmOther').value : '',
-      sector: document.getElementById('submitSector').value,
-      role: document.getElementById('submitRole').value,
-      stage: document.getElementById('submitStage').value,
-      year: document.getElementById('submitYear').value,
-      question: document.getElementById('submitQuestion').value,
-      previewFirms: [...selectedPreviewFirms]
-    };
+    savedSubmission = { firm, sector, role, stage, year, question, previewFirms: chosenPreviewFirms };
     closeModal('submitModal');
     openAuthModal('submit');
     return;
@@ -1450,44 +1482,6 @@ async function handleSubmit(savedData) {
     currentUser = session.user;
   } catch(e) {
     showToast('Please sign in again to submit.');
-    return;
-  }
-
-  // Use saved data if provided (post-signup auto-submit), else read from the form
-  let firm, sector, role, stage, year, question, chosenPreviewFirms;
-  if (savedData) {
-    firm = savedData.firm === 'Other' ? (savedData.firmOther || '').trim() : savedData.firm;
-    sector = savedData.sector;
-    role = savedData.role;
-    stage = savedData.stage;
-    year = savedData.year;
-    question = (savedData.question || '').trim();
-    chosenPreviewFirms = [...(savedData.previewFirms || [])];
-  } else {
-    const firmSelect = document.getElementById('submitFirm').value;
-    firm = firmSelect === 'Other'
-      ? document.getElementById('submitFirmOther').value.trim()
-      : firmSelect;
-    sector = document.getElementById('submitSector').value;
-    role = document.getElementById('submitRole').value;
-    stage = document.getElementById('submitStage').value;
-    year = document.getElementById('submitYear').value;
-    question = document.getElementById('submitQuestion').value.trim();
-    chosenPreviewFirms = [...selectedPreviewFirms];
-  }
-
-  if (!firm) { showToast('Please select or enter a firm.'); return; }
-  if (!sector) { showToast('Please select a sub-sector.'); return; }
-  if (!stage) { showToast('Please select an interview stage.'); return; }
-  if (question.length < 30) { showToast('Question must be at least 30 characters.'); return; }
-
-  // Basic English check — must have at least 3 real words
-  const words = question.split(/\s+/).filter(w => /^[a-zA-Z]{2,}$/.test(w));
-  if (words.length < 4) { showToast('Please enter a real interview question in English.'); return; }
-
-  // Non-subscribers must pick at least one firm to preview
-  if (!userHasFullAccess() && chosenPreviewFirms.length === 0) {
-    showToast('Pick at least one firm to unlock your free preview.');
     return;
   }
 
