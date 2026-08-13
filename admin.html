@@ -243,6 +243,7 @@ tr:hover td{background:#FAFAF9}
     <div class="tabs">
       <button class="tab active" id="tabPending" onclick="switchTab('pending')">Pending</button>
       <button class="tab" id="tabApproved" onclick="switchTab('approved')">Approved</button>
+      <button class="tab" id="tabThisweek" onclick="switchTab('thisweek')">📰 This Week</button>
       <button class="tab" id="tabRejected" onclick="switchTab('rejected')">Rejected</button>
       <button class="tab" id="tabUsers" onclick="switchTab('users')">Users</button>
     </div>
@@ -390,9 +391,18 @@ async function loadStats() {
   }
 }
 
+function copyNewsletterText() {
+  if (!window._newsletterText) return;
+  navigator.clipboard.writeText(window._newsletterText).then(() => {
+    showToast('✓ Copied — paste into your Brevo campaign');
+  }).catch(() => {
+    showToast('Could not copy — select the text manually');
+  });
+}
+
 function switchTab(tab) {
   currentTab = tab;
-  ['pending','approved','rejected','users'].forEach(t => {
+  ['pending','approved','rejected','users','thisweek'].forEach(t => {
     document.getElementById('tab' + t.charAt(0).toUpperCase() + t.slice(1))
       .classList.toggle('active', t === tab);
   });
@@ -406,6 +416,49 @@ async function loadTab(tab) {
   try {
     if (tab === 'users') {
       await loadUsers();
+      return;
+    }
+
+    if (tab === 'thisweek') {
+      const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
+      const { data, error } = await sb
+        .from('questions')
+        .select('*')
+        .eq('status', 'approved')
+        .gte('created_at', weekAgo)
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      if (!data || data.length === 0) {
+        content.innerHTML = `<div class="empty-state"><h3>No questions approved this week yet</h3><p>Approve some pending questions, then check back here.</p></div>`;
+        return;
+      }
+
+      const firmCounts = {};
+      data.forEach(q => { firmCounts[q.firm] = (firmCounts[q.firm] || 0) + 1; });
+      const firmList = Object.entries(firmCounts).map(([f,c]) => `${f} (${c})`).join(', ');
+
+      const newsletterText =
+`This week's new questions:
+
+${data.map(q => `• ${q.firm} (${q.stage || 'various'}) — ${q.question_text.length > 90 ? q.question_text.slice(0,90)+'…' : q.question_text}`).join('\n')}
+
+See them all in the live vault: https://www.financecareervault.com/vault.html`;
+
+      content.innerHTML = `
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px">
+          <p style="font-size:13px;color:var(--ink-light);margin-bottom:12px"><strong>${data.length} new questions this week</strong> across ${Object.keys(firmCounts).length} firms — ${escapeHtml(firmList)}</p>
+          <button onclick="copyNewsletterText()" style="background:var(--navy);color:white;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif">📋 Copy for newsletter</button>
+        </div>
+      ` + data.map(q => `
+        <div style="background:var(--white);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:10px">
+          <span class="tag tag-firm">${escapeHtml(q.firm)}</span>
+          <span class="tag tag-sector">${escapeHtml(q.sub_sector)}</span>
+          ${q.stage ? `<span class="tag tag-stage">${escapeHtml(q.stage)}</span>` : ''}
+          <p style="margin-top:8px;font-size:14px">${escapeHtml(q.question_text)}</p>
+        </div>`).join('');
+
+      window._newsletterText = newsletterText;
       return;
     }
 
