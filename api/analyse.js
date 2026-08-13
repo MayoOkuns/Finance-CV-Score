@@ -139,8 +139,11 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   "keywordsPresent": [<6-8 keywords found in the CV relevant to ${indLabel}>],
   "keywordsMissing": [<8-10 important keywords missing for ${indLabel} roles>],
   "jdMatchScore": ${jdText && jdText.length > 50 ? '<0-100 match score against the provided JD>' : 'null'},
-  "jdMissingTerms": ${jdText && jdText.length > 50 ? '[<6-8 specific terms from JD missing in CV>]' : 'null'}
+  "jdMissingTerms": ${jdText && jdText.length > 50 ? '[<6-8 specific terms from JD missing in CV>]' : 'null'},
+  "issueTags": [<array of 0-6 tags from this FIXED list ONLY, whichever genuinely apply to this CV: "weak_summary","duties_not_outcomes","no_market_interest_evidence","generic_not_tailored","no_quantified_achievements","missing_keywords","weak_formatting","no_leadership_evidence","cv_too_long","no_interview_prep_signal">]
 }
+
+issueTags rules: only include a tag if the CV genuinely exhibits that specific problem. This field is used for anonymous aggregate statistics (e.g. "62% of CVs are missing quantified achievements") — accuracy matters more than completeness, so omit a tag rather than guess.
 
 Rules:
 - Be brutally specific — no generic advice, reference actual content from the CV
