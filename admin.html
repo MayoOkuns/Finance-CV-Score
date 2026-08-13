@@ -214,6 +214,14 @@ tr:hover td{background:#FAFAF9}
         </div>
       </div>
 
+      <div class="an-section" style="border:2px solid var(--accent);background:var(--accent-light)">
+        <h3 class="an-title">🎯 Vault Activation Rate — the metric to watch right now</h3>
+        <p style="font-size:12px;color:var(--ink-mid);margin-bottom:12px">% of CV scans that go on to activate the vault (submit a question + unlock a preview). More diagnostic than MRR at low volume — isolates whether people who try the free tool actually engage with the paid product's core mechanic.</p>
+        <div class="an-grid">
+          <div class="an-item"><span class="an-num" id="anActivationRate" style="color:var(--accent);font-size:28px">—</span><span class="an-lbl">CV scan → Vault activation</span></div>
+        </div>
+      </div>
+
       <div class="an-section">
         <h3 class="an-title">📈 Conversion rates</h3>
         <div class="an-grid">
@@ -379,6 +387,13 @@ async function loadStats() {
     setIf('anUserToSub', userToSubRate);
 
     // Engagement / volume
+    // Vault activation rate — the single metric worth watching most right now:
+    // what % of everyone who's scanned a CV goes on to actually activate the
+    // vault (submit a question + get a preview unlocked). More diagnostic
+    // than MRR at this stage, since it isolates the email→vault step.
+    const activationRate = totalScans > 0 ? ((totalPreviews / totalScans) * 100).toFixed(1) + '%' : '—';
+    setIf('anActivationRate', activationRate);
+
     setIf('anTotalScans', totalScans.toLocaleString());
     setIf('anScansWeek', (scanWeek.count || 0).toLocaleString());
     setIf('anSubmissions', totalSubmissions.toLocaleString());

@@ -512,6 +512,14 @@
     <a href="/vault.html" style="background:#2563EB;color:white;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Explore the Vault →</a>
   </div>
 
+  <!-- QUIZ NUDGE — personalized with their actual score, shown right after they see it -->
+  <div id="quizNudge" style="background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <p id="quizNudgeText" style="font-size:14px;color:var(--ink-mid);line-height:1.5">Come back tomorrow — 5 questions a day keeps your technicals sharp for interviews.</p>
+    </div>
+    <a href="/quiz.html" onclick="if(typeof gtag!=='undefined')gtag('event','quiz_nudge_clicked',{event_category:'engagement'});" style="background:var(--surface);color:var(--ink);border:1.5px solid var(--border);font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Try today's quiz →</a>
+  </div>
+
   <!-- PERCENTILE RANKING (Pro feature) -->
   <div class="percentile-card" id="percentileCard">
     <div class="percentile-header">
@@ -1562,8 +1570,9 @@
     document.getElementById('resultsSection').classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
 
-    // Store score anonymously in Supabase for real percentile data
-    storeCVScore(data.overallScore, data.industry || selectedIndustry);
+    // Store score anonymously in Supabase for real percentile data,
+    // plus standardized issue tags for aggregate "common CV problems" stats
+    storeCVScore(data.overallScore, data.industry || selectedIndustry, data.issueTags);
 
     // Score ring and title — always visible
     document.getElementById('scoreNumber').textContent = data.overallScore;
@@ -2190,6 +2199,13 @@ BSc Business Management | University of Manchester | 2015–2018`;
     document.getElementById('gatedContent').style.display = 'block';
     const wrap = document.getElementById('scoreGridWrap');
     if (wrap) { wrap.classList.remove('score-blurred'); wrap.classList.add('score-unlocked'); }
+    // Personalize the quiz nudge with their actual score now that it's visible
+    try {
+      const nudgeText = document.getElementById('quizNudgeText');
+      if (nudgeText && analysisData && typeof analysisData.overallScore !== 'undefined') {
+        nudgeText.innerHTML = `Your score is <strong>${analysisData.overallScore}</strong>. Come back tomorrow — 5 questions a day keeps your technicals sharp for interviews.`;
+      }
+    } catch(e) {}
     try { localStorage.setItem('fcv_gate_passed', '1'); } catch(e) {}
   }
 
@@ -2218,7 +2234,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
   // ── CV SCORE STORAGE IN SUPABASE ─────────────────────────────────────
   // Stores anonymised CV scores to build real percentile data
   // Called after every analysis completes
-  async function storeCVScore(score, industry) {
+  async function storeCVScore(score, industry, issueTags) {
     try {
       await fetch(`${window.SUPABASE_URL || 'https://yweyfioiwwrvbawwuttk.supabase.co'}/rest/v1/cv_scores`, {
         method: 'POST',
@@ -2231,6 +2247,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
         body: JSON.stringify({
           industry: industry,
           score: score,
+          issue_tags: Array.isArray(issueTags) ? issueTags : [],
           submitted_at: new Date().toISOString()
         })
       });
