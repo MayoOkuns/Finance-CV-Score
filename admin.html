@@ -332,7 +332,7 @@ async function loadStats() {
   try {
     const weekAgo = new Date(Date.now() - 7*24*60*60*1000).toISOString();
     const monthAgo = new Date(Date.now() - 30*24*60*60*1000).toISOString();
-    const [pending, approved, rejected, profiles, newWeek, subsCount, previewCount, scanWeek, scanTotal] = await Promise.all([
+    const [pending, approved, rejected, profiles, newWeek, subsCount, previewCount, scanWeek, scanTotal, cvProData] = await Promise.all([
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','pending'),
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','approved'),
       sb.from('questions').select('*',{count:'exact',head:true}).eq('status','rejected'),
@@ -341,14 +341,21 @@ async function loadStats() {
       sb.from('submissions').select('*',{count:'exact',head:true}),
       sb.from('preview_access').select('*',{count:'exact',head:true}),
       sb.from('cv_scores').select('*',{count:'exact',head:true}).gte('submitted_at', weekAgo),
-      sb.from('cv_scores').select('*',{count:'exact',head:true})
+      sb.from('cv_scores').select('*',{count:'exact',head:true}),
+      sb.from('cv_pro_purchases').select('amount')
     ]);
 
     const rows = profiles.data || [];
     const totalUsers = rows.length;
     const activeSubs = rows.filter(p => p.subscription_status === 'active').length;
     const trials = rows.filter(p => p.subscription_status === 'trial').length;
-    const cvProSales = rows.filter(p => p.cv_pro_purchased).length;
+    // CV Pro sales come from the dedicated cv_pro_purchases table (populated by
+    // the webhook's checkout.session.completed handler) — NOT profiles, since
+    // CV Pro purchases don't require an account and profiles.cv_pro_purchased
+    // was never reliably populated.
+    const cvProRows = cvProData.data || [];
+    const cvProSales = cvProRows.length;
+    const cvProTotalRevenue = cvProRows.reduce((sum, r) => sum + parseFloat(r.amount || 7.99), 0);
     const totalSubmissions = subsCount.count || 0;
     const totalPreviews = previewCount.count || 0;
     const totalScans = scanTotal.count || 0;
@@ -370,7 +377,7 @@ async function loadStats() {
 
     // Revenue
     const mrr = activeSubs * 9.99;
-    const cvProRevenue = cvProSales * 7.99;
+    const cvProRevenue = cvProTotalRevenue;
     setIf('anMrr', '£' + mrr.toFixed(2));
     setIf('anArr', '£' + (mrr * 12).toFixed(0));
     setIf('anCvProRev', '£' + cvProRevenue.toFixed(2));
