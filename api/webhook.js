@@ -155,6 +155,42 @@ export default async function handler(req, res) {
         break;
       }
 
+      case 'checkout.session.completed': {
+        const session = event.data.object;
+        // Only handle one-time payments here — subscription checkouts also
+        // fire customer.subscription.created separately, which already
+        // handles the vault subscription case above.
+        if (session.mode === 'payment') {
+          const email = session.customer_details?.email || session.customer_email;
+          if (email) {
+            const amount = (session.amount_total || 799) / 100; // pence -> pounds
+            const insRes = await fetch(`${supabaseUrl}/rest/v1/cv_pro_purchases`, {
+              method: 'POST',
+              headers: { ...SB, 'Prefer': 'resolution=ignore-duplicates' }, // idempotent on session id
+              body: JSON.stringify({
+                email,
+                stripe_session_id: session.id,
+                amount
+              })
+            });
+            if (!insRes.ok) console.error('CV Pro purchase insert failed:', await insRes.text());
+            else console.log(`CV Pro purchase recorded for ${email} (£${amount})`);
+
+            // Also flag it on their profile if one exists, as a convenient cross-reference
+            const user = await findUserByEmail(supabaseUrl, serviceKey, email);
+            if (user) {
+              await fetch(`${supabaseUrl}/rest/v1/profiles?id=eq.${user.id}`, {
+                method: 'PATCH', headers: SB,
+                body: JSON.stringify({ cv_pro_purchased: true })
+              });
+            }
+          } else {
+            console.warn('checkout.session.completed with no email — cannot record CV Pro purchase');
+          }
+        }
+        break;
+      }
+
       case 'customer.subscription.deleted': {
         const subscription = event.data.object;
         const customerId = subscription.customer;
