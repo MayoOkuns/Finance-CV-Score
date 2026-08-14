@@ -499,6 +499,18 @@
   </div>
 
   <!-- INTERVIEW VAULT TEASER — shown after issues, before percentile -->
+  <!-- PROOF CARD — a real, relevant sample question shown immediately, so the
+       vault's value is demonstrated concretely rather than just claimed. -->
+  <div id="sampleQCard" style="display:none;background:var(--white);border:1.5px solid var(--accent);border-radius:16px;padding:22px 24px;margin-bottom:24px">
+    <p style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px">A real question from the vault, for your target sector</p>
+    <div style="background:var(--accent-light);border-radius:10px;padding:16px 18px;margin-bottom:14px">
+      <p id="sampleQFirm" style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px"></p>
+      <p id="sampleQText" style="font-size:15px;font-weight:500;color:var(--ink)"></p>
+    </div>
+    <p style="font-size:13px;color:var(--ink-mid);margin-bottom:14px">This is one of 227+ real questions candidates were actually asked — searchable by firm, role, and stage.</p>
+    <a href="/vault.html" onclick="if(typeof gtag!=='undefined')gtag('event','sample_question_clicked',{event_category:'engagement'});" style="background:var(--navy);color:white;font-size:13px;font-weight:600;padding:10px 20px;border-radius:10px;text-decoration:none;display:inline-block">See more like this →</a>
+  </div>
+
   <div id="vaultTeaser" style="background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:16px;padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
     <div style="flex:1;min-width:200px">
       <p style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#93C5FD;margin-bottom:6px">Real questions · Updated weekly · Not Glassdoor</p>
@@ -543,7 +555,7 @@
       <div class="lock-sub">See how your score compares to a modelled distribution for this sub-sector</div>
       <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock Pro — £7.99</button>
     </div>
-    <p style="font-size:11px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
+    <p id="percentileMethodology" style="font-size:11px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
       <strong>Methodology:</strong> This percentile is an estimate generated from a statistical model of typical CV
       scores for this sub-sector, not a live database of user submissions. It is intended as a directional guide,
       not a guarantee of recruiter outcomes.
@@ -1211,6 +1223,33 @@
     fintech:'Fintech'
   };
 
+  // Real, network-verified vault questions, matched to each CV-scorer industry,
+  // shown as concrete proof of vault value right when the score unlocks.
+  const sampleQuestions = {
+    ib:   { firm: 'Goldman Sachs · Superday', text: 'Walk me through a DCF.' },
+    am:   { firm: 'BlackRock · Superday', text: "Pitch me a stock or investment idea — walk through your thesis." },
+    pe:   { firm: 'KKR · First Round', text: 'Walk me through a basic LBO model.' },
+    hf:   { firm: 'Citadel · Superday', text: "Pitch me a stock, long or short, that you believe is fundamentally mispriced. What's your variant perception?" },
+    er:   { firm: 'Fidelity · Interview', text: 'Walk me through an investment idea from your personal portfolio — expect deep push-back to test whether you really understand it.' },
+    st:   { firm: 'Morgan Stanley · HireVue', text: 'Where do you think the FTSE 100 will be in 12 months, and why?' },
+    wm:   { firm: 'Morgan Stanley · Superday', text: "On-the-spot estimation case: pick a local business, and project its revenue, income and growth from scratch." },
+    cf:   { firm: 'JPMorgan · Superday', text: 'Walk me through the balance sheet.' },
+    insurance: { firm: 'Barclays · Assessment Centre', text: 'What is an LBO, and how do financial sponsors generate returns?' },
+    risk: { firm: 'JPMorgan · Superday', text: 'What current trends are you seeing in the markets?' },
+    retailbank: { firm: 'Citi · HireVue', text: 'Why investment banking, and why Citi?' },
+    fintech: { firm: 'Barclays · Assessment Centre', text: 'Explain a DCF model — from revenue forecast through free cash flow, discounting at WACC, to terminal value.' }
+  };
+
+  function showSampleQuestion(industry) {
+    const q = sampleQuestions[industry] || sampleQuestions.ib;
+    const card = document.getElementById('sampleQCard');
+    if (!card) return;
+    document.getElementById('sampleQFirm').textContent = q.firm;
+    document.getElementById('sampleQText').textContent = q.text;
+    card.style.display = 'block';
+  }
+
+
   function selectIndustry(btn) {
     document.querySelectorAll('.ind-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
@@ -1538,7 +1577,7 @@
       document.getElementById('percentileSub').textContent =
         `Your score of ${data.overallScore} places you in an estimated ${result.percentile}${ordSuffix(result.percentile)} percentile for ${label} CVs (modelled average: ${result.mean}). See methodology below.`;
 
-      // Upgrade to REAL percentile once 50+ scores exist for this industry
+      // Upgrade to REAL percentile once 30+ scores exist for this industry
       getRealPercentile(data.overallScore, data.industry).then(real => {
         if (real && real.isReal) {
           marker.style.left = real.percentile + '%';
@@ -1546,6 +1585,12 @@
             real.percentile >= 75 ? 'Top 25%' : `${real.percentile}th percentile`;
           document.getElementById('percentileSub').textContent =
             `Your score of ${data.overallScore} places you in the ${real.percentile}${ordSuffix(real.percentile)} percentile of ${real.sampleSize} real ${label} CVs scored on this platform.`;
+          // Update the methodology note too — it previously stayed static and
+          // contradicted the line above once real data was actually in use.
+          const methEl = document.getElementById('percentileMethodology');
+          if (methEl) {
+            methEl.innerHTML = `<strong>Methodology:</strong> This percentile is calculated from ${real.sampleSize} real, anonymised CV scores submitted by other candidates for this sub-sector on this platform — not a statistical model. It is intended as a directional guide, not a guarantee of recruiter outcomes.`;
+          }
         }
       }).catch(() => {});
     } else {
@@ -2206,6 +2251,10 @@ BSc Business Management | University of Manchester | 2015–2018`;
         nudgeText.innerHTML = `Your score is <strong>${analysisData.overallScore}</strong>. Come back tomorrow — 5 questions a day keeps your technicals sharp for interviews.`;
       }
     } catch(e) {}
+    // Show a real, relevant sample vault question as concrete proof of value
+    try {
+      showSampleQuestion((analysisData && (analysisData.industry || selectedIndustry)) || 'ib');
+    } catch(e) {}
     try { localStorage.setItem('fcv_gate_passed', '1'); } catch(e) {}
   }
 
@@ -2261,7 +2310,7 @@ BSc Business Management | University of Manchester | 2015–2018`;
   // Fetches real scores for this industry — uses real data once 50+ exist,
   // falls back to heuristic model below that threshold
   async function getRealPercentile(score, industry) {
-    const MIN_SCORES = 50; // switch threshold
+    const MIN_SCORES = 30; // switch threshold — n=30 is a standard statistical rule-of-thumb sample size
     try {
       const res = await fetch(
         `https://yweyfioiwwrvbawwuttk.supabase.co/rest/v1/cv_scores?industry=eq.${industry}&select=score`,
