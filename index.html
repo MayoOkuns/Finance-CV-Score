@@ -725,6 +725,14 @@
       } catch(e) {}
       trackEvent('pro_purchased');
 
+      // Remember this browser as belonging to a paying CV Pro customer, keyed
+      // by their email, so future scans recognise them without re-payment.
+      try {
+        const ownerEmail = document.getElementById('emailInput')?.value?.trim()
+          || document.getElementById('gateEmailInput')?.value?.trim();
+        if (ownerEmail) localStorage.setItem('fcv_pro_owner_email', ownerEmail);
+      } catch(e) {}
+
       // Restore the analysis saved before checkout, so we can show their results
       // with Pro unlocked immediately — no need to re-run the whole scan.
       let restored = false;
@@ -2278,6 +2286,27 @@ BSc Business Management | University of Manchester | 2015–2018`;
     trackEvent('email_gate_passed');
     if (typeof gtag !== 'undefined') gtag('event', 'email_gate_passed', { event_category: 'engagement' });
     unlockGatedContent();
+
+    // Recognise a returning CV Pro customer by email and auto-unlock — since
+    // CV Pro has no account, this is how we remember a past purchase across
+    // future scans, rather than asking them to pay again every time.
+    try {
+      const localFlag = localStorage.getItem('fcv_pro_owner_email');
+      if (localFlag && localFlag.toLowerCase() === email.toLowerCase()) {
+        unlockPro();
+      } else {
+        const res = await fetch('/api/check-cvpro', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email })
+        });
+        const out = await res.json();
+        if (out && out.purchased) {
+          unlockPro();
+          try { localStorage.setItem('fcv_pro_owner_email', email); } catch(e) {}
+        }
+      }
+    } catch(e) { console.warn('CV Pro status check (non-fatal):', e); }
   }
 
   // ── CV SCORE STORAGE IN SUPABASE ─────────────────────────────────────
