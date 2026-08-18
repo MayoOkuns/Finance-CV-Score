@@ -121,6 +121,7 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   "scoreVerdict": <2 specific sentences about this CV's chances for ${indLabel} roles>,
   "pills": [<3-4 short label strings>],
   "pillColors": [<"red"|"amber"|"green" for each pill>],
+  "issueTags": [<REQUIRED — always include this key, even if empty. Array of 1-6 tags from this FIXED list ONLY that this CV genuinely exhibits: "weak_summary","duties_not_outcomes","no_market_interest_evidence","generic_not_tailored","no_quantified_achievements","missing_keywords","weak_formatting","no_leadership_evidence","cv_too_long","no_interview_prep_signal". Most real CVs exhibit at least 1-2 of these — be honest, not overly cautious.>],
   "breakdown": [
     {"label":"ATS Compatibility","score":<0-100>},
     {"label":"Keyword Density","score":<0-100>},
@@ -139,11 +140,8 @@ Return ONLY a valid JSON object (no markdown, no backticks):
   "keywordsPresent": [<6-8 keywords found in the CV relevant to ${indLabel}>],
   "keywordsMissing": [<8-10 important keywords missing for ${indLabel} roles>],
   "jdMatchScore": ${jdText && jdText.length > 50 ? '<0-100 match score against the provided JD>' : 'null'},
-  "jdMissingTerms": ${jdText && jdText.length > 50 ? '[<6-8 specific terms from JD missing in CV>]' : 'null'},
-  "issueTags": [<array of 0-6 tags from this FIXED list ONLY, whichever genuinely apply to this CV: "weak_summary","duties_not_outcomes","no_market_interest_evidence","generic_not_tailored","no_quantified_achievements","missing_keywords","weak_formatting","no_leadership_evidence","cv_too_long","no_interview_prep_signal">]
+  "jdMissingTerms": ${jdText && jdText.length > 50 ? '[<6-8 specific terms from JD missing in CV>]' : 'null'}
 }
-
-issueTags rules: only include a tag if the CV genuinely exhibits that specific problem. This field is used for anonymous aggregate statistics (e.g. "62% of CVs are missing quantified achievements") — accuracy matters more than completeness, so omit a tag rather than guess.
 
 Rules:
 - Be brutally specific — no generic advice, reference actual content from the CV
@@ -162,7 +160,7 @@ Rules:
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 1500,
+        max_tokens: 2000,
         messages: [{ role: 'user', content: prompt }]
       })
     });
@@ -187,6 +185,10 @@ Rules:
 
     const result = JSON.parse(jsonMatch[0]);
     result.industry = industry;
+
+    // Diagnostic: confirms issueTags is actually present in the AI's response,
+    // visible in Vercel function logs — kept lightweight, not full CV content.
+    console.log('issueTags returned:', Array.isArray(result.issueTags) ? result.issueTags : 'MISSING/INVALID', '| industry:', industry);
 
     return res.status(200).json({ success: true, result });
 
