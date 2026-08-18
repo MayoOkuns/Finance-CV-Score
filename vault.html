@@ -472,8 +472,8 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <button class="feed-overlay-btn" onclick="openSubmitModal()">
           <span class="feed-overlay-plus">+</span>
           <span>
-            <span class="feed-overlay-title">Submit a question &amp; unlock a preview</span>
-            <span class="feed-overlay-sub">Share one question you were asked → unlock real questions for 3 firms, free for a week</span>
+            <span class="feed-overlay-title">See what Goldman, JPMorgan &amp; BlackRock actually asked</span>
+            <span class="feed-overlay-sub">Submit a question you were asked — or one you know is commonly asked — and unlock 3 firms, free for a week</span>
           </span>
         </button>
       </div>
@@ -618,16 +618,16 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <div class="char-count" id="charCount">0 / 500 (minimum 30)</div>
       </div>
       <div class="modal-input-group" id="previewFirmPicker">
-        <label>Unlock a free preview — pick up to 3 firms *</label>
+        <label>Pick up to 3 firms — see a real question from each *</label>
         <p style="font-size:12px;color:var(--ink-light);margin:-4px 0 8px">We'll unlock one real question for each firm you choose, free for a week.</p>
         <div id="previewFirmChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
       <button class="submit-question-btn" id="submitQuestionBtn" onclick="handleSubmit()">
-        Submit &amp; unlock my preview
+        Submit — see Goldman, JPMorgan &amp; more
       </button>
       <p style="font-size:12px;color:var(--ink-light);margin-top:12px;text-align:center;line-height:1.5">
-        By submitting you confirm this question is from your own experience and you are not sharing confidential information.
-        Questions are reviewed before going live.
+        By submitting you confirm this is a real interview question — one you were personally asked, or one you're confident is genuinely used by this firm — and you are not sharing confidential information.
+        Every question is reviewed before going live.
       </p>
     </div>
   </div>
@@ -1132,7 +1132,7 @@ function renderFeed(questions) {
   let feedHtml = unlocked.map(q => renderQuestionCard(q, false)).join('');
   if (unlocked.length && locked.length) {
     feedHtml += `<div class="feed-divider feed-divider-btn" onclick="openSubscribeModal()" role="button" tabindex="0">
-      <span>🔓 Subscribe to unlock the full live feed — £9.99/month</span>
+      <span>🔒 Subscribe to unlock the full live feed — £9.99/month</span>
     </div>`;
   }
   feedHtml += locked.map(q => renderQuestionCard(q, true)).join('');
@@ -1146,8 +1146,8 @@ function renderFeed(questions) {
   if (hasActivePreview()) {
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
-        <h3>You're previewing the feed</h3>
-        <p>You've unlocked one question for ${previewFirms.map(escapeHtml).join(', ')}. The full <strong>live feed</strong> — every question, new ones added weekly, plus firm alerts and answer frameworks — is part of the subscription.</p>
+        <h3>You've unlocked ${previewFirms.map(escapeHtml).join(', ')}</h3>
+        <p>The full <strong>live feed</strong> — every firm, every question, new ones added weekly, plus firm alerts and answer frameworks — is part of the subscription.</p>
         <div class="feed-paywall-options">
           <button class="option-primary" onclick="openSubscribeModal()">Unlock the full live feed — £9.99/month</button>
           <p class="option-divider">or</p>
@@ -1157,10 +1157,10 @@ function renderFeed(questions) {
   } else {
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
-        <h3>Unlock a free preview</h3>
-        <p>Submit one interview question of your own and we'll unlock a real question for up to three firms of your choice, free for a week. The full <strong>live feed</strong> — updated weekly with firm alerts — comes with the subscription.</p>
+        <h3>See real Goldman, JPMorgan &amp; BlackRock questions</h3>
+        <p>Submit a question you were asked — or one you know is commonly asked — and we'll unlock a real question for up to three firms of your choice, free for a week. The full <strong>live feed</strong> — updated weekly with firm alerts — comes with the subscription.</p>
         <div class="feed-paywall-options">
-          <button class="option-primary" onclick="openSubmitModal()">Submit a question — unlock a free preview</button>
+          <button class="option-primary" onclick="openSubmitModal()">Submit — see Goldman, JPMorgan &amp; more</button>
           <p class="option-divider">or</p>
           <button class="option-secondary" onclick="openSubscribeModal()">Get the full live feed — £9.99/month</button>
         </div>
@@ -1415,6 +1415,15 @@ function resetFilters() {
 document.getElementById('submitFirm').addEventListener('change', function() {
   document.getElementById('submitFirmOtherWrap').style.display =
     this.value === 'Other' ? 'block' : 'none';
+
+  // Pre-select this firm in the preview picker — the firm they're submitting
+  // about is the one they're most likely to want unlocked, so close that loop
+  // automatically rather than making them pick it again from a generic list.
+  const firm = this.value;
+  if (firm && firm !== 'Other' && !selectedPreviewFirms.includes(firm) && selectedPreviewFirms.length < 3) {
+    const chip = document.querySelector(`.preview-chip[data-firm="${CSS.escape(firm)}"]`);
+    if (chip) togglePreviewFirm(chip);
+  }
 });
 
 function updateCharCount() {
@@ -1576,7 +1585,7 @@ async function handleSubmit(savedData) {
     console.error('Submit error:', JSON.stringify(err), err.message);
     showToast('Something went wrong — ' + (err.message || 'please try again.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Submit & unlock my preview'; }
+    if (btn) { btn.disabled = false; btn.textContent = 'Submit — see Goldman, JPMorgan & more'; }
   }
 }
 
