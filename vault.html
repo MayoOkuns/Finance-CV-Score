@@ -60,7 +60,14 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
 
 /* MAIN LAYOUT */
 .vault-layout{max-width:1100px;margin:0 auto;padding:32px 24px;display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start}
-@media(max-width:800px){.vault-layout{grid-template-columns:1fr}}
+@media(max-width:800px){
+  .vault-layout{grid-template-columns:1fr}
+  /* On mobile, show the submit-a-question / feed area FIRST, and the filter
+     panel AFTER it — filtering only makes sense once someone has a way to
+     unlock content, so leading with filters on a locked feed is confusing. */
+  .vault-layout main{order:1}
+  .vault-layout .filter-panel{order:2}
+}
 
 /* SIDEBAR FILTERS */
 .filter-panel{background:var(--white);border-radius:16px;border:1px solid var(--border);padding:24px;position:sticky;top:80px}
