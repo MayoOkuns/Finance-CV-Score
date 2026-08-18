@@ -472,7 +472,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <button class="feed-overlay-btn" onclick="openSubmitModal()">
           <span class="feed-overlay-plus">+</span>
           <span>
-            <span class="feed-overlay-title">See what Goldman, JPMorgan &amp; BlackRock actually asked</span>
+            <span class="feed-overlay-title">See what top firms like Goldman, JPMorgan &amp; BlackRock actually asked</span>
             <span class="feed-overlay-sub">Submit a question you were asked — or one you know is commonly asked — and unlock 3 firms, free for a week</span>
           </span>
         </button>
@@ -623,7 +623,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:18px 4
         <div id="previewFirmChips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
       <button class="submit-question-btn" id="submitQuestionBtn" onclick="handleSubmit()">
-        Submit — see Goldman, JPMorgan &amp; more
+        Submit — pick firms above to unlock a preview
       </button>
       <p style="font-size:12px;color:var(--ink-light);margin-top:12px;text-align:center;line-height:1.5">
         By submitting you confirm this is a real interview question — one you were personally asked, or one you're confident is genuinely used by this firm — and you are not sharing confidential information.
@@ -1157,10 +1157,10 @@ function renderFeed(questions) {
   } else {
     paywallBlock.innerHTML = `
       <div class="feed-paywall">
-        <h3>See real Goldman, JPMorgan &amp; BlackRock questions</h3>
+        <h3>See real questions from firms like Goldman, JPMorgan &amp; BlackRock</h3>
         <p>Submit a question you were asked — or one you know is commonly asked — and we'll unlock a real question for up to three firms of your choice, free for a week. The full <strong>live feed</strong> — updated weekly with firm alerts — comes with the subscription.</p>
         <div class="feed-paywall-options">
-          <button class="option-primary" onclick="openSubmitModal()">Submit — see Goldman, JPMorgan &amp; more</button>
+          <button class="option-primary" onclick="openSubmitModal()">Submit — pick your firms &amp; see real questions</button>
           <p class="option-divider">or</p>
           <button class="option-secondary" onclick="openSubscribeModal()">Get the full live feed — £9.99/month</button>
         </div>
@@ -1585,7 +1585,7 @@ async function handleSubmit(savedData) {
     console.error('Submit error:', JSON.stringify(err), err.message);
     showToast('Something went wrong — ' + (err.message || 'please try again.'));
   } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Submit — see Goldman, JPMorgan & more'; }
+    if (btn) { btn.disabled = false; updateSubmitButtonText(); }
   }
 }
 
@@ -1874,6 +1874,7 @@ function renderPreviewFirmChips() {
   wrap.innerHTML = pickable.map(firm => `
     <button type="button" class="preview-chip" data-firm="${escapeHtml(firm)}" onclick="togglePreviewFirm(this)"
       style="font-size:12px;padding:6px 12px;border-radius:16px;border:1.5px solid var(--border);background:var(--white);color:var(--ink-mid);cursor:pointer;font-family:'Inter',sans-serif">${escapeHtml(firm)}</button>`).join('');
+  updateSubmitButtonText();
 }
 function togglePreviewFirm(btn) {
   const firm = btn.dataset.firm;
@@ -1885,6 +1886,19 @@ function togglePreviewFirm(btn) {
     if (selectedPreviewFirms.length >= 3) { showToast('You can preview up to 3 firms.'); return; }
     selectedPreviewFirms.push(firm);
     btn.style.background = 'var(--accent)'; btn.style.color = '#fff'; btn.style.borderColor = 'var(--accent)';
+  }
+  updateSubmitButtonText();
+}
+
+// Keeps the submit button honest — it names whichever firms are ACTUALLY
+// selected, never a hardcoded example, so it can't contradict the picker.
+function updateSubmitButtonText() {
+  const btn = document.getElementById('submitQuestionBtn');
+  if (!btn || btn.disabled) return; // don't overwrite while submitting
+  if (selectedPreviewFirms.length === 0) {
+    btn.textContent = userHasFullAccess() ? 'Submit question' : 'Submit — pick firms above to unlock a preview';
+  } else {
+    btn.textContent = 'Submit — see ' + selectedPreviewFirms.join(', ');
   }
 }
 function openSubscribeModal() {
