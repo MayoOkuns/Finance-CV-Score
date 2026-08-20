@@ -510,19 +510,6 @@
     <p style="font-size:12px;color:var(--ink-light);margin-top:12px">One of 227+ real questions candidates were actually asked — searchable by firm, role, and stage.</p>
   </div>
 
-  <div id="vaultTeaser" style="background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:16px;padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-    <div style="flex:1;min-width:200px">
-      <p style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#93C5FD;margin-bottom:6px">Real questions · Updated weekly · Not Glassdoor</p>
-      <h3 style="font-family:'Instrument Serif',serif;font-size:18px;color:white;letter-spacing:-0.3px;margin-bottom:6px">Now prep for the interview too</h3>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <p style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.4">🏦 227+ real questions across 21 firms — Goldman, JPMorgan, BlackRock, KKR, Citadel and more</p>
-        <p style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.4">💡 Answer frameworks for DCF, LBO, stock pitches & more</p>
-        <p style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.4">🎯 Daily finance quiz — 5 new questions every day</p>
-      </div>
-    </div>
-    <a href="/vault.html" style="background:#2563EB;color:white;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Explore the Vault →</a>
-  </div>
-
   <!-- QUIZ NUDGE — personalized with their actual score, shown right after they see it -->
   <div id="quizNudge" style="background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
     <div style="flex:1;min-width:200px">
@@ -550,13 +537,12 @@
     </div>
     <div class="percentile-lock-overlay" id="percentileLockOverlay">
       <div class="lock-icon">🔒</div>
-      <div class="lock-label">See your estimated percentile ranking</div>
-      <div class="lock-sub">See how your score compares to a modelled distribution for this sub-sector</div>
-      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock Pro — £7.99</button>
+      <div class="lock-label">See your percentile ranking</div>
+      <div class="lock-sub">See how your CV score compares to other applicants</div>
+      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock all with Pro — £7.99</button>
     </div>
     <p id="percentileMethodology" style="font-size:11px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
-      <strong>Methodology:</strong> This percentile is an estimate generated from a statistical model of typical CV
-      scores for this sub-sector, not a live database of user submissions. It is intended as a directional guide,
+      <strong>Methodology:</strong> Benchmarked against typical scoring patterns for this sub-sector. It is intended as a directional guide,
       not a guarantee of recruiter outcomes.
     </p>
   </div>
@@ -580,7 +566,7 @@
     <div class="jd-lock-banner" id="jdLockBanner">
       <span>🔒</span>
       <span><strong>Will this CV get you the interview?</strong> Unlock your exact match score and every required term you're missing for this role.</span>
-      <button class="unlock-mini-btn" onclick="openPaymentModal()" style="white-space:nowrap">Unlock Pro — £7.99</button>
+      <button class="unlock-mini-btn" onclick="openPaymentModal()" style="white-space:nowrap">Unlock all with Pro — £7.99</button>
     </div>
   </div>
 
@@ -592,7 +578,7 @@
       <div class="lock-icon">🔒</div>
       <div class="lock-label">Unlock full keyword analysis</div>
       <div class="lock-sub">See every missing keyword for your target role</div>
-      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock Pro — £7.99</button>
+      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock all with Pro — £7.99</button>
     </div>
   </div>
 
@@ -602,7 +588,8 @@
   <div class="paywall-card" id="paywallCard">
     <h3>Will this CV get you the interview?</h3>
     <p>Your free score shows where you stand in general. Pro shows whether this exact CV would clear the bar for a specific role — paste any job description and see precisely which required terms you're missing, plus your full percentile and keyword breakdown.</p>
-    <div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:12px;padding:16px 18px;margin:16px 0;display:flex;align-items:center;gap:14px">
+    <p style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-light);margin:16px 0 10px">One payment unlocks all of this:</p>
+    <div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:12px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px">
       <div style="font-size:28px;flex-shrink:0">🎯</div>
       <div>
         <div style="font-size:14px;font-weight:600;color:var(--ink)">Job description match score</div>
@@ -615,12 +602,25 @@
       <div class="paywall-feature"><div class="paywall-feature-icon">🏦</div><div class="paywall-feature-label">Firm-specific<br>keyword tips</div></div>
     </div>
     <button class="paywall-cta" onclick="openPaymentModal()">
-      Unlock Pro
+      Unlock everything above
       <span class="paywall-price">£7.99 one-time · instant access</span>
     </button>
     <p class="paywall-guarantee">🔒 Secure checkout · Money-back guarantee</p>
   </div>
 
+  <!-- VAULT TEASER — positioned here deliberately: after the CV Pro ask has
+       had its moment, this is the "next step" once your CV is sorted. -->
+  <div id="vaultTeaser" style="background:linear-gradient(135deg,#0F172A,#1E3A5F);border-radius:16px;padding:22px 28px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <p style="font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:#93C5FD;margin-bottom:6px">Real questions · Updated weekly · Not Glassdoor</p>
+      <h3 style="font-family:'Instrument Serif',serif;font-size:18px;color:white;letter-spacing:-0.3px;margin-bottom:6px">Once your CV's sorted, prep for the interview</h3>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <p style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.4">🏦 239+ real questions across 21 firms — Goldman, JPMorgan, BlackRock, KKR, Citadel and more</p>
+        <p style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.4">💡 Answer frameworks for DCF, LBO, stock pitches & more</p>
+      </div>
+    </div>
+    <a href="/vault.html" style="background:#2563EB;color:white;font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Explore the Vault →</a>
+  </div>
 
 </section>
 
