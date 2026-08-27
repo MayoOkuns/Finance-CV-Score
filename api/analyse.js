@@ -180,6 +180,12 @@ Rules:
 
     const jsonMatch = raw.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
+      // Log enough to actually diagnose this — content block types present,
+      // and the first 500 chars of raw text, so we can see what came back
+      // instead of guessing blind.
+      console.error('JSON extraction failed. Content block types:',
+        Array.isArray(data.content) ? data.content.map(b => b.type) : typeof data.content);
+      console.error('Raw text (first 500 chars):', raw.slice(0, 500));
       return res.status(500).json({ error: 'Invalid AI response format' });
     }
 
