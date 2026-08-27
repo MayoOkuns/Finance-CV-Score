@@ -110,7 +110,7 @@ export default async function handler(req, res) {
 Analyse this CV for a ${indLabel} role. ${roleContext}${jdContext}
 
 CV TEXT:
-${cvText.substring(0, 3000)}
+${cvText.substring(0, 12000)}
 
 Industry guidance for ${indLabel}: ${indGuide}
 
