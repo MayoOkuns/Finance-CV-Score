@@ -186,7 +186,17 @@ Rules:
       console.error('JSON extraction failed. Content block types:',
         Array.isArray(data.content) ? data.content.map(b => b.type) : typeof data.content);
       console.error('Raw text (first 500 chars):', raw.slice(0, 500));
-      return res.status(500).json({ error: 'Invalid AI response format' });
+      // TEMPORARY: also return the diagnostic in the response body itself,
+      // visible in the browser Network tab, since Vercel's log UI isn't
+      // surfacing console output reliably. Remove once diagnosed.
+      return res.status(500).json({
+        error: 'Invalid AI response format',
+        debug: {
+          contentTypes: Array.isArray(data.content) ? data.content.map(b => b.type) : typeof data.content,
+          rawSnippet: raw.slice(0, 500),
+          stopReason: data.stop_reason || null
+        }
+      });
     }
 
     const result = JSON.parse(jsonMatch[0]);
