@@ -170,7 +170,15 @@ Rules:
     if (data.error) {
       console.error('Anthropic error:', data.error);
       console.error('AI analysis error:', data.error.message);
-      return res.status(500).json({ error: 'Analysis temporarily unavailable. Please try again.' });
+      // TEMPORARY diagnostic: surface the actual Anthropic error in the
+      // response body so it's visible via the browser Network tab.
+      return res.status(500).json({
+        error: 'Analysis temporarily unavailable. Please try again.',
+        debug: {
+          anthropicErrorType: data.error.type || null,
+          anthropicErrorMessage: data.error.message || null
+        }
+      });
     }
 
     const raw = data.content
