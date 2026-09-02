@@ -482,7 +482,16 @@
     <div class="breakdown-card"><h3>Score Breakdown</h3><div id="breakdownBars"></div></div>
 
     <!-- ISSUES -->
-    <div class="issues-card"><h3>Key Issues Found</h3><div id="issuesList"></div></div>
+    <div class="issues-card" id="issuesCard">
+      <h3>Key Issues Found</h3>
+      <div id="issuesList"></div>
+      <div class="keyword-lock-overlay" id="issuesLockOverlay">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-label" id="issuesLockLabel">See what's actually wrong with your CV</div>
+        <div class="lock-sub">Specific, actionable fixes — not just a score</div>
+        <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock all with Pro — £7.99</button>
+      </div>
+    </div>
   </div>
 
   <!-- EMAIL GATE — shown after score/issues, before detailed breakdown -->
@@ -713,7 +722,7 @@
 
 
 <script>
-  let cvText = '', jobRole = '', jdText = '', analysisData = null, rewriteText = '';
+  let cvText = '', jobRole = '', jdText = '', analysisData = null, rewriteText = '', proUnlocked = false;
 
   // ── AUTO-UNLOCK ON RETURN FROM STRIPE ──────────────────────────────
   // Called at bottom of script after all functions are defined
@@ -735,8 +744,16 @@
       try {
         const ownerEmail = document.getElementById('emailInput')?.value?.trim()
           || document.getElementById('gateEmailInput')?.value?.trim();
-        if (ownerEmail) localStorage.setItem('fcv_pro_owner_email', ownerEmail);
-      } catch(e) {}
+        console.log('[CV Pro save] Email captured on return:', ownerEmail || '(none found)');
+        if (ownerEmail) {
+          localStorage.setItem('fcv_pro_owner_email', ownerEmail);
+          console.log('[CV Pro save] Saved to localStorage successfully.');
+        } else {
+          console.error('[CV Pro save] No email found in either field — flag NOT saved. This would explain a future "asked to pay again" bug.');
+        }
+      } catch(e) {
+        console.error('[CV Pro save] Error saving flag:', e);
+      }
 
       // Restore the analysis saved before checkout, so we can show their results
       // with Pro unlocked immediately — no need to re-run the whole scan.
@@ -1655,13 +1672,24 @@
     });
     setTimeout(() => document.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.width+'%'), 100);
 
-    // Issues
+    // Issues — gated behind Pro. Non-Pro users see a count teaser only;
+    // titles and actionable descriptions are the paid tier's core value.
     const issuesEl = document.getElementById('issuesList'); issuesEl.innerHTML = '';
-    data.issues.forEach(issue => {
-      const div = document.createElement('div'); div.className='issue-item';
-      div.innerHTML=`<div class="issue-icon ${issue.severity}">${issue.icon}</div><div class="issue-content"><div class="issue-title">${issue.title}</div><div class="issue-desc">${issue.description}</div></div>`;
-      issuesEl.appendChild(div);
-    });
+    const issuesLockOverlay = document.getElementById('issuesLockOverlay');
+    const issuesLockLabel = document.getElementById('issuesLockLabel');
+    if (issuesLockLabel && data.issues) {
+      issuesLockLabel.textContent = `${data.issues.length} issue${data.issues.length !== 1 ? 's' : ''} found — see what's actually wrong with your CV`;
+    }
+    if (userHasProAccess()) {
+      data.issues.forEach(issue => {
+        const div = document.createElement('div'); div.className='issue-item';
+        div.innerHTML=`<div class="issue-icon ${issue.severity}">${issue.icon}</div><div class="issue-content"><div class="issue-title">${issue.title}</div><div class="issue-desc">${issue.description}</div></div>`;
+        issuesEl.appendChild(div);
+      });
+      if (issuesLockOverlay) issuesLockOverlay.style.display = 'none';
+    } else {
+      if (issuesLockOverlay) issuesLockOverlay.style.display = 'block';
+    }
 
     // Keywords (blurred preview)
     renderKeywords(data, false);
@@ -1736,7 +1764,11 @@
     }, 800);
   }
 
+  function userHasProAccess() { return proUnlocked; }
+
   function unlockPro() {
+    if (proUnlocked) return; // guard against double-firing analytics/toast/scroll
+    proUnlocked = true;
     trackEvent('pro_unlocked', { industry: selectedIndustry, has_jd: !!jdText });
     document.getElementById('navTag').style.display = 'none';
     document.getElementById('navProBadge').style.display = 'block';
@@ -1748,6 +1780,22 @@
     renderKeywords(analysisData, true);
     renderPercentile(analysisData, true);
     const lb = document.getElementById('jdLockBanner'); if (lb) lb.style.display='none';
+
+    // Reveal the issues list — covers the case where it was already rendered
+    // in its locked (count-only) state before Pro status was confirmed
+    // (e.g. async recognition via the email gate's returning-customer check).
+    try {
+      const issuesEl = document.getElementById('issuesList');
+      const issuesLockOverlay = document.getElementById('issuesLockOverlay');
+      if (issuesEl && analysisData && analysisData.issues && issuesEl.children.length === 0) {
+        analysisData.issues.forEach(issue => {
+          const div = document.createElement('div'); div.className='issue-item';
+          div.innerHTML=`<div class="issue-icon ${issue.severity}">${issue.icon}</div><div class="issue-content"><div class="issue-title">${issue.title}</div><div class="issue-desc">${issue.description}</div></div>`;
+          issuesEl.appendChild(div);
+        });
+      }
+      if (issuesLockOverlay) issuesLockOverlay.style.display = 'none';
+    } catch(e) {}
 
     setTimeout(() => document.getElementById('keywordCard').scrollIntoView({behavior:'smooth', block:'start'}), 300);
     showToast('🎉 Pro unlocked! Your full keyword analysis and percentile ranking are ready.');
@@ -2274,6 +2322,20 @@ BSc Business Management | University of Manchester | 2015–2018`;
       showSampleQuestion((analysisData && (analysisData.industry || selectedIndustry)) || 'ib');
     } catch(e) {}
     try { localStorage.setItem('fcv_gate_passed', '1'); } catch(e) {}
+
+    // Recognise a returning CV Pro customer — checked HERE, independent of
+    // whether the email gate was just freshly submitted or auto-skipped
+    // because fcv_gate_passed was already set.
+    try {
+      const proFlag = localStorage.getItem('fcv_pro_owner_email');
+      console.log('[CV Pro check] localStorage flag:', proFlag || '(none)', '| already unlocked:', proUnlocked);
+      if (proFlag && !proUnlocked) {
+        console.log('[CV Pro check] Recognised returning Pro customer, unlocking.');
+        unlockPro();
+      }
+    } catch(e) {
+      console.error('[CV Pro check] Error reading localStorage flag:', e);
+    }
   }
 
   async function submitEmailGate() {
