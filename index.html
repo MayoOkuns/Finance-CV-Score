@@ -440,7 +440,7 @@
 <div class="loading-state" id="loadingState">
   <div class="spinner"></div>
   <p style="font-size:16px;font-weight:600;">Scanning your CV…</p>
-  <p style="font-size:13px;color:var(--ink-light);margin-top:4px">This takes about 15 seconds</p>
+  <p style="font-size:13px;color:var(--ink-light);margin-top:4px">This takes about 45 seconds</p>
   <div class="loading-steps" id="loadingSteps">
     <div class="loading-step" id="step1"><span class="step-dot"></span>Parsing document structure</div>
     <div class="loading-step" id="step2"><span class="step-dot"></span>Running ATS compatibility check</div>
@@ -488,8 +488,7 @@
       <div class="keyword-lock-overlay" id="issuesLockOverlay">
         <div class="lock-icon">🔒</div>
         <div class="lock-label" id="issuesLockLabel">See what's actually wrong with your CV</div>
-        <div class="lock-sub">Specific, actionable fixes — not just a score</div>
-        <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock all with Pro — £7.99</button>
+        <div class="lock-sub">Included with Pro — see below to unlock everything</div>
       </div>
     </div>
   </div>
@@ -547,8 +546,7 @@
     <div class="percentile-lock-overlay" id="percentileLockOverlay">
       <div class="lock-icon">🔒</div>
       <div class="lock-label">See your percentile ranking</div>
-      <div class="lock-sub">See how your CV score compares to other applicants</div>
-      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock all with Pro — £7.99</button>
+      <div class="lock-sub">Included with Pro — see below to unlock everything</div>
     </div>
     <p id="percentileMethodology" style="font-size:11px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
       <strong>Methodology:</strong> Benchmarked against typical scoring patterns for this sub-sector. It is intended as a directional guide,
@@ -586,8 +584,7 @@
     <div class="keyword-lock-overlay" id="keywordLockOverlay">
       <div class="lock-icon">🔒</div>
       <div class="lock-label">Unlock full keyword analysis</div>
-      <div class="lock-sub">See every missing keyword for your target role</div>
-      <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock all with Pro — £7.99</button>
+      <div class="lock-sub">Included with Pro — see below to unlock everything</div>
     </div>
   </div>
 
@@ -1691,11 +1688,13 @@
       if (issuesLockOverlay) issuesLockOverlay.style.display = 'block';
     }
 
-    // Keywords (blurred preview)
-    renderKeywords(data, false);
+    // Keywords — respects Pro status already determined earlier in this
+    // render (e.g. a returning Pro customer recognised via the email gate).
+    // Previously hardcoded to locked, which silently undid an early unlock.
+    renderKeywords(data, userHasProAccess());
 
-    // Percentile (locked preview)
-    renderPercentile(data, false);
+    // Percentile — same fix
+    renderPercentile(data, userHasProAccess());
 
     // JD match
     if (jdText) showJDMatch(analyseJDMatch(cvText, jdText));
