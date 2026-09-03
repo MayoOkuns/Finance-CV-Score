@@ -161,6 +161,8 @@ Rules:
       body: JSON.stringify({
         model: 'claude-sonnet-5',
         max_tokens: 4096,
+        temperature: 0, // analytical/scoring task, not creative writing —
+        // maximise consistency so the same CV gets the same result
         messages: [{ role: 'user', content: prompt }]
       })
     });
