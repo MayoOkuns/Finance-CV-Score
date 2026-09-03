@@ -481,14 +481,16 @@
     <!-- BREAKDOWN -->
     <div class="breakdown-card"><h3>Score Breakdown</h3><div id="breakdownBars"></div></div>
 
-    <!-- ISSUES -->
+    <!-- ISSUES — the main CV Pro unlock button lives here, since this is the
+         first of the three Pro sections a visitor sees. -->
     <div class="issues-card" id="issuesCard">
       <h3>Key Issues Found</h3>
       <div id="issuesList"></div>
       <div class="keyword-lock-overlay" id="issuesLockOverlay">
         <div class="lock-icon">🔒</div>
         <div class="lock-label" id="issuesLockLabel">See what's actually wrong with your CV</div>
-        <div class="lock-sub">Included with Pro — see below to unlock everything</div>
+        <div class="lock-sub">Unlocking this also unlocks your percentile ranking and keyword analysis below</div>
+        <button class="unlock-mini-btn" onclick="openPaymentModal()">Unlock Pro — £7.99</button>
       </div>
     </div>
   </div>
@@ -505,28 +507,7 @@
     <p style="font-size:11px;color:var(--ink-light);margin-top:8px">No spam, ever. Just your results and the occasional useful update.</p>
   </div>
 
-  <!-- INTERVIEW VAULT TEASER — shown after issues, before percentile -->
-  <!-- PROOF CARD — a real, relevant sample question shown immediately, so the
-       vault's value is demonstrated concretely rather than just claimed. -->
-  <div id="sampleQCard" style="display:none;background:var(--white);border:1.5px solid var(--accent);border-radius:16px;padding:22px 24px;margin-bottom:24px">
-    <p style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px">A real question from the vault, for your target sector</p>
-    <div style="background:var(--accent-light);border-radius:10px 10px 0 0;padding:16px 18px 14px">
-      <p id="sampleQFirm" style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px"></p>
-      <p id="sampleQText" style="font-size:15px;font-weight:500;color:var(--ink)"></p>
-    </div>
-    <a href="/vault.html" onclick="if(typeof gtag!=='undefined')gtag('event','sample_question_clicked',{event_category:'engagement'});" style="background:#0F172A;color:white;font-size:14px;font-weight:600;padding:13px 18px;border-radius:0 0 10px 10px;text-decoration:none;display:block;text-align:center">See more like this →</a>
-    <p style="font-size:12px;color:var(--ink-light);margin-top:12px">One of 227+ real questions candidates were actually asked — searchable by firm, role, and stage.</p>
-  </div>
-
-  <!-- QUIZ NUDGE — personalized with their actual score, shown right after they see it -->
-  <div id="quizNudge" style="background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
-    <div style="flex:1;min-width:200px">
-      <p id="quizNudgeText" style="font-size:14px;color:var(--ink-mid);line-height:1.5">Come back tomorrow — 5 questions a day keeps your technicals sharp for interviews.</p>
-    </div>
-    <a href="/quiz.html" onclick="if(typeof gtag!=='undefined')gtag('event','quiz_nudge_clicked',{event_category:'engagement'});" style="background:var(--surface);color:var(--ink);border:1.5px solid var(--border);font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Try today's quiz →</a>
-  </div>
-
-  <!-- PERCENTILE RANKING (Pro feature) -->
+  <!-- PERCENTILE RANKING — grouped directly with Issues and Keywords -->
   <div class="percentile-card" id="percentileCard">
     <div class="percentile-header">
       <div>
@@ -546,12 +527,23 @@
     <div class="percentile-lock-overlay" id="percentileLockOverlay">
       <div class="lock-icon">🔒</div>
       <div class="lock-label">See your percentile ranking</div>
-      <div class="lock-sub">Included with Pro — see below to unlock everything</div>
+      <div class="lock-sub">Unlocked with CV Pro — £7.99 for this, keyword analysis & key issues</div>
     </div>
     <p id="percentileMethodology" style="font-size:11px;color:var(--ink-light);margin-top:14px;line-height:1.5;">
       <strong>Methodology:</strong> Benchmarked against typical scoring patterns for this sub-sector. It is intended as a directional guide,
       not a guarantee of recruiter outcomes.
     </p>
+  </div>
+
+  <!-- KEYWORDS — third of the three grouped Pro sections -->
+  <div class="keyword-card" id="keywordCard">
+    <h3>ATS Keyword Analysis</h3>
+    <div id="keywordContent"></div>
+    <div class="keyword-lock-overlay" id="keywordLockOverlay">
+      <div class="lock-icon">🔒</div>
+      <div class="lock-label">Unlock full keyword analysis</div>
+      <div class="lock-sub">Unlocked with CV Pro — £7.99 for this, percentile ranking & key issues</div>
+    </div>
   </div>
 
   <!-- JD MATCH CARD (shown if JD was provided) -->
@@ -577,41 +569,24 @@
     </div>
   </div>
 
-  <!-- KEYWORDS (locked by default) -->
-  <div class="keyword-card" id="keywordCard">
-    <h3>ATS Keyword Analysis</h3>
-    <div id="keywordContent"></div>
-    <div class="keyword-lock-overlay" id="keywordLockOverlay">
-      <div class="lock-icon">🔒</div>
-      <div class="lock-label">Unlock full keyword analysis</div>
-      <div class="lock-sub">Included with Pro — see below to unlock everything</div>
+  <!-- PROOF CARD — a real, relevant sample question, now positioned after all
+       three CV Pro sections rather than competing with them for attention. -->
+  <div id="sampleQCard" style="display:none;background:var(--white);border:1.5px solid var(--accent);border-radius:16px;padding:22px 24px;margin-bottom:24px">
+    <p style="font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-bottom:10px">A real question from the vault, for your target sector</p>
+    <div style="background:var(--accent-light);border-radius:10px 10px 0 0;padding:16px 18px 14px">
+      <p id="sampleQFirm" style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:6px"></p>
+      <p id="sampleQText" style="font-size:15px;font-weight:500;color:var(--ink)"></p>
     </div>
+    <a href="/vault.html" onclick="if(typeof gtag!=='undefined')gtag('event','sample_question_clicked',{event_category:'engagement'});" style="background:#0F172A;color:white;font-size:14px;font-weight:600;padding:13px 18px;border-radius:0 0 10px 10px;text-decoration:none;display:block;text-align:center">See more like this →</a>
+    <p style="font-size:12px;color:var(--ink-light);margin-top:12px">One of 227+ real questions candidates were actually asked — searchable by firm, role, and stage.</p>
   </div>
 
-
-
-  <!-- PAYWALL (hidden after unlock) -->
-  <div class="paywall-card" id="paywallCard">
-    <h3>Will this CV get you the interview?</h3>
-    <p>Your free score shows where you stand in general. Pro shows whether this exact CV would clear the bar for a specific role — paste any job description and see precisely which required terms you're missing, plus your full percentile and keyword breakdown.</p>
-    <p style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-light);margin:16px 0 10px">One payment unlocks all of this:</p>
-    <div style="background:var(--accent-light);border:1.5px solid var(--accent);border-radius:12px;padding:16px 18px;margin-bottom:12px;display:flex;align-items:center;gap:14px">
-      <div style="font-size:28px;flex-shrink:0">🎯</div>
-      <div>
-        <div style="font-size:14px;font-weight:600;color:var(--ink)">Job description match score</div>
-        <div style="font-size:12px;color:var(--ink-mid)">Paste any listing — see your exact match % and every required term you're missing</div>
-      </div>
+  <!-- QUIZ NUDGE — personalized with their actual score, shown right after they see it -->
+  <div id="quizNudge" style="background:var(--white);border:1.5px solid var(--border);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+    <div style="flex:1;min-width:200px">
+      <p id="quizNudgeText" style="font-size:14px;color:var(--ink-mid);line-height:1.5">Come back tomorrow — 5 questions a day keeps your technicals sharp for interviews.</p>
     </div>
-    <div class="paywall-features">
-      <div class="paywall-feature"><div class="paywall-feature-icon">📊</div><div class="paywall-feature-label">Percentile rank<br>vs real finance CVs</div></div>
-      <div class="paywall-feature"><div class="paywall-feature-icon">🔑</div><div class="paywall-feature-label">Full keyword<br>gap analysis</div></div>
-      <div class="paywall-feature"><div class="paywall-feature-icon">🏦</div><div class="paywall-feature-label">Firm-specific<br>keyword tips</div></div>
-    </div>
-    <button class="paywall-cta" onclick="openPaymentModal()">
-      Unlock everything above
-      <span class="paywall-price">£7.99 one-time · instant access</span>
-    </button>
-    <p class="paywall-guarantee">🔒 Secure checkout · Money-back guarantee</p>
+    <a href="/quiz.html" onclick="if(typeof gtag!=='undefined')gtag('event','quiz_nudge_clicked',{event_category:'engagement'});" style="background:var(--surface);color:var(--ink);border:1.5px solid var(--border);font-size:13px;font-weight:600;padding:9px 16px;border-radius:10px;text-decoration:none;white-space:nowrap;flex-shrink:0">Try today's quiz →</a>
   </div>
 
   <!-- VAULT TEASER — positioned here deliberately: after the CV Pro ask has
@@ -1791,7 +1766,6 @@
     document.getElementById('navTag').style.display = 'none';
     document.getElementById('navProBadge').style.display = 'block';
     document.getElementById('proBanner').classList.add('visible');
-    document.getElementById('paywallCard').style.display = 'none';
     document.getElementById('resultsTitle').textContent = 'Your Pro CV Report';
 
     // Unlock keywords, percentile, JD match
@@ -2290,7 +2264,6 @@ BSc Business Management | University of Manchester | 2015–2018`;
     document.getElementById('fileChosen').style.display='none';
     document.getElementById('fileName').textContent='file selected';
     document.getElementById('proBanner').classList.remove('visible');
-    document.getElementById('paywallCard').style.display='';
 
     document.getElementById('navTag').style.display='';
     document.getElementById('navProBadge').style.display='none';
