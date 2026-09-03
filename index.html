@@ -114,7 +114,7 @@
   .bar-score { font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; width:36px; text-align:right; color:var(--ink-mid); }
 
   /* ISSUES */
-  .issues-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); }
+  .issues-card { background:var(--white); border-radius:16px; padding:28px 32px; margin-bottom:24px; border:1px solid var(--border); position:relative; overflow:hidden; }
   .issues-card h3 { font-size:14px; font-weight:600; letter-spacing:0.06em; text-transform:uppercase; color:var(--ink-light); margin-bottom:20px; }
   .issue-item { display:flex; gap:14px; padding:14px 0; border-bottom:1px solid var(--border); }
   .issue-item:last-child { border-bottom:none; }
@@ -1642,68 +1642,87 @@
     document.getElementById('resultsSection').classList.add('active');
     window.scrollTo({top:0,behavior:'smooth'});
 
+    // CRITICAL: show the email gate FIRST, before anything else that could
+    // possibly throw. Previously this ran after score/pills rendering — if
+    // any of that crashed on unexpected data, execution stopped before ever
+    // reaching this line, leaving the blur showing (its default HTML state)
+    // with no gate form ever appearing. Moving it here makes the gate
+    // immune to any rendering failure further down this function.
+    try { showEmailGate(); } catch(e) { console.error('showEmailGate failed:', e); }
+
+    // Score number/title/verdict — wrapped so a data issue here can't
+    // prevent the rest of the page (issues, keywords, percentile) from
+    // still attempting to render.
+    try {
+      document.getElementById('scoreNumber').textContent = data.overallScore;
+      document.getElementById('scoreTitle').textContent = data.scoreTitle;
+      document.getElementById('scoreVerdict').textContent = data.scoreVerdict;
+      drawRing(data.overallScore);
+    } catch(e) { console.error('Score render failed:', e); }
+
     // Store score anonymously in Supabase for real percentile data,
     // plus standardized issue tags for aggregate "common CV problems" stats
-    storeCVScore(data.overallScore, data.industry || selectedIndustry, data.issueTags);
-
-    // Score ring and title — always visible
-    document.getElementById('scoreNumber').textContent = data.overallScore;
-    document.getElementById('scoreTitle').textContent = data.scoreTitle;
-    document.getElementById('scoreVerdict').textContent = data.scoreVerdict;
-    drawRing(data.overallScore);
+    try {
+      storeCVScore(data.overallScore, data.industry || selectedIndustry, data.issueTags);
+    } catch(e) { console.error('storeCVScore failed:', e); }
 
     // Pills — always visible
-    const pillsEl = document.getElementById('scorePills'); pillsEl.innerHTML = '';
-    data.pills.forEach((p,i) => { const s = document.createElement('span'); s.className=`pill pill-${data.pillColors[i]}`; s.textContent=p; pillsEl.appendChild(s); });
-
-    // Show email gate — hides breakdown and issues until email submitted
-    showEmailGate();
+    try {
+      const pillsEl = document.getElementById('scorePills'); pillsEl.innerHTML = '';
+      (data.pills || []).forEach((p,i) => { const s = document.createElement('span'); s.className=`pill pill-${(data.pillColors||[])[i]}`; s.textContent=p; pillsEl.appendChild(s); });
+    } catch(e) { console.error('Pills render failed:', e); }
 
     // Breakdown bars
-    const barsEl = document.getElementById('breakdownBars'); barsEl.innerHTML = '';
-    data.breakdown.forEach(item => {
-      const c = item.score>=70?'green':item.score>=45?'amber':'red';
-      const row = document.createElement('div'); row.className='score-bar-row';
-      row.innerHTML=`<div class="bar-label">${item.label}</div><div class="bar-track"><div class="bar-fill ${c}" data-width="${item.score}"></div></div><div class="bar-score">${item.score}</div>`;
-      barsEl.appendChild(row);
-    });
-    setTimeout(() => document.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.width+'%'), 100);
+    try {
+      const barsEl = document.getElementById('breakdownBars'); barsEl.innerHTML = '';
+      (data.breakdown || []).forEach(item => {
+        const c = item.score>=70?'green':item.score>=45?'amber':'red';
+        const row = document.createElement('div'); row.className='score-bar-row';
+        row.innerHTML=`<div class="bar-label">${item.label}</div><div class="bar-track"><div class="bar-fill ${c}" data-width="${item.score}"></div></div><div class="bar-score">${item.score}</div>`;
+        barsEl.appendChild(row);
+      });
+      setTimeout(() => document.querySelectorAll('.bar-fill').forEach(b => b.style.width = b.dataset.width+'%'), 100);
+    } catch(e) { console.error('Breakdown bars render failed:', e); }
 
     // Issues — gated behind Pro. Non-Pro users see a count teaser only;
+    // Issues — gated behind Pro. Non-Pro users see a count teaser only;
     // titles and actionable descriptions are the paid tier's core value.
-    const issuesEl = document.getElementById('issuesList'); issuesEl.innerHTML = '';
-    const issuesLockOverlay = document.getElementById('issuesLockOverlay');
-    const issuesLockLabel = document.getElementById('issuesLockLabel');
-    if (issuesLockLabel && data.issues) {
-      issuesLockLabel.textContent = `${data.issues.length} issue${data.issues.length !== 1 ? 's' : ''} found — see what's actually wrong with your CV`;
-    }
-    if (userHasProAccess()) {
-      data.issues.forEach(issue => {
-        const div = document.createElement('div'); div.className='issue-item';
-        div.innerHTML=`<div class="issue-icon ${issue.severity}">${issue.icon}</div><div class="issue-content"><div class="issue-title">${issue.title}</div><div class="issue-desc">${issue.description}</div></div>`;
-        issuesEl.appendChild(div);
-      });
-      if (issuesLockOverlay) issuesLockOverlay.style.display = 'none';
-    } else {
-      if (issuesLockOverlay) issuesLockOverlay.style.display = 'block';
-    }
+    try {
+      const issuesEl = document.getElementById('issuesList'); issuesEl.innerHTML = '';
+      const issuesLockOverlay = document.getElementById('issuesLockOverlay');
+      const issuesLockLabel = document.getElementById('issuesLockLabel');
+      if (issuesLockLabel && data.issues) {
+        issuesLockLabel.textContent = `${data.issues.length} issue${data.issues.length !== 1 ? 's' : ''} found — see what's actually wrong with your CV`;
+      }
+      if (userHasProAccess()) {
+        (data.issues || []).forEach(issue => {
+          const div = document.createElement('div'); div.className='issue-item';
+          div.innerHTML=`<div class="issue-icon ${issue.severity}">${issue.icon}</div><div class="issue-content"><div class="issue-title">${issue.title}</div><div class="issue-desc">${issue.description}</div></div>`;
+          issuesEl.appendChild(div);
+        });
+        if (issuesLockOverlay) issuesLockOverlay.style.display = 'none';
+      } else {
+        if (issuesLockOverlay) issuesLockOverlay.style.display = 'block';
+      }
+    } catch(e) { console.error('Issues render failed:', e); }
 
     // Keywords — respects Pro status already determined earlier in this
     // render (e.g. a returning Pro customer recognised via the email gate).
-    // Previously hardcoded to locked, which silently undid an early unlock.
-    renderKeywords(data, userHasProAccess());
+    try { renderKeywords(data, userHasProAccess()); } catch(e) { console.error('Keywords render failed:', e); }
 
-    // Percentile — same fix
-    renderPercentile(data, userHasProAccess());
+    // Percentile
+    try { renderPercentile(data, userHasProAccess()); } catch(e) { console.error('Percentile render failed:', e); }
 
     // JD match
-    if (jdText) showJDMatch(analyseJDMatch(cvText, jdText));
+    try { if (jdText) showJDMatch(analyseJDMatch(cvText, jdText)); } catch(e) { console.error('JD match render failed:', e); }
 
     // Auto-unlock if returning from Stripe payment
-    if (window._pendingProUnlock) {
-      window._pendingProUnlock = false;
-      setTimeout(() => unlockPro(), 600);
-    }
+    try {
+      if (window._pendingProUnlock) {
+        window._pendingProUnlock = false;
+        setTimeout(() => unlockPro(), 600);
+      }
+    } catch(e) { console.error('Pending Pro unlock failed:', e); }
   }
 
   function renderKeywords(data, unlocked) {
