@@ -1799,8 +1799,13 @@ async function openCustomerPortal() {
 
     if (data.url) {
       window.location.href = data.url;
+    } else if (data.error === 'duplicate_subscriptions') {
+      // Rare but financially important — use alert() so it can't be missed
+      // the way a 3-second toast could be with a message this long.
+      alert(data.message);
+      if (btn) { btn.textContent = 'Manage or cancel subscription'; btn.disabled = false; }
     } else {
-      showToast('Could not open billing portal — ' + (data.error || 'please try again'));
+      showToast(data.message || ('Could not open billing portal — ' + (data.error || 'please try again')));
       if (btn) { btn.textContent = 'Manage or cancel subscription'; btn.disabled = false; }
     }
   } catch(err) {
